@@ -1,24 +1,37 @@
 # oxd-python
-Python Client Library for the [Gluu oxD Server RP](http://ox.gluu.org/doku.php?id=oxd:rp).
+oxD Python is a client library for the [Gluu oxD Server RP](https://www.gluu.org/docs-oxd/).
 
-**oxdpython** is a thin wrapper around the communication protocol of oxD server. This can be used to access the OpenID connect & UMA Authorization end points of the Gluu Server via the oxD RP. This library provides the function calls required by a website to access user information from a OpenID Connect Provider (OP) by using the OxD as the Relying Party (RP).
+It is a thin wrapper around the communication protocol of oxD server. This can be used to access the OpenID connect & UMA Authorization end points of the Gluu Server via the oxD RP. This library provides the function calls required by a website to access user information from a OpenID Connect Provider (OP) by using the OxD as the Relying Party (RP).
 
-## Using the Library in your website
+This page gives an overview of how to use the library. See the [API docs](https://oxd.gluu.org/api-docs/oxd-python/2.4.4) for in-depth information about the various functions and their parameters. The source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
 
-> You are now on the `master` branch. If you want to use `oxd-python` for production use, switch to the branch of the matching version as the `oxd-server` you are installing
-
-[oxD RP](http://ox.gluu.org/doku.php?id=oxd:rp) has complete information about the Code Authorization flow and the various details about oxD RP configuration. This document provides only documentation about the oxd-python library.
+## Deployment
 
 ### Prerequisites
 
-* Install `gluu-oxd-server`
+* Install oxD Server as explained in the [installation docs](https://www.gluu.org/docs-oxd/oxdserver/install/)
 
-### Configuring
+### Installation
+* Download the zip of the oxD Python Library from [here](https://github.com/GluuFederation/oxd-python/releases) and unzip to your location of choice
 
-Create a copy of the sample configuration file for your website in a server *writable* location. The website is registered with the OP and its ID is stored in this config file, also are the other peristant information about the website. So the config file needs to be *writable* for the server. The `sample.cfg` file contains complete documentation about itself.
+```
+cd oxdpython-version
+python setup.py install
+```
 
+### Using the Library in your website
 
-### Importing
+#### Configure the site
+
+Once the library is installed, it can be used by any Python web application deployed on the server. First, create a copy of the sample configuration file for your website in a server *writable* location and edit the configuration. For example
+
+```
+cp sample.cfg /var/www/demosite/demosite.cfg
+```
+
+**Note:** The website is registered with the OP and its ID is stored in this config file, also are the other peristant information about the website. So the config file needs to be *writable* for the server. The [sample.cfg](https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg) file contains complete documentation about itself.
+
+#### Website Registration
 
 The `Client` class of the library provides all the required methods required for the website to communicate with the oxD RP through sockets.
 
@@ -27,59 +40,63 @@ from oxdpython import Client
 
 config = "/var/www/demosite/demosite.cfg"  # This should be writable by the server
 client = Client(config)
+client.register_client()
 ```
 
-### Website Registration
+**Note:** `register_client()` can be skipped as any `get_authorization_url()` automatically registers the site.
 
-The website can be registered with the OP using the `client.register_client()` call. This can be skipped as any `get_authorization_url()` automatically registers the site if it is not.
+#### Get Authorization URL
 
-### Get Authorization URL
-
-The first step is to generate an authorization url which the user can visit to authorize your application to use the information from the OP.
+Next Generate an authorization url which the user can visit to authorize your application to use the information from the OP.
 
 ```python
 auth_url = client.get_authorization_url()
 ```
-Using the above url the website can redirect the user for authentication can authorization at the OP.
+In the web application, redirect the user for authentication can authorization at the OP.
 
-### Get access token
+#### Get access token
 
-The website needs to parse the information fromt the callback url and pass it on to get the access token for fetching user information.
+After authentication and authorization at the OP, the user is redirected to the website. The website needs to parse the information fromt the callback url and pass it on to get the access token for fetching user information. Refer to your web framework to how to get these values from the callback url.
 
 ```python
 token = client.get_tokens_by_code(code, scopes, state)
 ```
-The values for code, scope and state are parsed from the callback url querystring. Refer to your web framework to how to get these values from the url.
 
-### Get user claims
+#### Get user claims
 
 Claims (information fields) made availble by the OP can be fethed using the access token obtained above.
 
 ```python
 user = oxc.get_user_info(token)
-```
 
-### Using the claims
-
-The claims can be accessed using the dot notation.
-```python
+# The claims can be accessed using the dot notation.
 print user.username
 print user.inum
 print user.website
-```
-The availability of varios claims are completely dependent on the OP. Listing the fields of user can give list of all the available claims.
 
-```python
 print user._fields  # to print all the fields
 
 # to check for a particular field and get the information
 if 'website' in user._fields:
-    print getattr(user, 'website')  # or
+    print getattr(user, 'website')
+    # or
     print user.website
 ```
 
-## Demo Site
+#### Logout the user
 
-The **demosite** folder contains a demo Flask application which uses the `oxdpython` library to demonstrate the usage of the library. Read throught the code at `demosite.py` for a better understanding of how a website can use the library. The deployment instrctions for the demosite can be found inside the demosite's README.
+```python
+logout_uri = oxc.get_logout_uri()
+```
+Redirect the user to this uri from you web application to logout the user.
 
+### Demo Site
+
+To get the complete understanding of how all the functions are used, see the demo site written using Python Flask [here](https://github.com/GluuFederation/oxd-python/blob/master/demosite/demosite.py)
+
+
+## Contributing to Library
+
+* Fork the project in [Github](https://github.com/GluuFederation/oxd-python).
+* [Open Issues](https://github.com/GluuFederation/oxd-python/issues) when you find bugs
 

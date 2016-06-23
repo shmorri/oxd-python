@@ -18,7 +18,7 @@ def test_initializes_with_config():
     assert_equal(c.application_type, "web")
     assert_equal(c.authorization_redirect_uri,
                  "https://client.example.com/callback")
-    assert_is_instance(c.oxd_id, str)
+    assert_equal(c.op_host, "https://gluu.example.com")
 
 
 def test_register_site_command():
@@ -61,7 +61,7 @@ def test_get_auth_url_accepts_acrvalues_as_optional_params():
 def test_get_tokens_by_code(mock_send):
     c = Client(config_location)
     mock_send.return_value.status = "ok"
-    mock_send.return_value.data.access_token = "mock-token"
+    mock_send.return_value.data = "mock-token"
     code = "code"
     state = "state"
     scopes = ["openid"]
@@ -72,9 +72,9 @@ def test_get_tokens_by_code(mock_send):
                    "state": state,
                    "scopes": scopes
                    }}
-    access_token = c.get_tokens_by_code(code, scopes, state)
+    token = c.get_tokens_by_code(code, scopes, state)
     mock_send.assert_called_with(command)
-    assert_equal(access_token, "mock-token")
+    assert_equal(token, "mock-token")
 
 
 def test_get_tokens_raises_error_for_invalid_args():
@@ -90,23 +90,6 @@ def test_get_tokens_raises_error_for_invalid_args():
     # raise error when scopes is not a list
     with assert_raises(RuntimeError):
         c.get_tokens_by_code("code", "openid", "state")
-
-
-@patch.object(Messenger, 'send')
-def test_get_tokens_by_code_by_url(mock_send):
-    c = Client(config_location)
-    mock_send.return_value.status = "ok"
-    mock_send.return_value.data.access_token = "mock-token"
-    url = "https://client.example.com/callback#state=demo123&code=d1e2m3o4"\
-          "&scopes=openid%20profile"
-    command = {"command": "get_tokens_by_code",
-               "params": {
-                   "oxd_id": c.oxd_id,
-                   "url": url
-                   }}
-    access_token = c.get_tokens_by_code_by_url(url)
-    mock_send.assert_called_with(command)
-    assert_equal(access_token, "mock-token")
 
 
 @patch.object(Messenger, 'send')

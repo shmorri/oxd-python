@@ -21,7 +21,8 @@ class Client:
                 from this library
         """
         self.config = Configurer(config_location)
-        self.msgr = Messenger(int(self.config.get('oxd', 'port')))
+        self.msgr = Messenger(int(self.config.get("oxd", "port")))
+        self.op_host = self.config.get("client", "op_host")
         self.application_type = self.config.get("client", "application_type")
         self.authorization_redirect_uri = self.config.get(
             "client", "authorization_redirect_uri")
@@ -49,7 +50,12 @@ class Client:
         """Function to register the site and generate a unique ID for the site
 
         Returns:
-            The status (boolean) of the registration of site
+            The ID of the site (also called client id) as a string if the
+            registration is sucessful
+
+        Raises:
+            RuntimeError: Contains the oxD Server Error and Description if the
+            site registration fails.
         """
         if self.oxd_id:
             logger.info('Client is already registered. ID: %s', self.oxd_id)
@@ -58,8 +64,9 @@ class Client:
         command = {"command": "register_site"}
 
         # add required params for the command
-        params = {"authorization_redirect_uri":
-                  self.authorization_redirect_uri}
+        params = {"op_host": self.op_host,
+                  "authorization_redirect_uri": self.authorization_redirect_uri
+                  }
         # add other optional params if they exist in config
         opt_params = ["post_logout_redirect_uri",
                       "client_jwks_uri",
@@ -103,6 +110,10 @@ class Client:
         Returns:
             The authorization url (string) that the user must access for
             authentication and authorization
+
+        Raises:
+            RuntimeError with oxD Server error and description if oxD server
+            throws an error.
         """
         command = {"command": "get_authorization_url"}
         if not self.oxd_id:
@@ -131,8 +142,31 @@ class Client:
             state (string): state key obtained from the auth url callback
 
         Returns:
-            The access token (string) which should be passed to get the user
-            information from the OP
+            A named tuple containing the following data.
+            {
+                "access_token": "<token string>",
+                "expires_in": 3600,
+                "refresh_token": "<token string>",
+                "id_token": "<token string>",
+                "id_token_claims": {
+                    "iss": "https://server.example.com",
+                    "sub": "24400320",
+                    "aud": "s6BhdRkqt3",
+                    "nonce": "n-0S6_WzA2Mj",
+                    "exp": 1311281970,
+                    "iat": 1311280970,
+                    "at_hash": "MTIzNDU2Nzg5MDEyMzQ1Ng"
+                    }
+            }
+
+            Since this would be returned as a NamedTuple, it can be accessed
+            using the dot notation as given below -
+            data.access_token, data.refresh_token, data.id_token ...etc.,
+
+        Raises:
+            RuntimeError with oxD Server error and description if oxD server
+            throws an error OR if the params code and scopes are of improper
+            datatype.
         """
         if not (code and scopes) or type(scopes) != list:
             err_msg = """Empty/Wrong value in place of code or scope.
@@ -155,30 +189,7 @@ class Client:
         response = self.msgr.send(command)
         logger.debug("Recieved reponse: %s", response)
 
-        return self.__clear_data(response).access_token
-
-    def get_tokens_by_code_by_url(self, url):
-        """Function to get access code for getting the user details from the
-        OP. It is called after the user authorizies by visiting the auth URL.
-
-        Args:
-            url (string): the callback url which was called by the OP after
-                           user authorization which has the states, code and
-                           scopes as query parameters
-
-        Returns:
-            The access token (string) which should be passed to get the user
-            information from the OP
-        """
-        command = {"command": "get_tokens_by_code"}
-        params = {"oxd_id": self.oxd_id, "url": url}
-        command["params"] = params
-        logger.debug("Sending command `get_tokens_by_code` with params %s",
-                     params)
-        response = self.msgr.send(command)
-        logger.debug("Recieved reponse: %s", response)
-
-        return self.__clear_data(response).access_token
+        return self.__clear_data(response)
 
     def get_user_info(self, access_token):
         """Function to get the information about the user using the access code
@@ -189,7 +200,13 @@ class Client:
                                     function
 
         Returns:
-            The user data claims (named tuple) that are returned by the OP
+            The user data claims (named tuple) that are returned by the OP.
+            Refer to the /.well-known/openid-configuration URL of your OP for
+            the complete list of the claims for different scopes.
+
+        Raises:
+            RuntimeError with details in messafe if the param access_token
+            is empty OR if the oxD Server returns an error.
         """
         if not access_token:
             logger.error("Empty access code sent for get_user_info")
