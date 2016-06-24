@@ -148,7 +148,8 @@
 <span class="sd">                from this library</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Configurer</span><span class="p">(</span><span class="n">config_location</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span> <span class="o">=</span> <span class="n">Messenger</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oxd&#39;</span><span class="p">,</span> <span class="s1">&#39;port&#39;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span> <span class="o">=</span> <span class="n">Messenger</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oxd&quot;</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">op_host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;client&quot;</span><span class="p">,</span> <span class="s2">&quot;op_host&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">application_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;client&quot;</span><span class="p">,</span> <span class="s2">&quot;application_type&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">authorization_redirect_uri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="s2">&quot;client&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization_redirect_uri&quot;</span><span class="p">)</span>
@@ -176,7 +177,12 @@
         <span class="sd">&quot;&quot;&quot;Function to register the site and generate a unique ID for the site</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The status (boolean) of the registration of site</span>
+<span class="sd">            The ID of the site (also called client id) as a string if the</span>
+<span class="sd">            registration is sucessful</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: Contains the oxD Server Error and Description if the</span>
+<span class="sd">            site registration fails.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Client is already registered. ID: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">)</span>
@@ -185,8 +191,9 @@
         <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;register_site&quot;</span><span class="p">}</span>
 
         <span class="c1"># add required params for the command</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;authorization_redirect_uri&quot;</span><span class="p">:</span>
-                  <span class="bp">self</span><span class="o">.</span><span class="n">authorization_redirect_uri</span><span class="p">}</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;op_host&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">op_host</span><span class="p">,</span>
+                  <span class="s2">&quot;authorization_redirect_uri&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">authorization_redirect_uri</span>
+                  <span class="p">}</span>
         <span class="c1"># add other optional params if they exist in config</span>
         <span class="n">opt_params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;post_logout_redirect_uri&quot;</span><span class="p">,</span>
                       <span class="s2">&quot;client_jwks_uri&quot;</span><span class="p">,</span>
@@ -230,6 +237,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The authorization url (string) that the user must access for</span>
 <span class="sd">            authentication and authorization</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError with oxD Server error and description if oxD server</span>
+<span class="sd">            throws an error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;get_authorization_url&quot;</span><span class="p">}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">:</span>
@@ -258,8 +269,31 @@
 <span class="sd">            state (string): state key obtained from the auth url callback</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The access token (string) which should be passed to get the user</span>
-<span class="sd">            information from the OP</span>
+<span class="sd">            A named tuple containing the following data.</span>
+<span class="sd">            {</span>
+<span class="sd">                &quot;access_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
+<span class="sd">                &quot;expires_in&quot;: 3600,</span>
+<span class="sd">                &quot;refresh_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
+<span class="sd">                &quot;id_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
+<span class="sd">                &quot;id_token_claims&quot;: {</span>
+<span class="sd">                    &quot;iss&quot;: &quot;https://server.example.com&quot;,</span>
+<span class="sd">                    &quot;sub&quot;: &quot;24400320&quot;,</span>
+<span class="sd">                    &quot;aud&quot;: &quot;s6BhdRkqt3&quot;,</span>
+<span class="sd">                    &quot;nonce&quot;: &quot;n-0S6_WzA2Mj&quot;,</span>
+<span class="sd">                    &quot;exp&quot;: 1311281970,</span>
+<span class="sd">                    &quot;iat&quot;: 1311280970,</span>
+<span class="sd">                    &quot;at_hash&quot;: &quot;MTIzNDU2Nzg5MDEyMzQ1Ng&quot;</span>
+<span class="sd">                    }</span>
+<span class="sd">            }</span>
+
+<span class="sd">            Since this would be returned as a NamedTuple, it can be accessed</span>
+<span class="sd">            using the dot notation as given below -</span>
+<span class="sd">            data.access_token, data.refresh_token, data.id_token ...etc.,</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError with oxD Server error and description if oxD server</span>
+<span class="sd">            throws an error OR if the params code and scopes are of improper</span>
+<span class="sd">            datatype.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">code</span> <span class="ow">and</span> <span class="n">scopes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Empty/Wrong value in place of code or scope.</span>
@@ -282,30 +316,7 @@
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Recieved reponse: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__clear_data</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">access_token</span></div>
-
-<div class="viewcode-block" id="Client.get_tokens_by_code_by_url"><a class="viewcode-back" href="../../index.html#oxdpython.client.Client.get_tokens_by_code_by_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokens_by_code_by_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Function to get access code for getting the user details from the</span>
-<span class="sd">        OP. It is called after the user authorizies by visiting the auth URL.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            url (string): the callback url which was called by the OP after</span>
-<span class="sd">                           user authorization which has the states, code and</span>
-<span class="sd">                           scopes as query parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The access token (string) which should be passed to get the user</span>
-<span class="sd">            information from the OP</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;get_tokens_by_code&quot;</span><span class="p">}</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;oxd_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">}</span>
-        <span class="n">command</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending command `get_tokens_by_code` with params </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-                     <span class="n">params</span><span class="p">)</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Recieved reponse: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__clear_data</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">access_token</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__clear_data</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.get_user_info"><a class="viewcode-back" href="../../index.html#oxdpython.client.Client.get_user_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">access_token</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to get the information about the user using the access code</span>
@@ -316,7 +327,13 @@
 <span class="sd">                                    function</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The user data claims (named tuple) that are returned by the OP</span>
+<span class="sd">            The user data claims (named tuple) that are returned by the OP.</span>
+<span class="sd">            Refer to the /.well-known/openid-configuration URL of your OP for</span>
+<span class="sd">            the complete list of the claims for different scopes.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError with details in messafe if the param access_token</span>
+<span class="sd">            is empty OR if the oxD Server returns an error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">access_token</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Empty access code sent for get_user_info&quot;</span><span class="p">)</span>

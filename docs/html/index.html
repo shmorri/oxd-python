@@ -143,11 +143,19 @@ browser for the user to provide authorization and authentication</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>acr_values</strong> (<em>list</em>) &#8211; OPTIONAL list of acr values in the order of
-priority</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>acr_values</strong> (<em>list</em>) &#8211; OPTIONAL list of acr values in the order of
+priority</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The authorization url (string) that the user must access for
-authentication and authorization</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The authorization url (string) that the user must access for
+authentication and authorization</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li>RuntimeError with oxD Server error and description if oxD server</li>
+<li>throws an error.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -195,29 +203,38 @@ OP. It is called after the user authorizies by visiting the auth URL.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The access token (string) which should be passed to get the user
-information from the OP</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>A named tuple containing the following data.
+{</p>
+<blockquote>
+<div><p>&#8220;access_token&#8221;: &#8220;&lt;token string&gt;&#8221;,
+&#8220;expires_in&#8221;: 3600,
+&#8220;refresh_token&#8221;: &#8220;&lt;token string&gt;&#8221;,
+&#8220;id_token&#8221;: &#8220;&lt;token string&gt;&#8221;,
+&#8220;id_token_claims&#8221;: {</p>
+<blockquote>
+<div><p>&#8220;iss&#8221;: &#8220;<a class="reference external" href="https://server.example.com">https://server.example.com</a>&#8221;,
+&#8220;sub&#8221;: &#8220;24400320&#8221;,
+&#8220;aud&#8221;: &#8220;s6BhdRkqt3&#8221;,
+&#8220;nonce&#8221;: &#8220;n-0S6_WzA2Mj&#8221;,
+&#8220;exp&#8221;: 1311281970,
+&#8220;iat&#8221;: 1311280970,
+&#8220;at_hash&#8221;: &#8220;MTIzNDU2Nzg5MDEyMzQ1Ng&#8221;
+}</p>
+</div></blockquote>
+</div></blockquote>
+<p>}</p>
+<p>Since this would be returned as a NamedTuple, it can be accessed
+using the dot notation as given below -
+data.access_token, data.refresh_token, data.id_token ...etc.,</p>
+</p>
 </td>
 </tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="oxdpython.client.Client.get_tokens_by_code_by_url">
-<code class="descname">get_tokens_by_code_by_url</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_tokens_by_code_by_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_tokens_by_code_by_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to get access code for getting the user details from the
-OP. It is called after the user authorizies by visiting the auth URL.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>string</em>) &#8211; the callback url which was called by the OP after
-user authorization which has the states, code and
-scopes as query parameters</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The access token (string) which should be passed to get the user
-information from the OP</td>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li>RuntimeError with oxD Server error and description if oxD server</li>
+<li>throws an error OR if the params code and scopes are of improper</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">datatype.</span></code></li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -232,10 +249,20 @@ obtained from the OP</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>access_token</strong> (<em>string</em>) &#8211; access token from the get_tokens_by_code
-function</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>access_token</strong> (<em>string</em>) &#8211; access token from the get_tokens_by_code
+function</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The user data claims (named tuple) that are returned by the OP</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The user data claims (named tuple) that are returned by the OP.
+Refer to the /.well-known/openid-configuration URL of your OP for
+the complete list of the claims for different scopes.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li>RuntimeError with details in messafe if the param access_token</li>
+<li>is empty OR if the oxD Server returns an error.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -249,7 +276,15 @@ function</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The status (boolean) of the registration of site</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The ID of the site (also called client id) as a string if the
+registration is sucessful</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; Contains the oxD Server Error and Description if the</li>
+<li>site registration fails.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
