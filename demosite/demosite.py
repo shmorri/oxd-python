@@ -5,6 +5,8 @@ from flask import Flask, render_template, redirect, request
 this_dir = os.path.dirname(os.path.realpath(__file__))
 config = os.path.join(this_dir, 'demosite.cfg')
 
+# relative import of oxd-python. Comment out the following 3 lines
+# if the library has been installed with setup.py install
 oxd_path = os.path.dirname(this_dir)
 if oxd_path not in sys.path:
     sys.path.insert(0, oxd_path)
