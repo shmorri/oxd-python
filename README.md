@@ -1,15 +1,12 @@
 # oxd-python
-oxD Python is a client library for the [Gluu oxD Server RP](https://www.gluu.org/docs-oxd/).
-
-It is a thin wrapper around the communication protocol of oxD server. This can be used to access the OpenID connect & UMA Authorization end points of the Gluu Server via the oxD RP. This library provides the function calls required by a website to access user information from a OpenID Connect Provider (OP) by using the OxD as the Relying Party (RP).
-
-This page gives an overview of how to use the library. See the [API docs](https://oxd.gluu.org/api-docs/oxd-python/2.4.4) for in-depth information about the various functions and their parameters. The source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
+oxD Python is a client library for the Gluu oxD Server. For information about oxD, visit [http://oxd.gluu.org](http://oxd.gluu.org)
 
 ## Deployment
 
 ### Prerequisites
 
-* Install oxD Server as explained in the [installation docs](https://www.gluu.org/docs-oxd/oxdserver/install/)
+* Python 2.7
+* Gluu oxD Server - [Installation docs](https://www.gluu.org/docs-oxd/oxdserver/install/)
 
 ### Installation
 * Download the zip of the oxD Python Library from [here](https://github.com/GluuFederation/oxd-python/releases) and unzip to your location of choice
@@ -18,6 +15,19 @@ This page gives an overview of how to use the library. See the [API docs](https:
 cd oxdpython-version
 python setup.py install
 ```
+
+The code can be checked via unit tests using Nose.
+```
+pip install nose
+nosetests
+```
+
+### Next Steps
+
+* Scroll [below](#using-the-library-in-your-website) to learn how to use the library in an application.
+* See the [API docs](https://oxd.gluu.org/api-docs/oxd-python/2.4.4) for in-depth information about the various functions and their parameters.
+* See the code of a [sample Flask app](https://github.com/GluuFederation/oxd-python/tree/master/demosite) built using oxd-python.
+* Browse the source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
 
 ### Using the Library in your website
 
@@ -52,14 +62,13 @@ Next Generate an authorization url which the user can visit to authorize your ap
 ```python
 auth_url = client.get_authorization_url()
 ```
-In the web application, redirect the user for authentication can authorization at the OP.
 
 #### Get access token
 
-After authentication and authorization at the OP, the user is redirected to the website. The website needs to parse the information fromt the callback url and pass it on to get the access token for fetching user information. Refer to your web framework to how to get these values from the callback url.
+In the web application, redirect the user to the `auth_url`. After authentication and authorization at the OP, the user is sent back to the website. The website needs to parse the information from the callback url and use it to get the access token. Refer to your web framework to how to get these values from the callback url.
 
 ```python
-token = client.get_tokens_by_code(code, scopes, state)
+tokens = client.get_tokens_by_code(code, scopes, state)
 ```
 
 #### Get user claims
@@ -67,7 +76,7 @@ token = client.get_tokens_by_code(code, scopes, state)
 Claims (information fields) made availble by the OP can be fethed using the access token obtained above.
 
 ```python
-user = oxc.get_user_info(token)
+user = oxc.get_user_info(tokens.access_token)
 
 # The claims can be accessed using the dot notation.
 print user.username
@@ -89,14 +98,3 @@ if 'website' in user._fields:
 logout_uri = oxc.get_logout_uri()
 ```
 Redirect the user to this uri from you web application to logout the user.
-
-### Demo Site
-
-To get the complete understanding of how all the functions are used, see the demo site written using Python Flask [here](https://github.com/GluuFederation/oxd-python/blob/master/demosite/demosite.py)
-
-
-## Contributing to Library
-
-* Fork the project in [Github](https://github.com/GluuFederation/oxd-python).
-* [Open Issues](https://github.com/GluuFederation/oxd-python/issues) when you find bugs
-
