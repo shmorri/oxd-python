@@ -36,11 +36,6 @@ authorization_redirect_uri = https://client.example.com/callback
 redirect_uris = https://client.example.com/callback
 post_logout_redirect_uri = https://client.example.com/
 client_logout_uris = https://client.example.com/logout
-grant_types = 
-acr_values = 
-client_jwks_uri = 
-client_token_endpoint_auth_method = 
-client_request_uris = 
 contacts = demo@example.com</pre>
         </div>
     </div>
@@ -51,7 +46,7 @@ contacts = demo@example.com</pre>
         location to that the site specific configuration like callback URLs could be registered with the OP</p>
     </div>
     <div class="col-md-6">
-        <h3>In Flask</h3>
+        <h3>Flask code</h3>
         <pre class="prettyprint lang-python">
 import os
 import oxdpython
@@ -68,42 +63,49 @@ client = oxdpython.Client(config)
 </div>
 <div class="row">
     <div class="col-md-6">
-        <h3>Registration and Fetching Auth URL</h3>
+        <h3>Step 0: Website registration (can be skipped)</h3>
         <p>The first step is to register the client with the OP. Once the client is registered, then the user data can be fetched upon user authorization.
-        oxD Python performs client registration automatically when you request for an authorization url. Redirect the user to the authorization url to get user
-        consent.</p>
-        <hr>
-        <p><strong> Live demo. </strong><a class="btn btn-primary" href="{{ url_for('authorize') }}">Go to Authorization Page</a></p>
+        oxD Python performs client registration automatically when you request for an authorization url.</p>
     </div>
     <div class="col-md-6">
-    <pre class="prettyprint lang-python">
-@app.route('/authorize/')
-def authorize():
-    """The endpoint which is to be accessed but the user in order to start the authorization by the user"""
+    <pre class="prettyprint lang-python noheader">
+# this can be skipped. Registration happens automatically when you request for auth url
 
-    auth_url = client.get_authorization_url()
-    return redirect(auth_url)
-    </pre>
+client.register_site()
+</pre>
     </div>
 </div>
 <div class="row">
     <div class="col-md-6">
-    <h3>Get user information</h3>
-    <p>Once the user authorizes the website to use the information from the OP, the OP calls back the website with code and scopes for accessing the user data in the registered callback <code>authorization_redirect_uri</code> in the config file). Then an access token is obtained from the OP using which user claims can be requested.</p>
+        <h3>Step 1: Get authorization URL</h3>
+        <p><strong> Live demo. </strong><a class="btn btn-success btn-lg" href="{{ url_for('authorize') }}">Go to Authorization Page</a></p>
     </div>
     <div class="col-md-6">
-    <pre class="prettyprint lang-python">
+    <pre class="prettyprint lang-python noheader">
+@app.route('/authorize/')
+def authorize():
+    auth_url = client.get_authorization_url()
+    return redirect(auth_url)
+</pre>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+    <h3>Step 2: Get user information</h3>
+    <p>
+        Parse the query string from the callback url after authorization, get the access token and use the token to get information.
+    </p>
+    </div>
+    <div class="col-md-6">
+    <pre class="prettyprint lang-python noheader">
 @app.route('/callback')
 def callabck():
-    # parse the state, code and scopes from the callback url
     state = request.args.get('state')
     code = request.args.get('code')
     scopes = request.args.get('scope').split(" ")
 
-    # pass that information to obtain the access_token
     tokens = client.get_tokens_by_code(code, scopes, state)
 
-    # using the access token obtain user info
     user = client.get_user_info(tokens.access_token)
 
     return render_template("home.html", user=user)
@@ -112,26 +114,29 @@ def callabck():
 </div>
 <div class="row">
     <div class="col-md-6">
-        <h3>Using the user claims</h3>
+        <h3>Step 3: Using the user claims</h3>
         <p>Once the user data is obtained, the various claims supported by the OP can be used as required.</p>
         {% if user %}
         <div class="alert alert-success">
+            <p>
+            User information provided by the OpenID Provider
+            </p>
             {% for field in user._fields %}
-                <p>{{ field }} :: {{user|attr(field)}}</p>
+                <p>{{ field }} = {{user|attr(field)}}</p>
             {% endfor %}
         </div>
         {% else %}
-            <div class="alert alert-warning">No business card for you. You haven't authorized the demo user yet.</div>
+            <div class="alert alert-warning">You haven't authorized the demo user yet. Click the "Go to Authorization Page" button above</div>
         {% endif %}
     </div>
     <div class="col-md-6">
-    <h3>Template code</h3>
+    <h3>Jinja Template code</h3>
 {% raw %}
 <pre class="prettyprint lang-jinja">
 {% if user %}
 &lt;div class="alert alert-success"&gt;
     {% for field in user._fields %}
-        &lt;p&gt;{{ field }} :: {{user|attr(field)}}&lt;/p&gt;
+        &lt;p&gt;{{ field }} = {{user|attr(field)}}&lt;/p&gt;
     {% endfor %}
 &lt;/div&gt;
 {% endif %}
@@ -142,8 +147,9 @@ def callabck():
 
 <div class="row">
     <div class="col-md-6">
-        <h3>Logging Out</h3>
-        <p>Once the required work is done the user can be logged out of the system. <a class="btn btn-danger" href="/logout">Logout</a></p>
+        <h3>Step 4: Logging Out</h3>
+        <p>Once the required work is done the user can be logged out of the system.</p>
+        <p>Live Demo: <a class="btn btn-danger btn-lg" href="/logout">Logout</a></p>
         {% if logout_html %}
         <div class="alert alert-success">
             Logout returned html {{logout_html}}
@@ -151,12 +157,12 @@ def callabck():
         {% endif %}
     </div>
    <div class="col-md-6">
-    <pre class="prettyprint lang-python">
+    <pre class="prettyprint lang-python noheader">
 @app.route('/logout')
 def logout():
     logout_url = oxc.get_logout_uri()
     return redirect(logout_url)
-    </pre>
+</pre>
     </div>
 </div>
 
