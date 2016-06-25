@@ -24,24 +24,19 @@ def home():
 
 @app.route('/authorize/')
 def authorize():
-    """The endpoint which is to be accessed but the user in order to start the
-    authorization by the user"""
-
     auth_url = oxc.get_authorization_url()
     return redirect(auth_url)
 
 
 @app.route('/callback')
 def callabck():
-    # parse the state, code and scopes from the callback url
+    # using request from Flask to parse the query string of the callback
     state = request.args.get('state')
     code = request.args.get('code')
     scopes = request.args.get('scope').split(" ")
 
-    # pass that information to obtain the access_token
     tokens = oxc.get_tokens_by_code(code, scopes, state)
 
-    # usingthe access token obtain user info
     user = oxc.get_user_info(tokens.access_token)
 
     return render_template("home.html", user=user)
