@@ -16,7 +16,7 @@ cd oxdpython-version
 python setup.py install
 ```
 
-The code can be checked via unit tests using Nose.
+* OPTIONAL - Check code via unit tests using Nose.
 ```
 pip install nose
 nosetests
@@ -50,10 +50,10 @@ from oxdpython import Client
 
 config = "/var/www/demosite/demosite.cfg"  # This should be writable by the server
 client = Client(config)
-client.register_client()
+client.register_site()
 ```
 
-**Note:** `register_client()` can be skipped as any `get_authorization_url()` automatically registers the site.
+**Note:** `register_site()` can be skipped as any `get_authorization_url()` automatically registers the site.
 
 #### Get Authorization URL
 
@@ -68,6 +68,7 @@ auth_url = client.get_authorization_url()
 In the web application, redirect the user to the `auth_url`. After authentication and authorization at the OP, the user is sent back to the website. The website needs to parse the information from the callback url and use it to get the access token. Refer to your web framework to how to get these values from the callback url.
 
 ```python
+# code, scopes, state = parse_callback_url_querystring()  # Refer your web framework
 tokens = client.get_tokens_by_code(code, scopes, state)
 ```
 
@@ -80,7 +81,6 @@ user = oxc.get_user_info(tokens.access_token)
 
 # The claims can be accessed using the dot notation.
 print user.username
-print user.inum
 print user.website
 
 print user._fields  # to print all the fields
@@ -97,4 +97,4 @@ if 'website' in user._fields:
 ```python
 logout_uri = oxc.get_logout_uri()
 ```
-Redirect the user to this uri from you web application to logout the user.
+Redirect the user to this uri from your web application to logout the user.
