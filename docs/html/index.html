@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>oxD Python Library Documentation &mdash; oxD Python 2.4.4-master documentation</title>
+  <title>oxD Python Library Documentation &mdash; oxD Python 2.4.4-rc documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="oxD Python 2.4.4-master documentation" href="#"/> 
+    <link rel="top" title="oxD Python 2.4.4-rc documentation" href="#"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                2.4-master
+                2.4.4
               </div>
             
           
@@ -126,7 +126,7 @@
             
   <div class="section" id="oxd-python-library-documentation">
 <h1>oxD Python Library Documentation<a class="headerlink" href="#oxd-python-library-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Welcome to the oxD Python API reference page. If you are looking for docs on how to use the library <a class="reference external" href="https://gluu.org/docs-oxd/plugin/python/">go here</a>.</p>
+<p>Welcome to the oxD Python API reference page. If you are looking for docs on how to use the library <a class="reference external" href="https://oxd.gluu.org/docs/plugin/python/">go here</a>.</p>
 <span class="target" id="module-oxdpython.client"></span><dl class="class">
 <dt id="oxdpython.client.Client">
 <em class="property">class </em><code class="descclassname">oxdpython.client.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>config_location</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client" title="Permalink to this definition">¶</a></dt>
@@ -143,19 +143,14 @@ browser for the user to provide authorization and authentication</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>acr_values</strong> (<em>list</em>) &#8211; OPTIONAL list of acr values in the order of
-priority</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>acr_values</strong> (<em>list, optional</em>) &#8211; acr values in the order of priority</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The authorization url (string) that the user must access for
-authentication and authorization</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The authorization url that the user must access for
+authentication and authorization</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li>RuntimeError with oxD Server error and description if oxD server</li>
-<li>throws an error.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the oxD throws an error for any reason.</td>
 </tr>
 </tbody>
 </table>
@@ -170,17 +165,20 @@ authentication and authorization</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>id_token_hint</strong> (<em>string</em>) &#8211; OPTIONAL (oxd server will use last used
-ID Token)</li>
-<li><strong>post_logout_redirect_uri</strong> (<em>string</em>) &#8211; OPTIONAL URI for redirection,
+<li><strong>id_token_hint</strong> (<em>string, optional</em>) &#8211; oxd server will use last used
+ID Token, if not provided</li>
+<li><strong>post_logout_redirect_uri</strong> (<em>string, optional</em>) &#8211; URI to redirect,
 this uri would override the value given in the site-config</li>
-<li><strong>state</strong> (<em>string</em>) &#8211; OPTIONAL site state</li>
-<li><strong>session_state</strong> (<em>string</em>) &#8211; OPTIONAL session state</li>
+<li><strong>state</strong> (<em>string, optional</em>) &#8211; site state</li>
+<li><strong>session_state</strong> (<em>string, optional</em>) &#8211; session state</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The URI (string) to which the user must be directed in order to
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The URI to which the user must be directed in order to
 perform the logout</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
 </td>
 </tr>
 </tbody>
@@ -197,43 +195,43 @@ OP. It is called after the user authorizies by visiting the auth URL.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>code</strong> (<em>string</em>) &#8211; code obtained from the auth url callback</li>
-<li><strong>scopes</strong> (<em>list</em>) &#8211; scopes authorized by the OP, fromt he url callback</li>
-<li><strong>state</strong> (<em>string</em>) &#8211; state key obtained from the auth url callback</li>
+<li><strong>code</strong> (<em>string</em>) &#8211; code, parse from the callback URL querystring</li>
+<li><strong>scopes</strong> (<em>list</em>) &#8211; scopes authorized by the OP, parsed from the
+callback URL</li>
+<li><strong>state</strong> (<em>string, optional</em>) &#8211; state, parsed from the callback URL</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>A named tuple containing the following data.
-{</p>
-<blockquote>
-<div><p>&#8220;access_token&#8221;: &#8220;&lt;token string&gt;&#8221;,
-&#8220;expires_in&#8221;: 3600,
-&#8220;refresh_token&#8221;: &#8220;&lt;token string&gt;&#8221;,
-&#8220;id_token&#8221;: &#8220;&lt;token string&gt;&#8221;,
-&#8220;id_token_claims&#8221;: {</p>
-<blockquote>
-<div><p>&#8220;iss&#8221;: &#8220;<a class="reference external" href="https://server.example.com">https://server.example.com</a>&#8221;,
-&#8220;sub&#8221;: &#8220;24400320&#8221;,
-&#8220;aud&#8221;: &#8220;s6BhdRkqt3&#8221;,
-&#8220;nonce&#8221;: &#8220;n-0S6_WzA2Mj&#8221;,
-&#8220;exp&#8221;: 1311281970,
-&#8220;iat&#8221;: 1311280970,
-&#8220;at_hash&#8221;: &#8220;MTIzNDU2Nzg5MDEyMzQ1Ng&#8221;
-}</p>
-</div></blockquote>
-</div></blockquote>
-<p>}</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The tokens object with the following data structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;expires_in&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+    <span class="s2">&quot;refresh_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id_token_claims&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;iss&quot;</span><span class="p">:</span> <span class="s2">&quot;https://server.example.com&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="s2">&quot;24400320&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;aud&quot;</span><span class="p">:</span> <span class="s2">&quot;s6BhdRkqt3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nonce&quot;</span><span class="p">:</span> <span class="s2">&quot;n-0S6_WzA2Mj&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;exp&quot;</span><span class="p">:</span> <span class="mi">1311281970</span><span class="p">,</span>
+        <span class="s2">&quot;iat&quot;</span><span class="p">:</span> <span class="mi">1311280970</span><span class="p">,</span>
+        <span class="s2">&quot;at_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;MTIzNDU2Nzg5MDEyMzQ1Ng&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 <p>Since this would be returned as a NamedTuple, it can be accessed
-using the dot notation as given below -
-data.access_token, data.refresh_token, data.id_token ...etc.,</p>
+using the dot notation as <code class="xref py py-obj docutils literal"><span class="pre">data.access_token</span></code>,
+<code class="xref py py-obj docutils literal"><span class="pre">data.refresh_token</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">data.id_token</span></code>...etc.,</p>
 </p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li>RuntimeError with oxD Server error and description if oxD server</li>
-<li>throws an error OR if the params code and scopes are of improper</li>
-<li><code class="xref py py-exc docutils literal"><span class="pre">datatype.</span></code></li>
-</ul>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">NamedTuple</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If oxD server throws an error OR if the params code
+and scopes are of improper datatype.</p>
 </td>
 </tr>
 </tbody>
@@ -249,20 +247,17 @@ obtained from the OP</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>access_token</strong> (<em>string</em>) &#8211; access token from the get_tokens_by_code
-function</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>access_token</strong> (<em>string</em>) &#8211; access token from the get_tokens_by_code
+function</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The user data claims (named tuple) that are returned by the OP.
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The user data claims that are returned by the OP.
 Refer to the /.well-known/openid-configuration URL of your OP for
-the complete list of the claims for different scopes.</p>
-</td>
+the complete list of the claims for different scopes.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li>RuntimeError with details in messafe if the param access_token</li>
-<li>is empty OR if the oxD Server returns an error.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">NamedTuple</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the param access_token is empty OR if the oxD
+Server returns an error.</td>
 </tr>
 </tbody>
 </table>
@@ -276,15 +271,12 @@ the complete list of the claims for different scopes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The ID of the site (also called client id) as a string if the
-registration is sucessful</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The ID of the site (also called client id) if the
+registration is sucessful</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; Contains the oxD Server Error and Description if the</li>
-<li>site registration fails.</li>
-</ul>
-</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the site registration fails.</td>
 </tr>
 </tbody>
 </table>
@@ -299,7 +291,9 @@ This should be called after changing the values in the cfg file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The status (boolean) for update of information was sucessful or not</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The status for update. True for success and False for failure</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
 </tbody>
 </table>
@@ -341,7 +335,7 @@ This should be called after changing the values in the cfg file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.4.4-master',
+            VERSION:'2.4.4-rc',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

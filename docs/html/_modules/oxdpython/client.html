@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>oxdpython.client &mdash; oxD Python 2.4.4-master documentation</title>
+  <title>oxdpython.client &mdash; oxD Python 2.4.4-rc documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="oxD Python 2.4.4-master documentation" href="../../index.html"/>
+    <link rel="top" title="oxD Python 2.4.4-rc documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                2.4-master
+                2.4.4
               </div>
             
           
@@ -143,8 +143,8 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_location</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor of class Client</span>
 <span class="sd">        Args:</span>
-<span class="sd">            config_location (string): The complete path of the location of</span>
-<span class="sd">                the config file which is a modified conpy of the sample.cfg</span>
+<span class="sd">            config_location (string): The complete path of the location</span>
+<span class="sd">                of the config file which is a modified conpy of the sample.cfg</span>
 <span class="sd">                from this library</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Configurer</span><span class="p">(</span><span class="n">config_location</span><span class="p">)</span>
@@ -177,12 +177,11 @@
         <span class="sd">&quot;&quot;&quot;Function to register the site and generate a unique ID for the site</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The ID of the site (also called client id) as a string if the</span>
+<span class="sd">            string: The ID of the site (also called client id) if the</span>
 <span class="sd">            registration is sucessful</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RuntimeError: Contains the oxD Server Error and Description if the</span>
-<span class="sd">            site registration fails.</span>
+<span class="sd">            RuntimeError: If the site registration fails.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Client is already registered. ID: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">)</span>
@@ -231,16 +230,14 @@
 <span class="sd">        browser for the user to provide authorization and authentication</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            acr_values (list): OPTIONAL list of acr values in the order of</span>
-<span class="sd">                                priority</span>
+<span class="sd">            acr_values (list, optional): acr values in the order of priority</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The authorization url (string) that the user must access for</span>
+<span class="sd">            string: The authorization url that the user must access for</span>
 <span class="sd">            authentication and authorization</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RuntimeError with oxD Server error and description if oxD server</span>
-<span class="sd">            throws an error.</span>
+<span class="sd">            RuntimeError: If the oxD throws an error for any reason.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;get_authorization_url&quot;</span><span class="p">}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">:</span>
@@ -264,36 +261,38 @@
 <span class="sd">        OP. It is called after the user authorizies by visiting the auth URL.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            code (string): code obtained from the auth url callback</span>
-<span class="sd">            scopes (list): scopes authorized by the OP, fromt he url callback</span>
-<span class="sd">            state (string): state key obtained from the auth url callback</span>
+<span class="sd">            code (string): code, parse from the callback URL querystring</span>
+<span class="sd">            scopes (list): scopes authorized by the OP, parsed from the</span>
+<span class="sd">                callback URL</span>
+<span class="sd">            state (string, optional): state, parsed from the callback URL</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            A named tuple containing the following data.</span>
-<span class="sd">            {</span>
-<span class="sd">                &quot;access_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
-<span class="sd">                &quot;expires_in&quot;: 3600,</span>
-<span class="sd">                &quot;refresh_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
-<span class="sd">                &quot;id_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
-<span class="sd">                &quot;id_token_claims&quot;: {</span>
-<span class="sd">                    &quot;iss&quot;: &quot;https://server.example.com&quot;,</span>
-<span class="sd">                    &quot;sub&quot;: &quot;24400320&quot;,</span>
-<span class="sd">                    &quot;aud&quot;: &quot;s6BhdRkqt3&quot;,</span>
-<span class="sd">                    &quot;nonce&quot;: &quot;n-0S6_WzA2Mj&quot;,</span>
-<span class="sd">                    &quot;exp&quot;: 1311281970,</span>
-<span class="sd">                    &quot;iat&quot;: 1311280970,</span>
-<span class="sd">                    &quot;at_hash&quot;: &quot;MTIzNDU2Nzg5MDEyMzQ1Ng&quot;</span>
+<span class="sd">            NamedTuple: The tokens object with the following data structure::</span>
+
+<span class="sd">                {</span>
+<span class="sd">                    &quot;access_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
+<span class="sd">                    &quot;expires_in&quot;: 3600,</span>
+<span class="sd">                    &quot;refresh_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
+<span class="sd">                    &quot;id_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
+<span class="sd">                    &quot;id_token_claims&quot;:</span>
+<span class="sd">                    {</span>
+<span class="sd">                        &quot;iss&quot;: &quot;https://server.example.com&quot;,</span>
+<span class="sd">                        &quot;sub&quot;: &quot;24400320&quot;,</span>
+<span class="sd">                        &quot;aud&quot;: &quot;s6BhdRkqt3&quot;,</span>
+<span class="sd">                        &quot;nonce&quot;: &quot;n-0S6_WzA2Mj&quot;,</span>
+<span class="sd">                        &quot;exp&quot;: 1311281970,</span>
+<span class="sd">                        &quot;iat&quot;: 1311280970,</span>
+<span class="sd">                        &quot;at_hash&quot;: &quot;MTIzNDU2Nzg5MDEyMzQ1Ng&quot;</span>
 <span class="sd">                    }</span>
-<span class="sd">            }</span>
+<span class="sd">                }</span>
 
 <span class="sd">            Since this would be returned as a NamedTuple, it can be accessed</span>
-<span class="sd">            using the dot notation as given below -</span>
-<span class="sd">            data.access_token, data.refresh_token, data.id_token ...etc.,</span>
+<span class="sd">            using the dot notation as :obj:`data.access_token`,</span>
+<span class="sd">            :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RuntimeError with oxD Server error and description if oxD server</span>
-<span class="sd">            throws an error OR if the params code and scopes are of improper</span>
-<span class="sd">            datatype.</span>
+<span class="sd">            RuntimeError: If oxD server throws an error OR if the params code</span>
+<span class="sd">                and scopes are of improper datatype.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">code</span> <span class="ow">and</span> <span class="n">scopes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Empty/Wrong value in place of code or scope.</span>
@@ -327,13 +326,13 @@
 <span class="sd">                                    function</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The user data claims (named tuple) that are returned by the OP.</span>
+<span class="sd">            NamedTuple: The user data claims that are returned by the OP.</span>
 <span class="sd">            Refer to the /.well-known/openid-configuration URL of your OP for</span>
 <span class="sd">            the complete list of the claims for different scopes.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RuntimeError with details in messafe if the param access_token</span>
-<span class="sd">            is empty OR if the oxD Server returns an error.</span>
+<span class="sd">            RuntimeError: If the param access_token is empty OR if the oxD</span>
+<span class="sd">                Server returns an error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">access_token</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Empty access code sent for get_user_info&quot;</span><span class="p">)</span>
@@ -355,15 +354,15 @@
         <span class="sd">&quot;&quot;&quot;Function to logout the user.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            id_token_hint (string): OPTIONAL (oxd server will use last used</span>
-<span class="sd">                ID Token)</span>
-<span class="sd">            post_logout_redirect_uri (string): OPTIONAL URI for redirection,</span>
+<span class="sd">            id_token_hint (string, optional): oxd server will use last used</span>
+<span class="sd">                ID Token, if not provided</span>
+<span class="sd">            post_logout_redirect_uri (string, optional): URI to redirect,</span>
 <span class="sd">                this uri would override the value given in the site-config</span>
-<span class="sd">            state (string): OPTIONAL site state</span>
-<span class="sd">            session_state (string): OPTIONAL session state</span>
+<span class="sd">            state (string, optional): site state</span>
+<span class="sd">            session_state (string, optional): session state</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The URI (string) to which the user must be directed in order to</span>
+<span class="sd">            string: The URI to which the user must be directed in order to</span>
 <span class="sd">            perform the logout</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;get_logout_uri&quot;</span><span class="p">}</span>
@@ -397,7 +396,7 @@
 <span class="sd">        This should be called after changing the values in the cfg file.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The status (boolean) for update of information was sucessful or not</span>
+<span class="sd">            bool: The status for update. True for success and False for failure</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;update_site_registration&quot;</span><span class="p">}</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;oxd_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">,</span>
@@ -462,7 +461,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.4.4-master',
+            VERSION:'2.4.4-rc',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

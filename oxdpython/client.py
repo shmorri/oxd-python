@@ -16,8 +16,8 @@ class Client:
     def __init__(self, config_location):
         """Constructor of class Client
         Args:
-            config_location (string): The complete path of the location of
-                the config file which is a modified conpy of the sample.cfg
+            config_location (string): The complete path of the location
+                of the config file which is a modified conpy of the sample.cfg
                 from this library
         """
         self.config = Configurer(config_location)
@@ -50,12 +50,11 @@ class Client:
         """Function to register the site and generate a unique ID for the site
 
         Returns:
-            The ID of the site (also called client id) as a string if the
+            string: The ID of the site (also called client id) if the
             registration is sucessful
 
         Raises:
-            RuntimeError: Contains the oxD Server Error and Description if the
-            site registration fails.
+            RuntimeError: If the site registration fails.
         """
         if self.oxd_id:
             logger.info('Client is already registered. ID: %s', self.oxd_id)
@@ -104,16 +103,14 @@ class Client:
         browser for the user to provide authorization and authentication
 
         Args:
-            acr_values (list): OPTIONAL list of acr values in the order of
-                                priority
+            acr_values (list, optional): acr values in the order of priority
 
         Returns:
-            The authorization url (string) that the user must access for
+            string: The authorization url that the user must access for
             authentication and authorization
 
         Raises:
-            RuntimeError with oxD Server error and description if oxD server
-            throws an error.
+            RuntimeError: If the oxD throws an error for any reason.
         """
         command = {"command": "get_authorization_url"}
         if not self.oxd_id:
@@ -137,36 +134,38 @@ class Client:
         OP. It is called after the user authorizies by visiting the auth URL.
 
         Args:
-            code (string): code obtained from the auth url callback
-            scopes (list): scopes authorized by the OP, fromt he url callback
-            state (string): state key obtained from the auth url callback
+            code (string): code, parse from the callback URL querystring
+            scopes (list): scopes authorized by the OP, parsed from the
+                callback URL
+            state (string, optional): state, parsed from the callback URL
 
         Returns:
-            A named tuple containing the following data.
-            {
-                "access_token": "<token string>",
-                "expires_in": 3600,
-                "refresh_token": "<token string>",
-                "id_token": "<token string>",
-                "id_token_claims": {
-                    "iss": "https://server.example.com",
-                    "sub": "24400320",
-                    "aud": "s6BhdRkqt3",
-                    "nonce": "n-0S6_WzA2Mj",
-                    "exp": 1311281970,
-                    "iat": 1311280970,
-                    "at_hash": "MTIzNDU2Nzg5MDEyMzQ1Ng"
+            NamedTuple: The tokens object with the following data structure::
+
+                {
+                    "access_token": "<token string>",
+                    "expires_in": 3600,
+                    "refresh_token": "<token string>",
+                    "id_token": "<token string>",
+                    "id_token_claims":
+                    {
+                        "iss": "https://server.example.com",
+                        "sub": "24400320",
+                        "aud": "s6BhdRkqt3",
+                        "nonce": "n-0S6_WzA2Mj",
+                        "exp": 1311281970,
+                        "iat": 1311280970,
+                        "at_hash": "MTIzNDU2Nzg5MDEyMzQ1Ng"
                     }
-            }
+                }
 
             Since this would be returned as a NamedTuple, it can be accessed
-            using the dot notation as given below -
-            data.access_token, data.refresh_token, data.id_token ...etc.,
+            using the dot notation as :obj:`data.access_token`,
+            :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,
 
         Raises:
-            RuntimeError with oxD Server error and description if oxD server
-            throws an error OR if the params code and scopes are of improper
-            datatype.
+            RuntimeError: If oxD server throws an error OR if the params code
+                and scopes are of improper datatype.
         """
         if not (code and scopes) or type(scopes) != list:
             err_msg = """Empty/Wrong value in place of code or scope.
@@ -200,13 +199,13 @@ class Client:
                                     function
 
         Returns:
-            The user data claims (named tuple) that are returned by the OP.
+            NamedTuple: The user data claims that are returned by the OP.
             Refer to the /.well-known/openid-configuration URL of your OP for
             the complete list of the claims for different scopes.
 
         Raises:
-            RuntimeError with details in messafe if the param access_token
-            is empty OR if the oxD Server returns an error.
+            RuntimeError: If the param access_token is empty OR if the oxD
+                Server returns an error.
         """
         if not access_token:
             logger.error("Empty access code sent for get_user_info")
@@ -228,15 +227,15 @@ class Client:
         """Function to logout the user.
 
         Args:
-            id_token_hint (string): OPTIONAL (oxd server will use last used
-                ID Token)
-            post_logout_redirect_uri (string): OPTIONAL URI for redirection,
+            id_token_hint (string, optional): oxd server will use last used
+                ID Token, if not provided
+            post_logout_redirect_uri (string, optional): URI to redirect,
                 this uri would override the value given in the site-config
-            state (string): OPTIONAL site state
-            session_state (string): OPTIONAL session state
+            state (string, optional): site state
+            session_state (string, optional): session state
 
         Returns:
-            The URI (string) to which the user must be directed in order to
+            string: The URI to which the user must be directed in order to
             perform the logout
         """
         command = {"command": "get_logout_uri"}
@@ -270,7 +269,7 @@ class Client:
         This should be called after changing the values in the cfg file.
 
         Returns:
-            The status (boolean) for update of information was sucessful or not
+            bool: The status for update. True for success and False for failure
         """
         command = {"command": "update_site_registration"}
         params = {"oxd_id": self.oxd_id,
