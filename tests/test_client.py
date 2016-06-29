@@ -1,7 +1,8 @@
 import os
 
 from nose.tools import assert_equal, assert_is_instance, assert_true,\
-    assert_raises, assert_is_none, assert_is_not_none, assert_in
+    assert_raises, assert_is_none, assert_is_not_none, assert_in, \
+    assert_not_equal
 from mock import patch
 
 from oxdpython import Client
@@ -189,3 +190,38 @@ def test_update_site_registration():
     c = Client(config_location)
     status = c.update_site_registration()
     assert_true(status)
+
+
+def test_uma_rp_get_rpt():
+    c = Client(config_location)
+    rpt = c.uma_rp_get_rpt()
+    assert_is_instance(rpt, str)
+
+    # Verify the force_new flag
+    rpt2 = c.uma_rp_get_rpt(True)
+    assert_is_instance(rpt2, str)
+    assert_not_equal(rpt, rpt2)
+
+
+def test_uma_rp_authorize_rpt():
+    c = Client(config_location)
+    rpt = 'dummy_rpt'
+    ticket = 'dummy_ticket'
+    status = c.uma_rp_authorize_rpt(rpt, ticket)
+    assert_true(status)
+
+
+def test_uma_rp_authorize_rpt_throws_errors():
+    c = Client(config_location)
+    rpt = 'invalid_rpt'
+    ticket = 'invalid_ticket'
+    with assert_raises(RuntimeError):
+        c.uma_rp_authorize_rpt(rpt, ticket)
+
+
+def test_uma_rp_get_gat():
+    c = Client(config_location)
+    scopes = ["http://photoz.example.com/dev/actions/view",
+              "http://photoz.example.com/dev/actions/add"]
+    gat = c.uma_rp_get_gat(scopes)
+    assert_is_instance(gat, str)
