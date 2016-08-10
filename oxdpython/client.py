@@ -186,7 +186,7 @@ class Client:
         logger.debug("Sending command `get_tokens_by_code` with params %s",
                      params)
         response = self.msgr.send(command)
-        logger.debug("Recieved reponse: %s", response)
+        logger.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)
 
@@ -301,3 +301,198 @@ class Client:
             return True
         else:
             return False
+
+    def uma_rs_protect(self, resources):
+        """Function to be used in a UMA Resource Server to protect resources.
+
+        Args:
+            resources (list): list of resource to protect
+
+        Returns:
+            bool: The status of the request.
+        """
+        command = {"command": "uma_rs_protect"}
+        params = {"oxd_id": self.oxd_id,
+                  "resources": []}
+
+        if len(resources) < 1:
+            return False
+
+        params["resources"] = resources
+        command["params"] = params
+
+        logger.debug("Sending `uma_rs_protect` with params %s", params)
+        response = self.msgr.send(command)
+        logger.debug("Recieved response: %s", response)
+
+        if response.status == "ok":
+            return True
+        else:
+            return False
+
+    def uma_rs_check_access(self, rpt, path, http_method):
+        """Function to be used in a UMA Resource Server to check access.
+
+        Args:
+            rpt (string) - RPT or blank value if absent (not send by RP)
+            path (string) - Path of resource (e.g. for http://rs.com/phones,
+                /phones should be passed)
+            http_method (string) - Http method of RP request (GET, POST, PUT,
+                DELETE)
+
+        Returns:
+            NamedTuple: The access information recieved in the format below.
+            If the access is granted::
+
+                { "access": "granted" }
+
+            If the access is denied with ticket response::
+
+                {
+                    "access": "denied",
+                    "www-authenticate_header": "UMA realm=\"example\",
+                        as_uri=\"https://as.example.com\",
+                        error=\"insufficient_scope\",
+                        ticket=\"016f84e8-f9b9-11e0-bd6f-0021cc6004de\"",
+                    "ticket": "016f84e8-f9b9-11e0-bd6f-0021cc6004de"
+                }
+
+            If the access is denied without ticket response::
+
+                { "access": "denied" }
+
+            If the resource is not Protected::
+
+                {
+                    "error": "invalid_request",
+                    "error_description":"Resource is not protected. Please
+                        protect your resource first with uma_rs_protect
+                        command."
+                }
+
+        """
+        command = {"command": "uma_rs_check_access"}
+        params = {"oxd_id": self.oxd_id,
+                  "rpt": rpt,
+                  "path": path,
+                  "http_method": http_method}
+        command["params"] = params
+
+        logger.debug("Sending command `uma_rs_check_access` with params %s",
+                     params)
+        response = self.msgr.send(command)
+        logger.debug("Recieved response: %s", response)
+
+        return self.__clear_data(response)
+
+    def uma_rp_get_rpt(self, force_new=False):
+        """Function to be used by a UMA Requesting Party to get RPT token.
+
+        Args:
+            force_new (boolean) - indicates whether return new RPT, defaults to
+                false, so oxd server can cache/reuse same RPT
+
+        Returns:
+            String: The RPT token (if recived) or None
+        """
+        command = {"command": "uma_rp_get_rpt"}
+        params = {"oxd_id": self.oxd_id,
+                  "force_new": force_new
+                  }
+        command["params"] = params
+
+        logger.debug("Sending command `uma_rp_get_rpt` with params %s", params)
+        response = self.msgr.send(command)
+        logger.debug("Recieved response: %s", response)
+
+        if response.status == "ok":
+            return response.data.rpt
+        else:
+            return None
+
+    def uma_rp_authorize_rpt(self, rpt, ticket):
+        """Function to be used by UMA Requesting Party to authorize a RPT token.
+
+        Args:
+            rpt (string) - the RPT token to be authorized
+            ticket (string) - the ticket to authorize the token
+
+        Returns:
+            NamedTuple: The server response as an named tuple.
+            Authorized Response (Success)::
+
+                { "status":"ok" }
+
+            Not authorized error::
+
+                {
+                    "status": "error",
+                    "data": {
+                        "code": "not_authorized",
+                        "description": "RPT is not authorized"
+                        }
+                }
+
+            Invalid ticket error::
+
+                {
+                    "status":"error",
+                    "data":{
+                        "code":"invalid_ticket"
+                        "description":"Ticket is not valid (outdated or not
+                            present on Authorization Server)."
+                    }
+                }
+
+            Invalid rpt error::
+
+                {
+                    "status":"error",
+                    "data":{
+                        "code":"invalid_rpt"
+                        "description":"RPT isn't valid (outdated or not present
+                            on Authorization Server)."
+                    }
+                }
+        """
+        command = {"command": "uma_rp_authorize_rpt"}
+        params = {"oxd_id": self.oxd_id,
+                  "rpt": rpt,
+                  "ticket": ticket
+                  }
+        command["params"] = params
+
+        logger.debug("Sending command `uma_rp_authorize_rpt` with params %s",
+                     params)
+        response = self.msgr.send(command)
+        logger.debug("Recieved response: %s", response)
+
+        return response
+
+    def uma_rp_get_gat(self, scopes):
+        """Function to be used by UMA Requesting Party to get a GAT.
+
+        GAT stands for Gluu Access Token. It is invented by Gluu and is
+        described here:
+        https://ox.gluu.org/doku.php?id=uma:oauth2_access_management
+
+        Args:
+            scopes (list) - list of strings which describe the scopes
+
+        Returns:
+            string: The GAT token. If error, returns None.
+        """
+        command = {"command": "uma_rp_get_gat"}
+        params = {"oxd_id": self.oxd_id,
+                  "scopes": scopes
+                  }
+        command["params"] = params
+
+        logger.debug("Sending command `uma_rp_get_gat` with params %s", params)
+        response = self.msgr.send(command)
+        logger.debug("Recieved response: %s", response)
+
+        if response.status == "ok":
+            return response.data.gat
+        else:
+            return None
