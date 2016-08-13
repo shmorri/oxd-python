@@ -342,8 +342,8 @@ class Client:
         """Function to be used in a UMA Resource Server to check access.
 
         Args:
-            rpt (string) - RPT or blank value if absent (not send by RP)
-            path (string) - Path of resource (e.g. for http://rs.com/phones,
+            rpt (string): RPT or blank value if absent (not send by RP)
+            path (string): Path of resource (e.g. for http://rs.com/phones,
                 /phones should be passed)
             http_method (string) - Http method of RP request (GET, POST, PUT,
                 DELETE)
@@ -358,10 +358,10 @@ class Client:
 
                 {
                     "access": "denied",
-                    "www-authenticate_header": "UMA realm=\"example\",
-                        as_uri=\"https://as.example.com\",
-                        error=\"insufficient_scope\",
-                        ticket=\"016f84e8-f9b9-11e0-bd6f-0021cc6004de\"",
+                    "www-authenticate_header": "UMA realm='example',
+                        as_uri='https://as.example.com',
+                        error='insufficient_scope',
+                        ticket='016f84e8-f9b9-11e0-bd6f-0021cc6004de'",
                     "ticket": "016f84e8-f9b9-11e0-bd6f-0021cc6004de"
                 }
 
@@ -397,7 +397,7 @@ class Client:
         """Function to be used by a UMA Requesting Party to get RPT token.
 
         Args:
-            force_new (boolean) - indicates whether return new RPT, defaults to
+            force_new (boolean): indicates whether return new RPT, defaults to
                 false, so oxd server can cache/reuse same RPT
 
         Returns:
@@ -422,8 +422,8 @@ class Client:
         """Function to be used by UMA Requesting Party to authorize a RPT token.
 
         Args:
-            rpt (string) - the RPT token to be authorized
-            ticket (string) - the ticket to authorize the token
+            rpt (string): the RPT token to be authorized
+            ticket (string): the ticket to authorize the token
 
         Returns:
             NamedTuple: The server response as an named tuple.
@@ -485,7 +485,7 @@ class Client:
         https://ox.gluu.org/doku.php?id=uma:oauth2_access_management
 
         Args:
-            scopes (list) - list of strings which describe the scopes
+            scopes (list): list of strings which describe the scopes
 
         Returns:
             string: The GAT token. If error, returns None.
