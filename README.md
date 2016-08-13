@@ -30,14 +30,19 @@ python setup.py install
 
 * Scroll [below](#using-the-library-in-your-website) to learn how to use the library in an application.
 * See the [API docs](http://oxd-python.readthedocs.io/en/2.4.4/) for in-depth information about the various functions and their parameters.
-* See the code of a [sample Flask app](https://github.com/GluuFederation/oxd-python/blob/master/demosite/demosite.py) built using oxd-python.
+* See the code of a [sample Flask app](https://github.com/GluuFederation/oxd-python/blob/master/demosite) built using oxd-python.
 * Browse the source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
 
 ### Using the Library in your website
 
 #### Configure the site
 
-Once the library is installed, it can be used by any Python web application deployed on the server. First, create a configuration file for your website in a server *writable* location like `/var/www/html/<your-site>/your-site.cfg`. The minimal configuration required to get oxd-python working:
+This library uses a configuration file to specify information needed
+by OpenID Connect dynamic client registration, and to save information 
+that is returned, like the client id. So the config file needs to be 
+*writable*.
+
+The minimal configuration required to get oxd-python working:
 
 ```
 [oxd]
@@ -48,13 +53,13 @@ port = 8099
 authorization_redirect_uri=https://your.site.org/callback
 ```
 
-**Note:** The website is registered with the OP and its ID is stored in this config file, also are the other peristant information about the website. So the config file needs to be *writable* for the server. The [sample.cfg](https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg) file contains complete documentation about itself.
-
-A Minimal 
+**Note:** The [sample.cfg](https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
+file contains detailed documentation about the configuration values.
 
 #### Website Registration
 
-The `Client` class of the library provides all the required methods required for the website to communicate with the oxD RP through sockets.
+The `Client` class of the library provides all the required methods
+required for the website to communicate with the oxD RP through sockets.
 
 ```python
 from oxdpython import Client
@@ -64,28 +69,35 @@ client = Client(config)
 client.register_site()
 ```
 
-**Note:** `register_site()` can be skipped as any `get_authorization_url()` automatically registers the site.
+**Note:** `register_site()` can be skipped as any `get_authorization_url()`
+automatically registers the site.
 
 #### Get Authorization URL
-
-Next Generate an authorization url which the user can visit to authorize your application to use the information from the OP.
+Next generate an authorization url which the web application will 
+redirect the person to authorize the release of personal data 
+to your application from the OP.
 
 ```python
 auth_url = client.get_authorization_url()
 ```
 
-#### Get access token
+#### Get Tokens
 
-In the web application, redirect the user to the `auth_url`. After authentication and authorization at the OP, the user is sent back to the website. The website needs to parse the information from the callback url and use it to get the access token. Refer to your web framework to how to get these values from the callback url.
+After authentication and authorization at the OP, the response will 
+contain code and state values. You'll need these in this method
+to obtain an `id_token`, `access_token`, and `refresh_token`. 
 
 ```python
 # code, scopes, state = parse_callback_url_querystring()  # Refer your web framework
 tokens = client.get_tokens_by_code(code, scopes, state)
 ```
 
-#### Get user claims
+#### Get User Claims
 
-Claims (information fields) made availble by the OP can be fethed using the access token obtained above.
+User claims (information about the person) is made available by the OP 
+can be fetched using the access token obtained above. Simply obtaining
+tokens is not good enough--you need the user claims to know who is the 
+person
 
 ```python
 user = oxc.get_user_info(tokens.access_token)
@@ -108,14 +120,21 @@ if 'website' in user._fields:
 ```python
 logout_uri = oxc.get_logout_uri()
 ```
-Redirect the user to this uri from your web application to logout the user.
+Redirect the user to this uri from your web application to logout the 
+user.
 
 
-#### Update Site Registration
-Any changes in the configuration of the client can be updated in the OP by using this function call. Look at the [oxD docs](https://oxd.gluu.org/docs/oxdserver/) for the complete list of the configuration values that could be set.
+#### Update Site
+Any changes in the configuration of the client can be communicated to the OP
+using `update_site_registration` . Look at the [oxD docs](https://oxd.gluu.org/docs/oxdserver/)
+for the complete list of the configuration values that could be set.
 
 ```python
-scopes = ','.join(['openid','profile','uma_protection'])  # ensure list is converted to string
+client.config.set('client', 'post_logout_uri', 'https://client.example.org/post_logout')
+
+# ensure lists are converted to string
+scopes = ','.join(['openid','profile','uma_protection'])
 client.config.set('client', 'scope', scopes)
+
 client.update_site_registration()
 ```
