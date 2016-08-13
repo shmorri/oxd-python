@@ -22,9 +22,8 @@ class Client:
         """
         self.config = Configurer(config_location)
         self.msgr = Messenger(int(self.config.get("oxd", "port")))
-        self.redirect_uris = self.config.get("client",
-                                             "redirect_uris").split(",")
-        self.authorization_redirect_uri = self.redirect_uris[0]
+        self.authorization_redirect_uri = self.config.get(
+            "client", "authorization_redirect_uri")
         self.oxd_id = None
         if self.config.get("oxd", "id"):
             self.oxd_id = self.config.get("oxd", "id")
@@ -32,6 +31,26 @@ class Client:
             logger.info("Oxd ID found during initialization. Client is"
                         " already registered with the OpenID Provider")
             logger.info("oxd id: %s", self.oxd_id)
+
+        # list of optional params that can be passed to the oxd-server
+        self.opt_params = ["op_host",
+                           "post_logout_redirect_uri",
+                           "client_jwks_uri",
+                           "client_token_endpoint_auth_method",
+                           "client_id",
+                           "client_secret",
+                           "application_type"]
+        self.opt_list_params = ["grant_types",
+                                "acr_values",
+                                "contacts",
+                                "client_logout_uris",
+                                "client_request_uris",
+                                "client_sector_identifier_uri",
+                                "response_types",
+                                "scope",
+                                "ui_locales",
+                                "claims_locales",
+                                ]
 
     def __clear_data(self, response):
         """A private method that verifies that the oxd response is error free
@@ -64,33 +83,14 @@ class Client:
         # add required params for the command
         params = {
             "authorization_redirect_uri": self.authorization_redirect_uri,
-            "redirect_uris": self.redirect_uris
             }
         # add other optional params if they exist in config
-        opt_params = ["op_host",
-                      "post_logout_redirect_uri",
-                      "client_jwks_uri",
-                      "client_token_endpoint_auth_method",
-                      "client_id",
-                      "client_secret",
-                      "application_type"]
-        opt_list_params = ["grant_types",
-                           "acr_values",
-                           "contacts",
-                           "client_logout_uris",
-                           "client_request_uris",
-                           "client_sector_identifier_uri",
-                           "response_types",
-                           "scope",
-                           "ui_locales",
-                           "claims_locales",
-                           ]
-        for param in opt_params:
+        for param in self.opt_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
                 params[param] = value
 
-        for param in opt_list_params:
+        for param in self.opt_list_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param).split(",")
                 params[param] = value
@@ -283,18 +283,12 @@ class Client:
         params = {"oxd_id": self.oxd_id,
                   "authorization_redirect_uri": self.authorization_redirect_uri
                   }
-        optional_params = ["post_logout_redirect_uri", "application_type",
-                           "client_jwks_uri",
-                           "client_token_endpoint_auth_method"]
-        optional_list_params = ["client_logout_uris", "grant_types",
-                                "redirect_uris", "acr_values",
-                                "client_request_uris", "contacts"]
-        for param in optional_params:
+        for param in self.opt_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
                 params[param] = value
 
-        for param in optional_list_params:
+        for param in self.opt_list_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param).split(",")
                 params[param] = value
