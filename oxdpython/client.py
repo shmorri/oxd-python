@@ -22,10 +22,9 @@ class Client:
         """
         self.config = Configurer(config_location)
         self.msgr = Messenger(int(self.config.get("oxd", "port")))
-        self.op_host = self.config.get("client", "op_host")
-        self.application_type = self.config.get("client", "application_type")
-        self.authorization_redirect_uri = self.config.get(
-            "client", "authorization_redirect_uri")
+        self.redirect_uris = self.config.get("client",
+                                             "redirect_uris").split(",")
+        self.authorization_redirect_uri = self.redirect_uris[0]
         self.oxd_id = None
         if self.config.get("oxd", "id"):
             self.oxd_id = self.config.get("oxd", "id")
@@ -63,20 +62,29 @@ class Client:
         command = {"command": "register_site"}
 
         # add required params for the command
-        params = {"op_host": self.op_host,
-                  "authorization_redirect_uri": self.authorization_redirect_uri
-                  }
+        params = {
+            "authorization_redirect_uri": self.authorization_redirect_uri,
+            "redirect_uris": self.redirect_uris
+            }
         # add other optional params if they exist in config
-        opt_params = ["post_logout_redirect_uri",
+        opt_params = ["op_host",
+                      "post_logout_redirect_uri",
                       "client_jwks_uri",
                       "client_token_endpoint_auth_method",
+                      "client_id",
+                      "client_secret",
                       "application_type"]
         opt_list_params = ["grant_types",
                            "acr_values",
-                           "redirect_uris",
                            "contacts",
                            "client_logout_uris",
-                           "client_request_uris"]
+                           "client_request_uris",
+                           "client_sector_identifier_uri",
+                           "response_types",
+                           "scope",
+                           "ui_locales",
+                           "claims_locales",
+                           ]
         for param in opt_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
@@ -406,7 +414,7 @@ class Client:
         logger.debug("Recieved response: %s", response)
 
         if response.status == "ok":
-            return response.data.rpt
+            return str(response.data.rpt)
         else:
             return None
 

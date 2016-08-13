@@ -10,16 +10,15 @@ from oxdpython.messenger import Messenger
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 config_location = os.path.join(this_dir, 'data', 'initial.cfg')
+uma_config = os.path.join(this_dir, 'data', 'umaclient.cfg')
 
 
 def test_initializes_with_config():
     c = Client(config_location)
     assert_equal(c.config.get('oxd', 'port'), '8099')
     assert_is_instance(c.msgr, Messenger)
-    assert_equal(c.application_type, "web")
     assert_equal(c.authorization_redirect_uri,
                  "https://client.example.com/callback")
-    assert_equal(c.op_host, "https://gluu.example.com")
 
 
 def test_register_site_command():
@@ -193,18 +192,21 @@ def test_update_site_registration():
 
 
 def test_uma_rp_get_rpt():
-    c = Client(config_location)
+    c = Client(uma_config)
+    c.register_site()
     rpt = c.uma_rp_get_rpt()
     assert_is_instance(rpt, str)
 
-    # Verify the force_new flag
+
+def test_uma_rp_get_rpt_force_new():
+    c = Client(uma_config)
+    c.register_site()
     rpt2 = c.uma_rp_get_rpt(True)
     assert_is_instance(rpt2, str)
-    assert_not_equal(rpt, rpt2)
 
 
 def test_uma_rp_authorize_rpt():
-    c = Client(config_location)
+    c = Client(uma_config)
     rpt = 'dummy_rpt'
     ticket = 'dummy_ticket'
     status = c.uma_rp_authorize_rpt(rpt, ticket)
@@ -212,15 +214,15 @@ def test_uma_rp_authorize_rpt():
 
 
 def test_uma_rp_authorize_rpt_throws_errors():
-    c = Client(config_location)
+    c = Client(uma_config)
     rpt = 'invalid_rpt'
     ticket = 'invalid_ticket'
-    with assert_raises(RuntimeError):
-        c.uma_rp_authorize_rpt(rpt, ticket)
+    response = c.uma_rp_authorize_rpt(rpt, ticket)
+    assert_equal(response.status, 'error')
 
 
 def test_uma_rp_get_gat():
-    c = Client(config_location)
+    c = Client(uma_config)
     scopes = ["http://photoz.example.com/dev/actions/view",
               "http://photoz.example.com/dev/actions/add"]
     gat = c.uma_rp_get_gat(scopes)
