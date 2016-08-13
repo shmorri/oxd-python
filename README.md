@@ -37,9 +37,20 @@ python setup.py install
 
 #### Configure the site
 
-Once the library is installed, it can be used by any Python web application deployed on the server. First, create a copy of the [sample configuration file](https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg) for your website in a server *writable* location and edit the configuration. For example `/var/www/demosite/demosite.cfg`.
+Once the library is installed, it can be used by any Python web application deployed on the server. First, create a configuration file for your website in a server *writable* location like `/var/www/html/<your-site>/your-site.cfg`. The minimal configuration required to get oxd-python working:
+
+```
+[oxd]
+host = localhost
+port = 8099
+
+[client]
+redirect_uris=https://your.site.org/callback,https://your.site.org/callback_2
+```
 
 **Note:** The website is registered with the OP and its ID is stored in this config file, also are the other peristant information about the website. So the config file needs to be *writable* for the server. The [sample.cfg](https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg) file contains complete documentation about itself.
+
+A Minimal 
 
 #### Website Registration
 
