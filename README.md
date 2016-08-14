@@ -29,7 +29,7 @@ python setup.py install
 ### Next Steps
 
 * Scroll [below](#using-the-library-in-your-website) to learn how to use the library in an application.
-* See the [API docs](http://oxd-python.readthedocs.io/en/2.4.4/) for in-depth information about the various functions and their parameters.
+* See the [API docs](http://oxd-python.readthedocs.io/) for in-depth information about the various functions and their parameters.
 * See the code of a [sample Flask app](https://github.com/GluuFederation/oxd-python/blob/master/demosite) built using oxd-python.
 * Browse the source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
 
