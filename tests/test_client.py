@@ -187,6 +187,8 @@ def test_logout_raises_error_when_oxd_return_error(mock_send):
 
 def test_update_site_registration():
     c = Client(config_location)
+    c.config.set('client', 'post_logout_redirect_uri',
+                 'https://client.example.com/')
     status = c.update_site_registration()
     assert_true(status)
 
