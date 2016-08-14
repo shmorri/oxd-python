@@ -25,12 +25,9 @@ apt-get install gluu-oxd-server
 
 ### Configuring the oxd-server
 
-Edit the file `/opt/oxd-server/conf/oxd-conf.json`
-
-* Change the OP HOST name to your OpenID Provider domain at the line `"op_host": "https://ce-dev.gluu.org"`
-
 Edit the file `/opt/oxd-server/conf/oxd-default-site-config.json`
 
+* Set the OP HOST name to your OpenID Provider domain at the line `"op_host": ""`
 * Change the `response_types` line to `"response_types": ["code"]`
 
 Start the oxd-server
@@ -62,7 +59,7 @@ Deploying the site
 
 ```bash
 cd oxd-python
-pip install -r requirements.txt
+pip install flask
 cp demosite/demosite.conf /etc/apache2/sites-available/demosite.conf
 chown www-data demosite/demosite.cfg
 a2ensite demosite
