@@ -495,6 +495,6 @@ class Client:
         logger.debug("Recieved response: %s", response)
 
         if response.status == "ok":
-            return response.data.gat
+            return str(response.data.gat)
         else:
             return None
