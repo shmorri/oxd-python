@@ -57,6 +57,13 @@ def test_get_auth_url_accepts_acrvalues_as_optional_params():
     assert_in('gplus', auth_url)
 
 
+def test_get_auth_url_accepts_acr_and_prompt():
+    c = Client(config_location)
+    auth_url = c.get_authorization_url(["basic"], "login")
+    assert_in('basic', auth_url)
+    assert_in('prompt', auth_url)
+
+
 @patch.object(Messenger, 'send')
 def test_get_tokens_by_code(mock_send):
     c = Client(config_location)
