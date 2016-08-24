@@ -70,33 +70,14 @@ def test_get_tokens_by_code(mock_send):
     mock_send.return_value.status = "ok"
     mock_send.return_value.data = "mock-token"
     code = "code"
-    state = "state"
-    scopes = ["openid"]
     command = {"command": "get_tokens_by_code",
                "params": {
                    "oxd_id": c.oxd_id,
                    "code": code,
-                   "state": state,
-                   "scopes": scopes
                    }}
-    token = c.get_tokens_by_code(code, scopes, state)
+    token = c.get_tokens_by_code(code)
     mock_send.assert_called_with(command)
     assert_equal(token, "mock-token")
-
-
-def test_get_tokens_raises_error_for_invalid_args():
-    c = Client(config_location)
-    # Empty code should raise error
-    with assert_raises(RuntimeError):
-        c.get_tokens_by_code("", ["openid"], "state")
-
-    # Empty list for scopes should raise error
-    with assert_raises(RuntimeError):
-        c.get_tokens_by_code("code", [], "state")
-
-    # raise error when scopes is not a list
-    with assert_raises(RuntimeError):
-        c.get_tokens_by_code("code", "openid", "state")
 
 
 @patch.object(Messenger, 'send')
@@ -107,7 +88,7 @@ def test_get_tokens_raises_error_if_response_has_error(mock_send):
     mock_send.return_value.data.error_description = "No Tokens in Mock"
 
     with assert_raises(RuntimeError):
-        c.get_tokens_by_code("code", ["openid"], "state")
+        c.get_tokens_by_code("code")
 
 
 @patch.object(Messenger, 'send')

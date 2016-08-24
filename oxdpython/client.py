@@ -144,15 +144,12 @@ class Client:
 
         return self.__clear_data(response).authorization_url
 
-    def get_tokens_by_code(self, code, scopes, state=None):
+    def get_tokens_by_code(self, code):
         """Function to get access code for getting the user details from the
         OP. It is called after the user authorizies by visiting the auth URL.
 
         Args:
             code (string): code, parse from the callback URL querystring
-            scopes (list): scopes authorized by the OP, parsed from the
-                callback URL
-            state (string, optional): state, parsed from the callback URL
 
         Returns:
             NamedTuple: The tokens object with the following data structure::
@@ -182,20 +179,9 @@ class Client:
             RuntimeError: If oxD server throws an error OR if the params code
                 and scopes are of improper datatype.
         """
-        if not (code and scopes) or type(scopes) != list:
-            err_msg = """Empty/Wrong value in place of code or scope.
-                      Code (string): {0}
-                      Scopes (list): {1}""".format(code, scopes)
-            logger.error(err_msg)
-            raise RuntimeError(err_msg)
-
         command = {"command": "get_tokens_by_code"}
         params = {"oxd_id": self.oxd_id}
         params["code"] = code
-        params["scopes"] = scopes
-
-        if state:
-            params["state"] = state
 
         command["params"] = params
         logger.debug("Sending command `get_tokens_by_code` with params %s",
@@ -502,6 +488,6 @@ class Client:
         logger.debug("Recieved response: %s", response)
 
         if response.status == "ok":
-            return str(response.data.gat)
+            return str(response.data.rpt)
         else:
             return None
