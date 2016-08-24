@@ -7,14 +7,14 @@ logger = logging.getLogger(__name__)
 
 
 class Client:
-    """Client is the main class that carries out the commands to talk with the
-    oxD server. The oxD request commands are provided as class methods that
-    can be called to send the command to the oxD server via socket and the
-    reponse is returned as a dict by the called method.
+    """Client is the main class that carries out the task of talking with the
+    oxD server. The oxD commands are provided as class methods that are called
+    to send the command to the oxD server via socket.
     """
 
     def __init__(self, config_location):
         """Constructor of class Client
+
         Args:
             config_location (string): The complete path of the location
                 of the config file which is a modified conpy of the sample.cfg
@@ -360,7 +360,7 @@ class Client:
 
                 {
                     "error": "invalid_request",
-                    "error_description":"Resource is not protected. Please
+                    "error_description": "Resource is not protected. Please
                         protect your resource first with uma_rs_protect
                         command."
                 }
@@ -431,10 +431,10 @@ class Client:
             Invalid ticket error::
 
                 {
-                    "status":"error",
-                    "data":{
-                        "code":"invalid_ticket"
-                        "description":"Ticket is not valid (outdated or not
+                    "status": "error",
+                    "data": {
+                        "code": "invalid_ticket",
+                        "description": "Ticket is not valid (outdated or not
                             present on Authorization Server)."
                     }
                 }
@@ -442,11 +442,11 @@ class Client:
             Invalid rpt error::
 
                 {
-                    "status":"error",
-                    "data":{
-                        "code":"invalid_rpt"
-                        "description":"RPT isn't valid (outdated or not present
-                            on Authorization Server)."
+                    "status": "error",
+                    "data": {
+                        "code": "invalid_rpt",
+                        "description": "RPT isn't valid (outdated or not
+                            present on Authorization Server)."
                     }
                 }
         """

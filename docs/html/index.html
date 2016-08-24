@@ -130,27 +130,52 @@
 <span class="target" id="module-oxdpython.client"></span><dl class="class">
 <dt id="oxdpython.client.Client">
 <em class="property">class </em><code class="descclassname">oxdpython.client.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>config_location</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client is the main class that carries out the commands to talk with the
-oxD server. The oxD request commands are provided as class methods that
-can be called to send the command to the oxD server via socket and the
-reponse is returned as a dict by the called method.</p>
+<dd><p>Client is the main class that carries out the task of talking with the
+oxD server. The oxD commands are provided as class methods that are called
+to send the command to the oxD server via socket.</p>
+<dl class="method">
+<dt id="oxdpython.client.Client.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>config_location</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor of class Client</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_location</strong> (<em>string</em>) &#8211; The complete path of the location
+of the config file which is a modified conpy of the sample.cfg
+from this library</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="oxdpython.client.Client.get_authorization_url">
-<code class="descname">get_authorization_url</code><span class="sig-paren">(</span><em>acr_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_authorization_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_authorization_url" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_authorization_url</code><span class="sig-paren">(</span><em>acr_values=None</em>, <em>prompt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_authorization_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_authorization_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to get the authorization url that can be opened in the
 browser for the user to provide authorization and authentication</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>acr_values</strong> (<em>list, optional</em>) &#8211; acr values in the order of priority</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>acr_values</strong> (<em>list, optional</em>) &#8211; acr values in the order of priority</li>
+<li><strong>prompt</strong> (<em>string, optional</em>) &#8211; prompt=login is required if you want to
+force alter current user session (in case user is already
+logged in from site1 and site2 construsts authorization
+request and want to force alter current user session)</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The authorization url that the user must access for
-authentication and authorization</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The authorization url that the user must access for
+authentication and authorization</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">string</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the oxD throws an error for any reason.</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the oxD throws an error for any reason.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -187,23 +212,16 @@ perform the logout</p>
 
 <dl class="method">
 <dt id="oxdpython.client.Client.get_tokens_by_code">
-<code class="descname">get_tokens_by_code</code><span class="sig-paren">(</span><em>code</em>, <em>scopes</em>, <em>state=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_tokens_by_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_tokens_by_code" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_tokens_by_code</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_tokens_by_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_tokens_by_code" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to get access code for getting the user details from the
 OP. It is called after the user authorizies by visiting the auth URL.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>code</strong> (<em>string</em>) &#8211; code, parse from the callback URL querystring</li>
-<li><strong>scopes</strong> (<em>list</em>) &#8211; scopes authorized by the OP, parsed from the
-callback URL</li>
-<li><strong>state</strong> (<em>string, optional</em>) &#8211; state, parsed from the callback URL</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>code</strong> (<em>string</em>) &#8211; code, parse from the callback URL querystring</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The tokens object with the following data structure:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The tokens object with the following data structure:<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
     <span class="s2">&quot;expires_in&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
     <span class="s2">&quot;refresh_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
@@ -224,15 +242,12 @@ callback URL</li>
 <p>Since this would be returned as a NamedTuple, it can be accessed
 using the dot notation as <code class="xref py py-obj docutils literal"><span class="pre">data.access_token</span></code>,
 <code class="xref py py-obj docutils literal"><span class="pre">data.refresh_token</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">data.id_token</span></code>...etc.,</p>
-</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">NamedTuple</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">NamedTuple</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If oxD server throws an error OR if the params code
-and scopes are of improper datatype.</p>
-</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If oxD server throws an error OR if the params code
+and scopes are of improper datatype.</td>
 </tr>
 </tbody>
 </table>
@@ -277,6 +292,180 @@ registration is sucessful</td>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the site registration fails.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rp_authorize_rpt">
+<code class="descname">uma_rp_authorize_rpt</code><span class="sig-paren">(</span><em>rpt</em>, <em>ticket</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rp_authorize_rpt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rp_authorize_rpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used by UMA Requesting Party to authorize a RPT token.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rpt</strong> (<em>string</em>) &#8211; the RPT token to be authorized</li>
+<li><strong>ticket</strong> (<em>string</em>) &#8211; the ticket to authorize the token</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The server response as an named tuple.
+Authorized Response (Success):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;ok&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>Not authorized error:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;not_authorized&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;RPT is not authorized&quot;</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Invalid ticket error:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>{
+    &quot;status&quot;: &quot;error&quot;,
+    &quot;data&quot;: {
+        &quot;code&quot;: &quot;invalid_ticket&quot;,
+        &quot;description&quot;: &quot;Ticket is not valid (outdated or not
+            present on Authorization Server).&quot;
+    }
+}
+</pre></div>
+</div>
+<p>Invalid rpt error:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>{
+    &quot;status&quot;: &quot;error&quot;,
+    &quot;data&quot;: {
+        &quot;code&quot;: &quot;invalid_rpt&quot;,
+        &quot;description&quot;: &quot;RPT isn&#39;t valid (outdated or not
+            present on Authorization Server).&quot;
+    }
+}
+</pre></div>
+</div>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">NamedTuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rp_get_gat">
+<code class="descname">uma_rp_get_gat</code><span class="sig-paren">(</span><em>scopes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rp_get_gat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rp_get_gat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used by UMA Requesting Party to get a GAT.</p>
+<p>GAT stands for Gluu Access Token. It is invented by Gluu and is
+described here:
+<a class="reference external" href="https://ox.gluu.org/doku.php?id=uma:oauth2_access_management">https://ox.gluu.org/doku.php?id=uma:oauth2_access_management</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scopes</strong> (<em>list</em>) &#8211; list of strings which describe the scopes</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The GAT token. If error, returns None.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rp_get_rpt">
+<code class="descname">uma_rp_get_rpt</code><span class="sig-paren">(</span><em>force_new=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rp_get_rpt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rp_get_rpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used by a UMA Requesting Party to get RPT token.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>force_new</strong> (<em>boolean</em>) &#8211; indicates whether return new RPT, defaults to
+false, so oxd server can cache/reuse same RPT</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The RPT token (if recived) or None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">String</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rs_check_access">
+<code class="descname">uma_rs_check_access</code><span class="sig-paren">(</span><em>rpt</em>, <em>path</em>, <em>http_method</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rs_check_access"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rs_check_access" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used in a UMA Resource Server to check access.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rpt</strong> (<em>string</em>) &#8211; RPT or blank value if absent (not send by RP)</li>
+<li><strong>path</strong> (<em>string</em>) &#8211; Path of resource (e.g. for <a class="reference external" href="http://rs.com/phones">http://rs.com/phones</a>,
+/phones should be passed)</li>
+<li><strong>http_method</strong> (<em>string</em>) &#8211; DELETE)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The access information recieved in the format below.
+If the access is granted:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="s2">&quot;access&quot;</span><span class="p">:</span> <span class="s2">&quot;granted&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>If the access is denied with ticket response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>{
+    &quot;access&quot;: &quot;denied&quot;,
+    &quot;www-authenticate_header&quot;: &quot;UMA realm=&#39;example&#39;,
+        as_uri=&#39;https://as.example.com&#39;,
+        error=&#39;insufficient_scope&#39;,
+        ticket=&#39;016f84e8-f9b9-11e0-bd6f-0021cc6004de&#39;&quot;,
+    &quot;ticket&quot;: &quot;016f84e8-f9b9-11e0-bd6f-0021cc6004de&quot;
+}
+</pre></div>
+</div>
+<p>If the access is denied without ticket response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="s2">&quot;access&quot;</span><span class="p">:</span> <span class="s2">&quot;denied&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>If the resource is not Protected:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>{
+    &quot;error&quot;: &quot;invalid_request&quot;,
+    &quot;error_description&quot;: &quot;Resource is not protected. Please
+        protect your resource first with uma_rs_protect
+        command.&quot;
+}
+</pre></div>
+</div>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">NamedTuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rs_protect">
+<code class="descname">uma_rs_protect</code><span class="sig-paren">(</span><em>resources</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rs_protect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rs_protect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used in a UMA Resource Server to protect resources.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>resources</strong> (<em>list</em>) &#8211; list of resource to protect</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The status of the request.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
 </tbody>
 </table>

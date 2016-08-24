@@ -9,3 +9,4 @@ Welcome to the oxD Python API reference page. If you are looking for docs on how
 
 .. automodule:: oxdpython.client
    :members:
+   :special-members:
