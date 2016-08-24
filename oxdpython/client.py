@@ -17,8 +17,8 @@ class Client:
 
         Args:
             config_location (string): The complete path of the location
-                of the config file which is a modified conpy of the sample.cfg
-                from this library
+                of the config file. Sample config at
+                (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
         """
         self.config = Configurer(config_location)
         self.msgr = Messenger(int(self.config.get("oxd", "port")))

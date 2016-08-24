@@ -144,8 +144,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            config_location (string): The complete path of the location</span>
-<span class="sd">                of the config file which is a modified conpy of the sample.cfg</span>
-<span class="sd">                from this library</span>
+<span class="sd">                of the config file. Sample config at</span>
+<span class="sd">                (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Configurer</span><span class="p">(</span><span class="n">config_location</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span> <span class="o">=</span> <span class="n">Messenger</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oxd&quot;</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">)))</span>
