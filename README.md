@@ -29,7 +29,7 @@ python setup.py install
 ### Next Steps
 
 * Scroll [below](#using-the-library-in-your-website) to learn how to use the library in an application.
-* See the [API docs](http://oxd-python.readthedocs.io/) for in-depth information about the various functions and their parameters.
+* See the [API docs](https://oxd.gluu.org/api-docs/oxd-python/2.4.4/) for in-depth information about the various functions and their parameters.
 * See the code of a [sample Flask app](https://github.com/GluuFederation/oxd-python/blob/master/demosite) built using oxd-python.
 * Browse the source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
 
@@ -88,8 +88,8 @@ contain code and state values. You'll need these in this method
 to obtain an `id_token`, `access_token`, and `refresh_token`. 
 
 ```python
-# code, scopes, state = parse_callback_url_querystring()  # Refer your web framework
-tokens = client.get_tokens_by_code(code, scopes, state)
+# code = parse_callback_url_querystring()  # Refer your web framework
+tokens = client.get_tokens_by_code(code)
 ```
 
 #### Get User Claims
@@ -110,8 +110,6 @@ print user._fields  # to print all the fields
 
 # to check for a particular field and get the information
 if 'website' in user._fields:
-    print getattr(user, 'website')
-    # or
     print user.website
 ```
 
