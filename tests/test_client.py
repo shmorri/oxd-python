@@ -40,14 +40,14 @@ def test_register_raises_runtime_error_for_oxd_error_response():
 def test_get_authorization_url():
     c = Client(config_location)
     auth_url = c.get_authorization_url()
-    assert_in('client_secret', auth_url)
+    assert_in('callback', auth_url)
 
 
 def test_get_authorization_url_works_wihtout_explicit_site_registration():
     c = Client(config_location)
     c.oxd_id = None  # assume the client isn't registered
     auth_url = c.get_authorization_url()
-    assert_in('client_secret', auth_url)
+    assert_in('callback', auth_url)
 
 
 def test_get_auth_url_accepts_acrvalues_as_optional_params():
