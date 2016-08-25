@@ -99,12 +99,8 @@ def authorize():
     <pre class="prettyprint lang-python noheader">
 @app.route('/callback')
 def callabck():
-    state = request.args.get('state')
     code = request.args.get('code')
-    scopes = request.args.get('scope').split(" ")
-
-    tokens = client.get_tokens_by_code(code, scopes, state)
-
+    tokens = client.get_tokens_by_code(code)
     user = client.get_user_info(tokens.access_token)
 
     return render_template("home.html", user=user)

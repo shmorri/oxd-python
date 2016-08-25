@@ -31,11 +31,9 @@ def authorize():
 @app.route('/callback')
 def callabck():
     # using request from Flask to parse the query string of the callback
-    state = request.args.get('state')
     code = request.args.get('code')
-    scopes = request.args.get('scope').split(" ")
 
-    tokens = oxc.get_tokens_by_code(code, scopes, state)
+    tokens = oxc.get_tokens_by_code(code)
 
     user = oxc.get_user_info(tokens.access_token)
 
