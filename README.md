@@ -1,14 +1,14 @@
 # oxd-python
 oxD Python is a client library for the Gluu oxD Server. For information about oxD, visit [http://oxd.gluu.org](http://oxd.gluu.org)
 
-## Deployment
+## Installation
 
 ### Prerequisites
 
 * Python 2.7
 * Gluu oxD Server - [Installation docs](https://www.gluu.org/docs-oxd/oxdserver/install/)
 
-### Installation
+### Library
 * *Official Gluu Repo* - Install using the package manager from the official Gluu repository.
 
 ```
@@ -26,16 +26,14 @@ cd oxdpython-version
 python setup.py install
 ```
 
-### Next Steps
+#### Important Links
 
-* Scroll [below](#using-the-library-in-your-website) to learn how to use the library in an application.
 * See the [API docs](https://oxd.gluu.org/api-docs/oxd-python/2.4.4/) for in-depth information about the various functions and their parameters.
 * See the code of a [sample Flask app](https://github.com/GluuFederation/oxd-python/blob/master/demosite) built using oxd-python.
 * Browse the source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
 
-### Using the Library in your website
 
-#### Configure the site
+## Configuration
 
 This library uses a configuration file to specify information needed
 by OpenID Connect dynamic client registration, and to save information 
@@ -56,10 +54,9 @@ authorization_redirect_uri=https://your.site.org/callback
 **Note:** The [sample.cfg](https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
 file contains detailed documentation about the configuration values.
 
-#### Website Registration
+## Sample Code
 
-The `Client` class of the library provides all the required methods
-required for the website to communicate with the oxD RP through sockets.
+#### Website Registration
 
 ```python
 from oxdpython import Client
@@ -73,9 +70,6 @@ client.register_site()
 automatically registers the site.
 
 #### Get Authorization URL
-Next generate an authorization url which the web application will 
-redirect the person to authorize the release of personal data 
-to your application from the OP.
 
 ```python
 auth_url = client.get_authorization_url()
@@ -83,21 +77,12 @@ auth_url = client.get_authorization_url()
 
 #### Get Tokens
 
-After authentication and authorization at the OP, the response will 
-contain code and state values. You'll need these in this method
-to obtain an `id_token`, `access_token`, and `refresh_token`. 
-
 ```python
 # code = parse_callback_url_querystring()  # Refer your web framework
 tokens = client.get_tokens_by_code(code)
 ```
 
 #### Get User Claims
-
-User claims (information about the person) is made available by the OP 
-can be fetched using the access token obtained above. Simply obtaining
-tokens is not good enough--you need the user claims to know who is the 
-person
 
 ```python
 user = oxc.get_user_info(tokens.access_token)
@@ -113,26 +98,73 @@ if 'website' in user._fields:
     print user.website
 ```
 
-#### Logout the user
+#### Logout
 
 ```python
 logout_uri = oxc.get_logout_uri()
 ```
-Redirect the user to this uri from your web application to logout the 
-user.
-
 
 #### Update Site
-Any changes in the configuration of the client can be communicated to the OP
-using `update_site_registration` . Look at the [oxD docs](https://oxd.gluu.org/docs/oxdserver/)
-for the complete list of the configuration values that could be set.
 
 ```python
 client.config.set('client', 'post_logout_uri', 'https://client.example.org/post_logout')
 
-# ensure lists are converted to string
+# ensure lists are converted to comma sperated string
 scopes = ','.join(['openid','profile','uma_protection'])
 client.config.set('client', 'scope', scopes)
 
 client.update_site_registration()
+```
+
+#### UMA RS Protect
+
+```python
+# define the resource
+resources = [{"path": "/photo",
+              "conditions": [
+                {
+                    "httpMethods": ["GET"],
+                    "scopes": ["http://photoz.example.com/dev/actions/view"]
+                 }]
+            }]
+
+result = client.uma_rs_protect(resources)
+```
+
+#### UMA RS Check Access
+
+```python
+rpt = 'lsjdfa-sfas234s'
+path = '/photo'
+http_method = 'GET'
+
+response = client.uma_rs_check_access(rpt, path, http_method)
+```
+
+#### UMA RP Get RPT
+
+```python
+rpt = client.uma_rp_get_rpt()
+
+# To force a new RPT
+rpt = client.uma_rp_get_rpt(True)
+```
+
+#### UMA RP Authorize RPT
+
+```python
+rpt = 'rpt-token-string'
+ticket = 'ticket-value-as-string'
+
+response = client.uma_rp_authorize_rpt(rpt, ticket)
+```
+
+#### UMA RP Get GAT
+
+```python
+scopes = ["http://photoz.example.com/dev/actions/add",
+          "http://photoz.example.com/dev/actions/view"
+          ]
+
+gat = client.uma_rp_get_gat(scopes)
 ```
