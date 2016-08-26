@@ -38,7 +38,7 @@ python setup.py install
 This library uses a configuration file to specify information needed
 by OpenID Connect dynamic client registration, and to save information 
 that is returned, like the client id. So the config file needs to be 
-*writable*.
+*writable by the app*.
 
 The minimal configuration required to get oxd-python working:
 
