@@ -217,3 +217,15 @@ def test_uma_rp_get_gat():
               "http://photoz.example.com/dev/actions/add"]
     gat = c.uma_rp_get_gat(scopes)
     assert_is_instance(gat, str)
+
+
+def test_uma_rs_protect():
+    c = Client(uma_config)
+    resources = [{"path": "/photo",
+                  "conditions": [{
+                      "httpMethods": ["GET"],
+                      "scopes": ["http://photoz.example.com/dev/actions/view"]
+                      }]
+                  }]
+
+    assert_true(c.uma_rs_protect(resources))
