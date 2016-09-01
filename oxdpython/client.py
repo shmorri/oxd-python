@@ -35,6 +35,7 @@ class Client:
         # list of optional params that can be passed to the oxd-server
         self.opt_params = ["op_host",
                            "post_logout_redirect_uri",
+                           "client_name",
                            "client_jwks_uri",
                            "client_token_endpoint_auth_method",
                            "client_id",
