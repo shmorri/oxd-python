@@ -162,6 +162,7 @@
         <span class="c1"># list of optional params that can be passed to the oxd-server</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;op_host&quot;</span><span class="p">,</span>
                            <span class="s2">&quot;post_logout_redirect_uri&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;client_name&quot;</span><span class="p">,</span>
                            <span class="s2">&quot;client_jwks_uri&quot;</span><span class="p">,</span>
                            <span class="s2">&quot;client_token_endpoint_auth_method&quot;</span><span class="p">,</span>
                            <span class="s2">&quot;client_id&quot;</span><span class="p">,</span>
@@ -233,7 +234,8 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Site registration successful. Oxd ID: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span></div>
 
-<div class="viewcode-block" id="Client.get_authorization_url"><a class="viewcode-back" href="../../index.html#oxdpython.client.Client.get_authorization_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_authorization_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acr_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_authorization_url"><a class="viewcode-back" href="../../index.html#oxdpython.client.Client.get_authorization_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_authorization_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acr_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="n">hd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to get the authorization url that can be opened in the</span>
 <span class="sd">        browser for the user to provide authorization and authentication</span>
 
@@ -243,6 +245,11 @@
 <span class="sd">                force alter current user session (in case user is already</span>
 <span class="sd">                logged in from site1 and site2 construsts authorization</span>
 <span class="sd">                request and want to force alter current user session)</span>
+<span class="sd">            scope (list, optional): scopes required, takes the one provided</span>
+<span class="sd">                during site registrations by default</span>
+<span class="sd">            hd (string, optional): hosted domain Google OP parameter if you</span>
+<span class="sd">                are using Google as your OpenID Provider.</span>
+<span class="sd">                https://developers.google.com/identity/protocols/OpenIDConnect#hd-param</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            string: The authorization url that the user must access for</span>
@@ -257,11 +264,17 @@
 
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;oxd_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="n">scope</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;scope&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scope</span>
+
         <span class="k">if</span> <span class="n">acr_values</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">acr_values</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">params</span><span class="p">[</span><span class="s2">&quot;acr_values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">acr_values</span>
 
         <span class="k">if</span> <span class="n">prompt</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">params</span><span class="p">[</span><span class="s2">&quot;prompt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prompt</span>
+
+        <span class="k">if</span> <span class="n">hd</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hd</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hd</span>
 
         <span class="n">command</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending command `get_authorization_url` with params </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -271,12 +284,13 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__clear_data</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">authorization_url</span></div>
 
-<div class="viewcode-block" id="Client.get_tokens_by_code"><a class="viewcode-back" href="../../index.html#oxdpython.client.Client.get_tokens_by_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokens_by_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_tokens_by_code"><a class="viewcode-back" href="../../index.html#oxdpython.client.Client.get_tokens_by_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokens_by_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to get access code for getting the user details from the</span>
 <span class="sd">        OP. It is called after the user authorizies by visiting the auth URL.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code (string): code, parse from the callback URL querystring</span>
+<span class="sd">            state (string): state value parsed from the callback URL</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            NamedTuple: The tokens object with the following data structure::</span>
@@ -309,6 +323,7 @@
         <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;get_tokens_by_code&quot;</span><span class="p">}</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;oxd_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span><span class="p">}</span>
         <span class="n">params</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span>
 
         <span class="n">command</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending command `get_tokens_by_code` with params </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>

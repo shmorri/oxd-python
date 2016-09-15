@@ -151,7 +151,7 @@ of the config file. Sample config at
 
 <dl class="method">
 <dt id="oxdpython.client.Client.get_authorization_url">
-<code class="descname">get_authorization_url</code><span class="sig-paren">(</span><em>acr_values=None</em>, <em>prompt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_authorization_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_authorization_url" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_authorization_url</code><span class="sig-paren">(</span><em>acr_values=None</em>, <em>prompt=None</em>, <em>scope=None</em>, <em>hd=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_authorization_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_authorization_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to get the authorization url that can be opened in the
 browser for the user to provide authorization and authentication</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -164,6 +164,11 @@ browser for the user to provide authorization and authentication</p>
 force alter current user session (in case user is already
 logged in from site1 and site2 construsts authorization
 request and want to force alter current user session)</li>
+<li><strong>scope</strong> (<em>list, optional</em>) &#8211; scopes required, takes the one provided
+during site registrations by default</li>
+<li><strong>hd</strong> (<em>string, optional</em>) &#8211; hosted domain Google OP parameter if you
+are using Google as your OpenID Provider.
+<a class="reference external" href="https://developers.google.com/identity/protocols/OpenIDConnect#hd-param">https://developers.google.com/identity/protocols/OpenIDConnect#hd-param</a></li>
 </ul>
 </td>
 </tr>
@@ -212,16 +217,21 @@ perform the logout</p>
 
 <dl class="method">
 <dt id="oxdpython.client.Client.get_tokens_by_code">
-<code class="descname">get_tokens_by_code</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_tokens_by_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_tokens_by_code" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_tokens_by_code</code><span class="sig-paren">(</span><em>code</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_tokens_by_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_tokens_by_code" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to get access code for getting the user details from the
 OP. It is called after the user authorizies by visiting the auth URL.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>code</strong> (<em>string</em>) &#8211; code, parse from the callback URL querystring</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>code</strong> (<em>string</em>) &#8211; code, parse from the callback URL querystring</li>
+<li><strong>state</strong> (<em>string</em>) &#8211; state value parsed from the callback URL</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The tokens object with the following data structure:<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The tokens object with the following data structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
     <span class="s2">&quot;expires_in&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
     <span class="s2">&quot;refresh_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
@@ -242,12 +252,15 @@ OP. It is called after the user authorizies by visiting the auth URL.</p>
 <p>Since this would be returned as a NamedTuple, it can be accessed
 using the dot notation as <code class="xref py py-obj docutils literal"><span class="pre">data.access_token</span></code>,
 <code class="xref py py-obj docutils literal"><span class="pre">data.refresh_token</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">data.id_token</span></code>...etc.,</p>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">NamedTuple</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">NamedTuple</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If oxD server throws an error OR if the params code
-and scopes are of improper datatype.</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If oxD server throws an error OR if the params code
+and scopes are of improper datatype.</p>
+</td>
 </tr>
 </tbody>
 </table>
