@@ -107,7 +107,8 @@ class Client:
         logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
         return self.oxd_id
 
-    def get_authorization_url(self, acr_values=None, prompt=None):
+    def get_authorization_url(self, acr_values=None, prompt=None, scope=None,
+                              hd=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
@@ -117,6 +118,11 @@ class Client:
                 force alter current user session (in case user is already
                 logged in from site1 and site2 construsts authorization
                 request and want to force alter current user session)
+            scope (list, optional): scopes required, takes the one provided
+                during site registrations by default
+            hd (string, optional): hosted domain Google OP parameter if you
+                are using Google as your OpenID Provider.
+                https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
 
         Returns:
             string: The authorization url that the user must access for
@@ -131,11 +137,17 @@ class Client:
 
         params = {"oxd_id": self.oxd_id}
 
+        if scope and isinstance(scope, list):
+            params["scope"] = scope
+
         if acr_values and isinstance(acr_values, list):
             params["acr_values"] = acr_values
 
         if prompt and isinstance(prompt, str):
             params["prompt"] = prompt
+
+        if hd and isinstance(hd, str):
+            params["hd"] = hd
 
         command["params"] = params
         logger.debug("Sending command `get_authorization_url` with params %s",
@@ -145,12 +157,13 @@ class Client:
 
         return self.__clear_data(response).authorization_url
 
-    def get_tokens_by_code(self, code):
+    def get_tokens_by_code(self, code, state):
         """Function to get access code for getting the user details from the
         OP. It is called after the user authorizies by visiting the auth URL.
 
         Args:
             code (string): code, parse from the callback URL querystring
+            state (string): state value parsed from the callback URL
 
         Returns:
             NamedTuple: The tokens object with the following data structure::
@@ -183,6 +196,7 @@ class Client:
         command = {"command": "get_tokens_by_code"}
         params = {"oxd_id": self.oxd_id}
         params["code"] = code
+        params["state"] = state
 
         command["params"] = params
         logger.debug("Sending command `get_tokens_by_code` with params %s",

@@ -50,18 +50,29 @@ def test_get_authorization_url_works_wihtout_explicit_site_registration():
     assert_in('callback', auth_url)
 
 
-def test_get_auth_url_accepts_acrvalues_as_optional_params():
+def test_get_auth_url_accepts_optional_params():
     c = Client(config_location)
+    # acr values
     auth_url = c.get_authorization_url(["basic", "gplus"])
     assert_in('basic', auth_url)
     assert_in('gplus', auth_url)
 
-
-def test_get_auth_url_accepts_acr_and_prompt():
-    c = Client(config_location)
+    # prompt
     auth_url = c.get_authorization_url(["basic"], "login")
     assert_in('basic', auth_url)
     assert_in('prompt', auth_url)
+
+    # scope
+    auth_url = c.get_authorization_url(["basic"], None,
+                                       ["openid", "profile", "email"])
+    assert_in('openid', auth_url)
+    assert_in('profile', auth_url)
+    assert_in('email', auth_url)
+
+    # hd
+    auth_url = c.get_authorization_url(None, None, None, "https://test.com")
+    assert_in('https://test.com', auth_url)
+    assert_in('hd', auth_url)
 
 
 @patch.object(Messenger, 'send')
@@ -70,12 +81,14 @@ def test_get_tokens_by_code(mock_send):
     mock_send.return_value.status = "ok"
     mock_send.return_value.data = "mock-token"
     code = "code"
+    state = "state"
     command = {"command": "get_tokens_by_code",
                "params": {
                    "oxd_id": c.oxd_id,
                    "code": code,
+                   "state": state
                    }}
-    token = c.get_tokens_by_code(code)
+    token = c.get_tokens_by_code(code, state)
     mock_send.assert_called_with(command)
     assert_equal(token, "mock-token")
 
@@ -88,7 +101,7 @@ def test_get_tokens_raises_error_if_response_has_error(mock_send):
     mock_send.return_value.data.error_description = "No Tokens in Mock"
 
     with assert_raises(RuntimeError):
-        c.get_tokens_by_code("code")
+        c.get_tokens_by_code("code", "state")
 
 
 @patch.object(Messenger, 'send')
