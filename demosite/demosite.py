@@ -32,8 +32,9 @@ def authorize():
 def callabck():
     # using request from Flask to parse the query string of the callback
     code = request.args.get('code')
+    state = request.args.get('state')
 
-    tokens = oxc.get_tokens_by_code(code)
+    tokens = oxc.get_tokens_by_code(code, state)
 
     user = oxc.get_user_info(tokens.access_token)
 

@@ -79,7 +79,8 @@ auth_url = client.get_authorization_url()
 
 ```python
 # code = parse_callback_url_querystring()  # Refer your web framework
-tokens = client.get_tokens_by_code(code)
+# state = parse_callback_url_querystring()  # Refer your web framework
+tokens = client.get_tokens_by_code(code, state)
 ```
 
 #### Get User Claims
