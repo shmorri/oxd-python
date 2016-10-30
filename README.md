@@ -9,15 +9,8 @@ oxD Python is a client library for the Gluu oxD Server. For information about ox
 * Gluu oxD Server - [Installation docs](https://github.com/GluuFederation/oxd-python/archive/v2.4.4.zip)
 
 ### Library
-* *Official Gluu Repo* - Install using the package manager from the official Gluu repository.
 
-```
-apt-get install gluu-oxd-python
-
-# or
-
-yum install gluu-oxd-python
-```
+* *Install from Pip* - `pip install oxdpython`
 
 * *Source from Github* -  Download the zip of the oxD Python Library from [here](https://github.com/GluuFederation/oxd-python/archive/v2.4.4.zip) and unzip to your location of choice
 
