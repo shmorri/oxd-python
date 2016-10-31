@@ -22,7 +22,8 @@ front channel logout. It clears the session and cookie, and redirects
 to the logout confirmation page
 * **logout-confirmation.cgi** This pages checks to make sure that the
 cookie and DB session are removed.
-* **createDB.py** Helper script used to create the DB
+* **setupDemo.py** Helper script used to create the DB and set 
+file permissions.
 * **appLog.py** Module to centralize logging code
 * **constants.py** Module to centralize constant values
 
@@ -41,3 +42,5 @@ they are ok, and are writeable by the web server.
 
 See the sequence diagram below to get a better picture of the flow of 
 this application.
+
+![Demo Sequence Diagram](https://raw.githubusercontent.com/GluuFederation/oxd-python/master/demo-cgi/sequence_diagram.png)
