@@ -79,7 +79,7 @@ tokens = client.get_tokens_by_code(code, state)
 #### Get User Claims
 
 ```python
-user = oxc.get_user_info(tokens.access_token)
+user = client.get_user_info(tokens.access_token)
 
 # The claims can be accessed using the dot notation.
 print user.username
@@ -95,7 +95,7 @@ if 'website' in user._fields:
 #### Logout
 
 ```python
-logout_uri = oxc.get_logout_uri()
+logout_uri = client.get_logout_uri()
 ```
 
 #### Update Site
