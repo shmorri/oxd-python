@@ -107,8 +107,7 @@ class Client:
         logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
         return self.oxd_id
 
-    def get_authorization_url(self, acr_values=None, prompt=None, scope=None,
-                              hd=None):
+    def get_authorization_url(self, acr_values=None, prompt=None, scope=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
@@ -120,9 +119,6 @@ class Client:
                 request and want to force alter current user session)
             scope (list, optional): scopes required, takes the one provided
                 during site registrations by default
-            hd (string, optional): hosted domain Google OP parameter if you
-                are using Google as your OpenID Provider.
-                https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
 
         Returns:
             string: The authorization url that the user must access for
@@ -145,9 +141,6 @@ class Client:
 
         if prompt and isinstance(prompt, str):
             params["prompt"] = prompt
-
-        if hd and isinstance(hd, str):
-            params["hd"] = hd
 
         command["params"] = params
         logger.debug("Sending command `get_authorization_url` with params %s",

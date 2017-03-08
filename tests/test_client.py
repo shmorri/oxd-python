@@ -69,11 +69,6 @@ def test_get_auth_url_accepts_optional_params():
     assert_in('profile', auth_url)
     assert_in('email', auth_url)
 
-    # hd
-    auth_url = c.get_authorization_url(None, None, None, "https://test.com")
-    assert_in('https://test.com', auth_url)
-    assert_in('hd', auth_url)
-
 
 @patch.object(Messenger, 'send')
 def test_get_tokens_by_code(mock_send):
