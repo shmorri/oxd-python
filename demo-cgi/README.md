@@ -36,7 +36,7 @@ client.
 3. Edit *constants.py* and check the filesystem paths to make sure 
 they are ok, and are writeable by the web server.
 4. sftp all the files to your cgi-bin
-5. Run `./createDB.py` to initialize the database
+5. Run `./setupDemo.py` to initialize the database
 6. Navigate to https://hostname/home.cgi and click on login.
 7. If something goes wrong, check the logs.
 
