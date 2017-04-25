@@ -44,3 +44,38 @@ See the sequence diagram below to get a better picture of the flow of
 this application.
 
 ![Demo Sequence Diagram](https://raw.githubusercontent.com/GluuFederation/oxd-python/master/demo-cgi/sequence_diagram.png)
+
+## Deployment of demosite in Ubuntu
+
+1. Install [oxd-server](https://gluu.org/docs/oxd/install/)
+2. Edit `/opt/oxd-server/conf/oxd-conf.json` and enter your OXD License details. Edit `/opt/oxd-server/conf/oxd-default-site-conf.json` and enter the value for `op_host` pointing to your Gluu Server installation. Run `service gluu-oxd-server start`
+3. Install oxd-python
+    ```
+    apt-get install python-pip
+    pip install oxdpython
+    ```
+3. Install and configure Apache 2
+    ```
+    apt-get install apache2
+    a2enmod cgi
+    a2enmod ssl
+    a2dissite 000-default
+    a2ensite default-ssl
+    ```
+2. Clone the demosite and setup for cgi-bin
+    ```
+    cd /usr/lib/cgi-bin/
+    wget https://github.com/GluuFederation/oxd-python/archive/v3.0.1.tar.gz
+    tar -xvf v3.0.1.tar.gz
+    cp oxd-python-3.0.1/demo-cgi/* .
+    chmod +x *.cgi
+    ```
+3. Edit `COOKIE_DOMAIN` in `constants.py` to suit your domain name.
+4. Setup logging and initialize the app
+    ```
+    mkdir -p /var/log/sampleapp/
+    python setupDemo.py
+    ```
+4. Change the domain names in `/var/log/sampleapp/demosite.cfg` URLs to match yours. (Similar to Step 3)
+5. Visit `https://your-hostname/cgi-bin/home.cgi`
+6. To debug check the logs are `/var/log/sampleapp/app.log` and `/var/log/oxd-server.log`
