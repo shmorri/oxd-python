@@ -27,24 +27,6 @@ file permissions.
 * **appLog.py** Module to centralize logging code
 * **constants.py** Module to centralize constant values
 
-## Deployment Instructions
-
-1. Make sure you have oxd installed and running.
-2. Edit *demosite.cfg* and update *hostname* with your local web 
-server's hostname. This file is used by oxd-python to register your
-client.
-3. Edit *constants.py* and check the filesystem paths to make sure 
-they are ok, and are writeable by the web server.
-4. sftp all the files to your cgi-bin
-5. Run `./setupDemo.py` to initialize the database
-6. Navigate to https://hostname/home.cgi and click on login.
-7. If something goes wrong, check the logs.
-
-See the sequence diagram below to get a better picture of the flow of 
-this application.
-
-![Demo Sequence Diagram](https://raw.githubusercontent.com/GluuFederation/oxd-python/master/demo-cgi/sequence_diagram.png)
-
 ## Deployment of demosite in Ubuntu
 
 1. Install [oxd-server](https://gluu.org/docs/oxd/install/)
@@ -79,3 +61,8 @@ this application.
 4. Change the domain names in `/var/log/sampleapp/demosite.cfg` URLs to match yours. (Similar to Step 3)
 5. Visit `https://your-hostname/cgi-bin/home.cgi`
 6. To debug check the logs are `/var/log/sampleapp/app.log` and `/var/log/oxd-server.log`
+
+See the sequence diagram below to get a better picture of the flow of 
+this application.
+
+![Demo Sequence Diagram](https://raw.githubusercontent.com/GluuFederation/oxd-python/master/demo-cgi/sequence_diagram.png)
