@@ -1,6 +1,9 @@
 import json
 import socket
 import logging
+import urllib2
+import ssl
+
 
 from collections import namedtuple
 
@@ -24,6 +27,8 @@ class Messenger:
         logger.debug("Creating a AF_INET, SOCK_STREAM socket.")
         self.firstDone = False
 
+
+
     def __connect(self):
         """A helper function to make connection."""
         try:
@@ -37,8 +42,12 @@ class Messenger:
             self.sock.connect((self.host, self.port))
 
     def __json_object_hook(self, d):
-        """function to customized the json.loads to return named tuple instead
+        """Function to customize the json.loads to return named tuple instead
         of a dict"""
+
+        #if a response key contains '-' then replace it with 'hyphen'
+        d = self.encodeHyphen(d)
+
         return namedtuple('response', d.keys())(*d.values())
 
     def __json2obj(self, data):
@@ -46,8 +55,27 @@ class Messenger:
         so the reponse values can be accessed like objects instead of dicts"""
         return json.loads(data, object_hook=self.__json_object_hook)
 
+    def encodeHyphen(self, d):
+        """This is just for work around purpose. Original fix needs to be worked on."""
+        for i in d.keys():
+            if '-' in i:
+                newkey = i.replace('-', 'hyphen')
+                val = d[i]
+                d.pop(i)
+                d[newkey] = val
+        return d
+
+    def decodeHyphen(self, d):
+        """This is just for work around purpose. Original fix needs to be worked on."""
+        for i in d.keys():
+            if '-' in i:
+                newkey = i.replace('hyphen', '-')
+                d[newkey] = d[i]
+                d.pop(i)
+        return d
+
     def send(self, command):
-        """send function sends the command to the oxD server and recieves the
+        """Send function sends the command to the oxD server and recieves the
         response.
 
         Args:
@@ -60,13 +88,13 @@ class Messenger:
         cmd = "{:04d}".format(len(cmd)) + cmd
         msg_length = len(cmd)
 
-        # make the first time connection
+        # Makes the first time connection
         if not self.firstDone:
             logger.info('Initiating first time socket connection.')
             self.__connect()
             self.firstDone = True
 
-        # Send the message the to the server
+        # Send the message to the server
         totalsent = 0
         while totalsent < msg_length:
             try:
@@ -103,5 +131,38 @@ class Messenger:
             parts.append(part)
 
         response = "".join(parts)
+        # return the JSON as a namedtuple object
+        return self.__json2obj(response)
+
+
+    def sendtohttp(self, params, rest_url):
+        """send function sends the command to the oxD server and recieves the
+        response for web connection type.
+
+        Args:
+            params (dict) - Dict representation of the JSON param string
+            rest_url - Url of the rest API
+
+        Returns:
+            response (dict) - The JSON response from the oxD Server as a dict
+        """
+
+
+        param = json.dumps(params)
+
+        if 'protection_access_token' in param:
+            accessToken = 'Bearer ' + params.get('protection_access_token','None')
+        else:
+            accessToken=''
+
+        headers = {'Content-Type': 'application/json', 'Authorization': accessToken}
+
+        request = urllib2.Request(rest_url, param, headers)
+        gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        response = urllib2.urlopen(request, context=gcontext)
+
+        resp_page = response.read()
+
+        response = "".join(resp_page)
         # return the JSON as a namedtuple object
         return self.__json2obj(response)

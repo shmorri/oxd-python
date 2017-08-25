@@ -2,37 +2,30 @@ import logging
 
 from .configurer import Configurer
 from .messenger import Messenger
+import urllib2, ssl
 
 logger = logging.getLogger(__name__)
 
 
 class Client:
-    """Client is the main class that carries out the task of talking with the
-    oxD server. The oxD commands are provided as class methods that are called
-    to send the command to the oxD server via socket.
-    """
 
     def __init__(self, config_location):
-        """Constructor of class Client
 
-        Args:
-            config_location (string): The complete path of the location
-                of the config file. Sample config at
-                (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
-        """
         self.config = Configurer(config_location)
-        self.msgr = Messenger(int(self.config.get("oxd", "port")))
-        self.authorization_redirect_uri = self.config.get(
-            "client", "authorization_redirect_uri")
-        self.oxd_id = None
-        if self.config.get("oxd", "id"):
-            self.oxd_id = self.config.get("oxd", "id")
 
-            logger.info("Oxd ID found during initialization. Client is"
-                        " already registered with the OpenID Provider")
-            logger.info("oxd id: %s", self.oxd_id)
+        self.conn_type = self.config.get("oxd", "connection_type")
+        self.conn_type_value = self.config.get("oxd", "connection_type_value")
 
-        # list of optional params that can be passed to the oxd-server
+        if self.conn_type == "web" and self.conn_type_value[-1:] != "/":
+            self.conn_type_value += "/"
+
+        self.oxd_id = self.config.get("oxd", "id")
+        self.client_name = self.config.get("client", "client_name")
+        self.client_id = self.config.get("client", "client_id")
+        self.client_secret = self.config.get("client", "client_secret")
+        self.op_host = self.config.get("client", "op_host")
+
+        #list of optional params that can be passed to the oxd-server
         self.opt_params = ["op_host",
                            "post_logout_redirect_uri",
                            "client_name",
@@ -40,11 +33,12 @@ class Client:
                            "client_token_endpoint_auth_method",
                            "client_id",
                            "client_secret",
+                           "client_secret_expires_at",
                            "application_type"]
         self.opt_list_params = ["grant_types",
                                 "acr_values",
                                 "contacts",
-                                "client_logout_uris",
+                                "client_frontchannel_logout_uris",
                                 "client_request_uris",
                                 "client_sector_identifier_uri",
                                 "response_types",
@@ -59,32 +53,111 @@ class Client:
         """
         if response.status == "error":
             error = "OxD Server Error: {0}\nDescription:{1}".format(
-                    response.data.error, response.data.error_description)
+                response.data.error, response.data.error_description)
             logger.error(error)
             raise RuntimeError(error)
         elif response.status == "ok":
             return response.data
 
-    def register_site(self):
-        """Function to register the site and generate a unique ID for the site
+    def get_config_value(self):
+        return {"op_host":self.config.get("client", "op_host"),
+                "client_name":self.config.get("client", "client_name"),
+                "authorization_redirect_url":self.config.get("client", "authorization_redirect_uri"),
+                "post_logout_redirect_uri":self.config.get("client", "post_logout_redirect_uri"),
+                "connection_type_value":self.config.get("oxd", "connection_type_value"),
+                "id":self.config.get("oxd", "id"),
+                "client_id":self.config.get("client", "client_id"),
+                "client_secret":self.config.get("client", "client_secret"),
+                "connection_type":self.config.get("oxd", "connection_type"),
+                "dynamic_registration":self.config.get("client", "dynamic_registration")
+                }
+
+    def set_config_value(self, values):
+        self.config.set("client", "op_host", values[0])
+        self.config.set("client", "client_name", values[1])
+        self.config.set("client", "authorization_redirect_uri", values[2])
+        self.config.set("client", "post_logout_redirect_uri", values[3])
+        self.config.set("oxd", "connection_type_value", values[4])
+        self.config.set("oxd", "connection_type",values[5])
+
+        return
+
+    def OpenidType(self, op_host):
+        """Fucntion to know static or dynamic openID Provider.
+        This should be called after getting the URI of the OpenID Provider, Client Redirect URI, Post logout URI, oxd port values from user.
+        Returns:
+            bool: The type for openID Provider type. True for dynamic and False for static openID provider.
+        """
+        op_host = op_host + "/.well-known/openid-configuration"
+
+        try:
+            res = urllib2.urlopen(op_host)
+        except urllib2.URLError, e:
+            if "[SSL: CERTIFICATE_VERIFY_FAILED]" in str(e.reason):
+                ctx = ssl.create_default_context()
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+                res = urllib2.urlopen(op_host, context=ctx)
+            else:
+                raise e
+
+        data = res.read()
+        if "registration_endpoint" in data:
+            #dynamic
+            self.openid_type="dynamic"
+            return True
+        else:
+            #static
+            self.openid_type="static"
+            return False
+
+
+    def setup_client(self, op_host, client_name, authorization_redirect_uri, post_logout_uri, clientId, clientSecret, conn_type, conn_type_value, claims_redirect_uri):
+        """Function to setup the client and generate a Client ID, Client Secret for the site
 
         Returns:
-            string: The ID of the site (also called client id) if the
-            registration is sucessful
+            NamedTuple: The tokens object with the following data structure::
+
+                {
+                    "oxd_id": "<token string>",
+                    "op_host": "<token string>",
+                    "client_id": "<token string>",
+                    "client_secret": "<token string>",
+                    "client_registration_access_token": "<token string>",
+                    "client_registration_client_uri": "<token string>",
+                    "client_id_issued_at": "<token long>",
+                    "client_secret_expires_at": "<token long>"
+                }
+
+            Since this would be returned as a NamedTuple, it can be accessed
+            using the dot notation as :obj:`data.oxd_id`,
+            :obj:`data.client_id`, :obj:`data.client_secret`...etc.,
 
         Raises:
-            RuntimeError: If the site registration fails.
+            RuntimeError: If the site client setup fails.
         """
-        if self.oxd_id:
-            logger.info('Client is already registered. ID: %s', self.oxd_id)
-            return self.oxd_id
+        values = [op_host, client_name, authorization_redirect_uri, post_logout_uri, conn_type_value, conn_type]
 
-        command = {"command": "register_site"}
+        self.set_config_value(values)
+        self.config.set("client", "client_id", clientId)
+        self.config.set("client", "client_secret", clientSecret)
+
+        if conn_type == "web" and conn_type_value[-1:] != "/":
+            conn_type_value += "/"
+
+        command = {"command": "setup_client"}
+        rest_url = conn_type_value + "setup-client"
+
 
         # add required params for the command
-        params = {
-            "authorization_redirect_uri": self.authorization_redirect_uri,
-            }
+        params = {"authorization_redirect_uri": authorization_redirect_uri,
+                    "op_host": op_host,
+                    "post_logout_redirect_uri": post_logout_uri,
+                    "client_id": clientId,
+                    "client_secret": clientSecret,
+                    "oxd_rp_programming_language": 'python',
+                    "claims_redirect_uri": claims_redirect_uri,}
+
         # add other optional params if they exist in config
         for param in self.opt_params:
             if self.config.get("client", param):
@@ -97,17 +170,86 @@ class Client:
                 params[param] = value
 
         command["params"] = params
-        logger.debug("Sending command `register_site` with params %s",
+        logger.debug("Sending command `setup_client` with params %s",
                      params)
-        response = self.msgr.send(command)
+
+        if conn_type == "local":
+            msgr = Messenger(int(conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
         logger.debug("Recieved reponse: %s", response)
 
-        self.oxd_id = self.__clear_data(response).oxd_id
-        self.config.set("oxd", "id", self.oxd_id)
-        logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
-        return self.oxd_id
+        self.id = self.__clear_data(response).oxd_id
+        clientid = self.__clear_data(response).client_id
+        clientsecret = self.__clear_data(response).client_secret
+        if self.id and clientid and clientsecret:
+            self.config.set("oxd", "id", self.id)
+            self.config.set("client", "client_id", clientid)
+            self.config.set("client", "client_secret", clientsecret)
 
-    def get_authorization_url(self, acr_values=None, prompt=None, scope=None):
+
+        logger.info("Setup Client successful. Oxd ID: %s, Client ID: %s", self.id,
+                    self.__clear_data(response).client_id)
+
+        return self.__clear_data(response)
+
+
+    def update_site_registration(self, protection_access_token, client_name, authorization_redirect_uri, post_logout_uri, connection_type_value, connection_type):
+        """Fucntion to update the site's information with OpenID Provider.
+        This should be called after changing the values in the cfg file.
+        Returns:
+            bool: The status for update. True for success and False for failure
+        """
+        command = {"command": "update_site_registration"}
+        rest_url = self.conn_type_value + "update-site"
+
+
+        params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token,
+                  "authorization_redirect_uri": authorization_redirect_uri,
+                  "post_logout_redirect_uri": post_logout_uri,
+                  }
+
+        # add other optional params if they exist in config
+        for param in self.opt_params:
+            if self.config.get("client", param):
+                value = self.config.get("client", param)
+                params[param] = value
+
+        for param in self.opt_list_params:
+            if self.config.get("client", param):
+                value = self.config.get("client", param).split(",")
+                params[param] = value
+
+        command["params"] = params
+        logger.debug("Sending `update_site_registration` with params %s", params)
+
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
+        logger.debug("Recieved reponse: %s", response)
+        if response.status == 'ok' :
+            values = [self.config.get("client","op_host"), client_name, authorization_redirect_uri, post_logout_uri, connection_type_value, connection_type]
+            self.set_config_value(values)
+
+        return response.status
+
+    def delete_config(self):
+        self.config.set("oxd", "id", '')
+        self.config.set("client", "dynamic_registration", '')
+        self.set_config_value(['', '', '', '', '', ''])
+        self.config.set("client", "client_id", '')
+        self.config.set("client", "client_secret", '')
+
+    def get_authorization_url(self, protection_access_token, acr_values=None, prompt=None, scope=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
@@ -128,10 +270,11 @@ class Client:
             RuntimeError: If the oxD throws an error for any reason.
         """
         command = {"command": "get_authorization_url"}
-        if not self.oxd_id:
-            self.register_site()
+        rest_url = self.conn_type_value + "get-authorization-url"
 
-        params = {"oxd_id": self.oxd_id}
+        params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token,
+                  }
 
         if scope and isinstance(scope, list):
             params["scope"] = scope
@@ -143,14 +286,21 @@ class Client:
             params["prompt"] = prompt
 
         command["params"] = params
-        logger.debug("Sending command `get_authorization_url` with params %s",
-                     params)
-        response = self.msgr.send(command)
+        logger.debug("Sending command `get_authorization_url` with params %s", params)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
         logger.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).authorization_url
 
-    def get_tokens_by_code(self, code, state):
+
+    def get_tokens_by_code(self,protection_access_token, code, state):
         """Function to get access code for getting the user details from the
         OP. It is called after the user authorizies by visiting the auth URL.
 
@@ -187,19 +337,115 @@ class Client:
                 and scopes are of improper datatype.
         """
         command = {"command": "get_tokens_by_code"}
-        params = {"oxd_id": self.oxd_id}
-        params["code"] = code
-        params["state"] = state
+        rest_url = self.conn_type_value + "get-tokens-by-code"
+
+
+        params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token,
+                  "code": code,
+                  "state": state
+                  }
 
         command["params"] = params
-        logger.debug("Sending command `get_tokens_by_code` with params %s",
-                     params)
-        response = self.msgr.send(command)
+        logger.debug("Sending command `get_tokens_by_code` with params %s", params)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
         logger.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)
 
-    def get_user_info(self, access_token):
+    def get_access_token_by_refresh_token(self, protection_access_token, refresh_token, scope=None):
+        """Function to get access code for getting the user details from the
+                        OP by using the refresh_token.
+                        It is called after getting the refresh_token by using the code and state.
+
+                        Args:
+                            refresh_token (string): refresh_token is obtained by using the code and state
+                            scope (list, optional): scopes required, takes the one provided
+                                during site registrations by default
+
+                        Returns:
+                            NamedTuple: The tokens object with the following data structure::
+
+                                {
+                                    "status":"ok",
+                                    "data":{
+                                        "access_token":"SlAV32hkKG",
+                                        "expires_in":3600,
+                                        "refresh_token":"aaAV32hkKG1"
+                                    }
+                                }
+
+                            Since this would be returned as a NamedTuple, it can be accessed
+                            using the dot notation as :obj:`data.access_token`,
+                            :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,
+
+                        Raises:
+                            RuntimeError: If oxD server throws an error OR if the params code
+                                and scopes are of improper datatype.
+                        """
+
+        command = {"command": "get_access_token_by_refresh_token"}
+        rest_url = self.conn_type_value + "get-access-token-by-refresh-token"
+
+        params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token,
+                  "refresh_token": refresh_token,
+                  }
+
+        if scope and isinstance(scope, list):
+            params["scope"] = scope
+
+        command["params"] = params
+        logger.debug("Sending command `get_access_token_by_refresh_token` with params %s", params)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
+        logger.debug("Recieved response: %s", response)
+
+        return self.__clear_data(response)
+
+    def get_client_token(self):
+
+        command = {"command": "get_client_token"}
+        rest_url = self.conn_type_value + "get-client-token"
+
+        #add required params for the command
+        params = {
+            "client_id":  self.client_id,
+            "client_secret":  self.client_secret,
+            "op_host": self.op_host
+        }
+
+        command["params"] = params
+        logger.debug("Sending command `get_client_token` with params %s",
+                     params)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
+        logger.debug("Recieved reponse: %s", response)
+
+        return_data = self.__clear_data(response)
+
+        return return_data
+
+    def get_user_info(self, protection_access_token, access_token):
         """Function to get the information about the user using the access code
         obtained from the OP
 
@@ -221,20 +467,31 @@ class Client:
             raise RuntimeError("Empty access code")
 
         command = {"command": "get_user_info"}
-        params = {"oxd_id": self.oxd_id}
-        params["access_token"] = access_token
+        rest_url = self.conn_type_value +"get-user-info"
+
+
+        params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token,
+                  "access_token": access_token
+                 }
+
         command["params"] = params
-        logger.debug("Sending command `get_user_info` with params %s",
-                     params)
-        response = self.msgr.send(command)
+        logger.debug("Sending command `get_user_info` with params %s", params)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
         logger.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).claims
 
-    def get_logout_uri(self, id_token_hint=None, post_logout_redirect_uri=None,
-                       state=None, session_state=None):
-        """Function to logout the user.
 
+    def get_logout_uri(self, protection_access_token, id_token_hint=None, post_logout_redirect_uri=None, state=None, session_state=None):
+        """Function to logout the user.
         Args:
             id_token_hint (string, optional): oxd server will use last used
                 ID Token, if not provided
@@ -247,76 +504,60 @@ class Client:
             string: The URI to which the user must be directed in order to
             perform the logout
         """
+
         command = {"command": "get_logout_uri"}
-        params = {"oxd_id": self.oxd_id}
-        if id_token_hint:
+        rest_url = self.conn_type_value + "get-logout-uri"
+
+        params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token
+                  }
+
+
+        if id_token_hint and isinstance(id_token_hint, str):
             params["id_token_hint"] = id_token_hint
 
-        if post_logout_redirect_uri:
+        if post_logout_redirect_uri and isinstance(post_logout_redirect_uri, str):
             params["post_logout_redirect_uri"] = post_logout_redirect_uri
-        elif self.config.get("client", "logout_redirect_uri"):
-            params["post_logout_redirect_uri"] = self.config.get(
-                "client", "logout_redirect_uri"
-                )
 
-        if state:
+        if state and isinstance(state, str):
             params["state"] = state
 
-        if session_state:
+        if session_state and isinstance(session_state, str):
             params["session_state"] = session_state
+
 
         command["params"] = params
 
         logger.debug("Sending command `get_logout_uri` with params %s", params)
-        response = self.msgr.send(command)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
         logger.debug("Recieved response: %s", response)
 
         return self.__clear_data(response).uri
 
-    def update_site_registration(self):
-        """Fucntion to update the site's information with OpenID Provider.
-        This should be called after changing the values in the cfg file.
-
-        Returns:
-            bool: The status for update. True for success and False for failure
-        """
-        command = {"command": "update_site_registration"}
-        params = {"oxd_id": self.oxd_id,
-                  "authorization_redirect_uri": self.authorization_redirect_uri
-                  }
-        for param in self.opt_params:
-            if self.config.get("client", param):
-                value = self.config.get("client", param)
-                params[param] = value
-
-        for param in self.opt_list_params:
-            if self.config.get("client", param):
-                value = self.config.get("client", param).split(",")
-                params[param] = value
-
-        command["params"] = params
-        logger.debug("Sending `update_site_registration` with params %s",
-                     params)
-        response = self.msgr.send(command)
-        logger.debug("Recieved reponse: %s", response)
-
-        if response.status == "ok":
-            return True
-        else:
-            return False
-
-    def uma_rs_protect(self, resources):
+    def uma_rs_protect(self,protection_access_token, resources):
         """Function to be used in a UMA Resource Server to protect resources.
 
         Args:
-            resources (list): list of resource to protect
+                    resources (list): list of resource to protect
 
         Returns:
-            bool: The status of the request.
+                    bool: The status of the request.
         """
+
         command = {"command": "uma_rs_protect"}
+        rest_url = self.conn_type_value + "uma-rs-protect"
+
         params = {"oxd_id": self.oxd_id,
-                  "resources": []}
+                  "protection_access_token": protection_access_token,
+                  "resources": resources
+                  }
 
         if len(resources) < 1:
             return False
@@ -325,15 +566,17 @@ class Client:
         command["params"] = params
 
         logger.debug("Sending `uma_rs_protect` with params %s", params)
-        response = self.msgr.send(command)
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
         logger.debug("Recieved response: %s", response)
 
-        if response.status == "ok":
-            return True
-        else:
-            return False
+        return self.__clear_data(response)
 
-    def uma_rs_check_access(self, rpt, path, http_method):
+    def uma_rs_check_access(self, protection_access_token, rpt, path, http_method):
         """Function to be used in a UMA Resource Server to check access.
 
         Args:
@@ -374,128 +617,181 @@ class Client:
                 }
 
         """
+
         command = {"command": "uma_rs_check_access"}
+        rest_url = self.conn_type_value + "uma-rs-check-access"
+
         params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token,
                   "rpt": rpt,
                   "path": path,
-                  "http_method": http_method}
+                  "http_method": http_method
+                  }
+
         command["params"] = params
 
-        logger.debug("Sending command `uma_rs_check_access` with params %s",
-                     params)
-        response = self.msgr.send(command)
+        logger.debug("Sending command `uma_rs_check_access` with params %s", params)
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+        logger.debug("Received response: %s", response)
+
+        return self.__clear_data(response)
+
+    def uma_rp_get_rpt(self, protection_access_token, ticket, rpt=None, state=None, claim_token=None, claim_token_format=None, pct=None, scope=None):
+        """Function to be used in a UMA Resource Server to get rpt.
+
+                Args:
+                    rpt (string): RPT or blank value if absent (not send by RP)
+                    ticket(string): ticket value returned by the uma_rs_check_access() method
+
+                Returns:
+                    NamedTuple: The access information recieved in the format below.
+
+                    Success Response:
+
+                        {
+                            "status":"ok",
+                            "data":{
+                                        "access_token":"SSJHBSUSSJHVhjsgvhsgvshgsv",
+                                        "token_type":"Bearer",
+                                        "pct":"c2F2ZWRjb25zZW50",
+                                        "upgraded":true
+                                    }
+                        }
+
+                    Needs info error response:
+
+                        {
+                            "status":"error",
+                            "data":{
+                            "error":"need_info",
+                            "error_description":"The authorization server needs additional information in order to determine whether the client is authorized to have these permissions.",
+                            "details": {
+                                "error":"need_info",
+                                "ticket":"ZXJyb3JfZGV0YWlscw==",
+                            "required_claims":[
+                                {
+                                    "claim_token_format":[
+                                    "http://openid.net/specs/openid-connect-core-1_0.html#IDToken"
+                                ],
+                                    "claim_type":"urn:oid:0.9.2342.19200300.100.1.3",
+                                    "friendly_name":"email",
+                                    "issuer":["https://example.com/idp"],
+                                    "name":"email23423453ou453"
+                                }
+                            ],
+                            "redirect_user":"https://as.example.com/rqp_claims?id=2346576421"
+                         }
+                    }
+                }
+
+                   Invalid ticket error:
+
+                            {
+                                "status":"error",
+                                "data":{
+                                    "error":"invalid_ticket",
+                                    "error_description":"Ticket is not valid (outdated or not present on Authorization Server)."
+                                    }
+                            }
+
+                    Internal oxd server error
+
+                        {
+                            "status":"error",
+                            "data":{
+                            "error":"internal_error",
+                            "error_description":"oxd server failed to handle command. Please check logs for details."
+                            }
+                        }
+
+                """
+
+        command = {"command": "uma_rp_get_rpt"}
+        rest_url = self.conn_type_value + "uma-rp-get-rpt"
+
+        params = {"oxd_id": self.oxd_id,
+                  "protection_access_token": protection_access_token,
+                  "ticket": ticket,
+                 }
+
+        if claim_token and isinstance(claim_token, str):
+            params["claim_token"] = claim_token
+
+        if claim_token_format and isinstance(claim_token_format, str):
+            params["claim_token_format"] = claim_token_format
+
+        if pct and isinstance(pct, str):
+            params["pct"] = pct
+
+        if rpt and isinstance(rpt, str):
+            params["rpt"] = rpt
+
+        if scope and isinstance(scope, list):
+            params["scope"] = scope
+
+        if state and isinstance(state, str):
+            params["state"] = state
+
+
+        command["params"] = params
+
+        logger.debug("Sending command `uma_rs_check_access` with params %s", params)
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
         logger.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)
 
-    def uma_rp_get_rpt(self, force_new=False):
-        """Function to be used by a UMA Requesting Party to get RPT token.
+    def uma_rp_get_claims_gathering_url(self, protection_access_token, claims_redirect_uri, ticket):
+        """Function to be used in a UMA Resource Server to obtain claims gathering url.
 
-        Args:
-            force_new (boolean): indicates whether return new RPT, defaults to
-                false, so oxd server can cache/reuse same RPT
+                Args:
+                    claims_redirect_uri(string):
+                    ticket(string): ticket value returned by the uma_rs_check_access() method
 
-        Returns:
-            String: The RPT token (if recived) or None
-        """
-        command = {"command": "uma_rp_get_rpt"}
+                Returns:
+                    NamedTuple: The access information recieved in the format below.
+
+                    {
+                        "status":"ok",
+                        "data":{
+                                    "url":"https://as.com/restv1/uma/gather_claims
+                                    ?client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!AB77!1A2B
+                                    &ticket=4678a107-e124-416c-af79-7807f3c31457
+                                    &claims_redirect_uri=https://client.example.com/cb
+                                    &state=af0ifjsldkj",
+                                    "state":"af0ifjsldkj"
+                                }
+                    }"""
+
+        command = {"command": "uma_rp_get_claims_gathering_url"}
+        rest_url = self.conn_type_value + "uma-rp-get-claims-gathering-url"
+
         params = {"oxd_id": self.oxd_id,
-                  "force_new": force_new
+                  "claims_redirect_uri": claims_redirect_uri,
+                  "ticket": ticket,
+                  "protection_access_token": protection_access_token,
                   }
+
         command["params"] = params
 
-        logger.debug("Sending command `uma_rp_get_rpt` with params %s", params)
-        response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
-
-        if response.status == "ok":
-            return str(response.data.rpt)
-        else:
-            return None
-
-    def uma_rp_authorize_rpt(self, rpt, ticket):
-        """Function to be used by UMA Requesting Party to authorize a RPT token.
-
-        Args:
-            rpt (string): the RPT token to be authorized
-            ticket (string): the ticket to authorize the token
-
-        Returns:
-            NamedTuple: The server response as an named tuple.
-            Authorized Response (Success)::
-
-                { "status":"ok" }
-
-            Not authorized error::
-
-                {
-                    "status": "error",
-                    "data": {
-                        "code": "not_authorized",
-                        "description": "RPT is not authorized"
-                        }
-                }
-
-            Invalid ticket error::
-
-                {
-                    "status": "error",
-                    "data": {
-                        "code": "invalid_ticket",
-                        "description": "Ticket is not valid (outdated or not
-                            present on Authorization Server)."
-                    }
-                }
-
-            Invalid rpt error::
-
-                {
-                    "status": "error",
-                    "data": {
-                        "code": "invalid_rpt",
-                        "description": "RPT isn't valid (outdated or not
-                            present on Authorization Server)."
-                    }
-                }
-        """
-        command = {"command": "uma_rp_authorize_rpt"}
-        params = {"oxd_id": self.oxd_id,
-                  "rpt": rpt,
-                  "ticket": ticket
-                  }
-        command["params"] = params
-
-        logger.debug("Sending command `uma_rp_authorize_rpt` with params %s",
+        logger.debug("Sending command `uma_rs_check_access` with params %s",
                      params)
-        response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
-
-        return response
-
-    def uma_rp_get_gat(self, scopes):
-        """Function to be used by UMA Requesting Party to get a GAT.
-
-        GAT stands for Gluu Access Token. It is invented by Gluu and is
-        described here:
-        https://ox.gluu.org/doku.php?id=uma:oauth2_access_management
-
-        Args:
-            scopes (list): list of strings which describe the scopes
-
-        Returns:
-            string: The GAT token. If error, returns None.
-        """
-        command = {"command": "uma_rp_get_gat"}
-        params = {"oxd_id": self.oxd_id,
-                  "scopes": scopes
-                  }
-        command["params"] = params
-
-        logger.debug("Sending command `uma_rp_get_gat` with params %s", params)
-        response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
-
-        if response.status == "ok":
-            return str(response.data.rpt)
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
         else:
-            return None
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+        logger.debug("Recieved response: %s", response)
+
+        return self.__clear_data(response)
