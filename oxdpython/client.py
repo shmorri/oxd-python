@@ -1,16 +1,17 @@
 import logging
-
+import urllib2
+import ssl
 from .configurer import Configurer
 from .messenger import Messenger
-import urllib2, ssl
 
-logger = logging.getLogger(__name__)
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Client:
 
     def __init__(self, config_location):
-
+        """Constructor for the Client class"""
         self.config = Configurer(config_location)
 
         self.conn_type = self.config.get("oxd", "connection_type")
@@ -24,6 +25,7 @@ class Client:
         self.client_id = self.config.get("client", "client_id")
         self.client_secret = self.config.get("client", "client_secret")
         self.op_host = self.config.get("client", "op_host")
+        self.ophost_type = None
 
         #list of optional params that can be passed to the oxd-server
         self.opt_params = ["op_host",
@@ -45,21 +47,23 @@ class Client:
                                 "scope",
                                 "ui_locales",
                                 "claims_locales",
-                                ]
+                               ]
 
-    def __clear_data(self, response):
+    @staticmethod
+    def __clear_data(response):
         """A private method that verifies that the oxd response is error free
         and raises a RuntimeError when it encounters an error
         """
         if response.status == "error":
-            error = "OxD Server Error: {0}\nDescription:{1}".format(
+            error = "oxd Server Error: {0}\nDescription:{1}".format(
                 response.data.error, response.data.error_description)
-            logger.error(error)
+            LOGGER.error(error)
             raise RuntimeError(error)
         elif response.status == "ok":
             return response.data
 
     def get_config_value(self):
+        """A private method which returns the client attributes"""
         return {"op_host":self.config.get("client", "op_host"),
                 "client_name":self.config.get("client", "client_name"),
                 "authorization_redirect_url":self.config.get("client", "authorization_redirect_uri"),
@@ -70,19 +74,20 @@ class Client:
                 "client_secret":self.config.get("client", "client_secret"),
                 "connection_type":self.config.get("oxd", "connection_type"),
                 "dynamic_registration":self.config.get("client", "dynamic_registration")
-                }
+               }
 
     def set_config_value(self, values):
+        """A private method which sets the client attributes"""
         self.config.set("client", "op_host", values[0])
         self.config.set("client", "client_name", values[1])
         self.config.set("client", "authorization_redirect_uri", values[2])
         self.config.set("client", "post_logout_redirect_uri", values[3])
         self.config.set("oxd", "connection_type_value", values[4])
-        self.config.set("oxd", "connection_type",values[5])
+        self.config.set("oxd", "connection_type", values[5])
 
         return
 
-    def OpenidType(self, op_host):
+    def openid_type(self, op_host):
         """Fucntion to know static or dynamic openID Provider.
         This should be called after getting the URI of the OpenID Provider, Client Redirect URI, Post logout URI, oxd port values from user.
         Returns:
@@ -104,12 +109,69 @@ class Client:
         data = res.read()
         if "registration_endpoint" in data:
             #dynamic
-            self.openid_type="dynamic"
+            self.ophost_type = "dynamic"
             return True
         else:
             #static
-            self.openid_type="static"
+            self.ophost_type = "static"
             return False
+
+    def register_site(self, protection_access_token):
+        """Function to register the site and generate a unique ID for the site
+
+        Returns:
+            string: The ID of the site (also called client id) if the
+            registration is sucessful
+
+        Raises:
+            RuntimeError: If the site registration fails.
+        """
+        if self.oxd_id:
+            LOGGER.info('Client is already registered. ID: %s', self.oxd_id)
+            return self.oxd_id
+
+        if self.conn_type == "web" and self.conn_type_value[-1:] != "/":
+            self.conn_type_value += "/"
+
+        command = {"command": "register_site"}
+        rest_url = self.conn_type_value + "register-site"
+
+
+        # add required params for the command
+        params = {
+            "authorization_redirect_uri": self.config.get("client", "authorization_redirect_uri"),
+            "protection_access_token": protection_access_token
+
+        }
+        # add other optional params if they exist in config
+        for param in self.opt_params:
+            if self.config.get("client", param):
+                value = self.config.get("client", param)
+                params[param] = value
+
+        for param in self.opt_list_params:
+            if self.config.get("client", param):
+                value = self.config.get("client", param).split(",")
+                params[param] = value
+
+        command["params"] = params
+        LOGGER.debug("Sending command `register_site` with params %s",
+                     params)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
+
+        LOGGER.debug("Recieved reponse: %s", response)
+
+        self.oxd_id = self.__clear_data(response).oxd_id
+        self.config.set("oxd", "id", self.oxd_id)
+        LOGGER.info("Site registration successful. oxd ID: %s", self.oxd_id)
+        return self.oxd_id
 
 
     def setup_client(self, op_host, client_name, authorization_redirect_uri, post_logout_uri, clientId, clientSecret, conn_type, conn_type_value, claims_redirect_uri):
@@ -151,12 +213,12 @@ class Client:
 
         # add required params for the command
         params = {"authorization_redirect_uri": authorization_redirect_uri,
-                    "op_host": op_host,
-                    "post_logout_redirect_uri": post_logout_uri,
-                    "client_id": clientId,
-                    "client_secret": clientSecret,
-                    "oxd_rp_programming_language": 'python',
-                    "claims_redirect_uri": claims_redirect_uri,}
+                  "op_host": op_host,
+                  "post_logout_redirect_uri": post_logout_uri,
+                  "client_id": clientId,
+                  "client_secret": clientSecret,
+                  "oxd_rp_programming_language": 'python',
+                  "claims_redirect_uri": claims_redirect_uri,}
 
         # add other optional params if they exist in config
         for param in self.opt_params:
@@ -170,7 +232,7 @@ class Client:
                 params[param] = value
 
         command["params"] = params
-        logger.debug("Sending command `setup_client` with params %s",
+        LOGGER.debug("Sending command `setup_client` with params %s",
                      params)
 
         if conn_type == "local":
@@ -180,18 +242,17 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved reponse: %s", response)
+        LOGGER.debug("Recieved reponse: %s", response)
 
-        self.id = self.__clear_data(response).oxd_id
+        self.oxd_id = self.__clear_data(response).oxd_id
         clientid = self.__clear_data(response).client_id
         clientsecret = self.__clear_data(response).client_secret
-        if self.id and clientid and clientsecret:
-            self.config.set("oxd", "id", self.id)
+        if self.oxd_id and clientid and clientsecret:
+            self.config.set("oxd", "id", self.oxd_id)
             self.config.set("client", "client_id", clientid)
             self.config.set("client", "client_secret", clientsecret)
 
-
-        logger.info("Setup Client successful. Oxd ID: %s, Client ID: %s", self.id,
+        LOGGER.info("Setup Client successful. oxd ID: %s, Client ID: %s", self.oxd_id,
                     self.__clear_data(response).client_id)
 
         return self.__clear_data(response)
@@ -211,7 +272,7 @@ class Client:
                   "protection_access_token": protection_access_token,
                   "authorization_redirect_uri": authorization_redirect_uri,
                   "post_logout_redirect_uri": post_logout_uri,
-                  }
+                 }
 
         # add other optional params if they exist in config
         for param in self.opt_params:
@@ -225,7 +286,7 @@ class Client:
                 params[param] = value
 
         command["params"] = params
-        logger.debug("Sending `update_site_registration` with params %s", params)
+        LOGGER.debug("Sending `update_site_registration` with params %s", params)
 
 
         if self.conn_type == "local":
@@ -235,14 +296,15 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved reponse: %s", response)
-        if response.status == 'ok' :
-            values = [self.config.get("client","op_host"), client_name, authorization_redirect_uri, post_logout_uri, connection_type_value, connection_type]
+        LOGGER.debug("Recieved reponse: %s", response)
+        if response.status == 'ok':
+            values = [self.config.get("client", "op_host"), client_name, authorization_redirect_uri, post_logout_uri, connection_type_value, connection_type]
             self.set_config_value(values)
 
         return response.status
 
     def delete_config(self):
+        """A private method which deletes client attributes from the config file"""
         self.config.set("oxd", "id", '')
         self.config.set("client", "dynamic_registration", '')
         self.set_config_value(['', '', '', '', '', ''])
@@ -267,14 +329,14 @@ class Client:
             authentication and authorization
 
         Raises:
-            RuntimeError: If the oxD throws an error for any reason.
+            RuntimeError: If the oxd throws an error for any reason.
         """
         command = {"command": "get_authorization_url"}
         rest_url = self.conn_type_value + "get-authorization-url"
 
         params = {"oxd_id": self.oxd_id,
                   "protection_access_token": protection_access_token,
-                  }
+                 }
 
         if scope and isinstance(scope, list):
             params["scope"] = scope
@@ -286,7 +348,7 @@ class Client:
             params["prompt"] = prompt
 
         command["params"] = params
-        logger.debug("Sending command `get_authorization_url` with params %s", params)
+        LOGGER.debug("Sending command `get_authorization_url` with params %s", params)
 
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
@@ -295,12 +357,12 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved reponse: %s", response)
+        LOGGER.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).authorization_url
 
 
-    def get_tokens_by_code(self,protection_access_token, code, state):
+    def get_tokens_by_code(self, protection_access_token, code, state):
         """Function to get access code for getting the user details from the
         OP. It is called after the user authorizies by visiting the auth URL.
 
@@ -333,7 +395,7 @@ class Client:
             :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,
 
         Raises:
-            RuntimeError: If oxD server throws an error OR if the params code
+            RuntimeError: If oxd server throws an error OR if the params code
                 and scopes are of improper datatype.
         """
         command = {"command": "get_tokens_by_code"}
@@ -344,10 +406,10 @@ class Client:
                   "protection_access_token": protection_access_token,
                   "code": code,
                   "state": state
-                  }
+                 }
 
         command["params"] = params
-        logger.debug("Sending command `get_tokens_by_code` with params %s", params)
+        LOGGER.debug("Sending command `get_tokens_by_code` with params %s", params)
 
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
@@ -356,7 +418,7 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved response: %s", response)
+        LOGGER.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)
 
@@ -387,7 +449,7 @@ class Client:
                             :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,
 
                         Raises:
-                            RuntimeError: If oxD server throws an error OR if the params code
+                            RuntimeError: If oxd server throws an error OR if the params code
                                 and scopes are of improper datatype.
                         """
 
@@ -397,13 +459,13 @@ class Client:
         params = {"oxd_id": self.oxd_id,
                   "protection_access_token": protection_access_token,
                   "refresh_token": refresh_token,
-                  }
+                 }
 
         if scope and isinstance(scope, list):
             params["scope"] = scope
 
         command["params"] = params
-        logger.debug("Sending command `get_access_token_by_refresh_token` with params %s", params)
+        LOGGER.debug("Sending command `get_access_token_by_refresh_token` with params %s", params)
 
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
@@ -412,12 +474,12 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved response: %s", response)
+        LOGGER.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)
 
     def get_client_token(self):
-
+        """A method which generates the protection access token"""
         command = {"command": "get_client_token"}
         rest_url = self.conn_type_value + "get-client-token"
 
@@ -429,7 +491,7 @@ class Client:
         }
 
         command["params"] = params
-        logger.debug("Sending command `get_client_token` with params %s",
+        LOGGER.debug("Sending command `get_client_token` with params %s",
                      params)
 
         if self.conn_type == "local":
@@ -439,7 +501,7 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved reponse: %s", response)
+        LOGGER.debug("Recieved reponse: %s", response)
 
         return_data = self.__clear_data(response)
 
@@ -459,11 +521,11 @@ class Client:
             the complete list of the claims for different scopes.
 
         Raises:
-            RuntimeError: If the param access_token is empty OR if the oxD
+            RuntimeError: If the param access_token is empty OR if the oxd
                 Server returns an error.
         """
         if not access_token:
-            logger.error("Empty access code sent for get_user_info")
+            LOGGER.error("Empty access code sent for get_user_info")
             raise RuntimeError("Empty access code")
 
         command = {"command": "get_user_info"}
@@ -476,7 +538,7 @@ class Client:
                  }
 
         command["params"] = params
-        logger.debug("Sending command `get_user_info` with params %s", params)
+        LOGGER.debug("Sending command `get_user_info` with params %s", params)
 
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
@@ -485,7 +547,7 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved reponse: %s", response)
+        LOGGER.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).claims
 
@@ -510,7 +572,7 @@ class Client:
 
         params = {"oxd_id": self.oxd_id,
                   "protection_access_token": protection_access_token
-                  }
+                 }
 
 
         if id_token_hint and isinstance(id_token_hint, str):
@@ -528,7 +590,7 @@ class Client:
 
         command["params"] = params
 
-        logger.debug("Sending command `get_logout_uri` with params %s", params)
+        LOGGER.debug("Sending command `get_logout_uri` with params %s", params)
 
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
@@ -537,11 +599,11 @@ class Client:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
 
-        logger.debug("Recieved response: %s", response)
+        LOGGER.debug("Recieved response: %s", response)
 
         return self.__clear_data(response).uri
 
-    def uma_rs_protect(self,protection_access_token, resources):
+    def uma_rs_protect(self, protection_access_token, resources):
         """Function to be used in a UMA Resource Server to protect resources.
 
         Args:
@@ -557,7 +619,7 @@ class Client:
         params = {"oxd_id": self.oxd_id,
                   "protection_access_token": protection_access_token,
                   "resources": resources
-                  }
+                 }
 
         if len(resources) < 1:
             return False
@@ -565,14 +627,14 @@ class Client:
         params["resources"] = resources
         command["params"] = params
 
-        logger.debug("Sending `uma_rs_protect` with params %s", params)
+        LOGGER.debug("Sending `uma_rs_protect` with params %s", params)
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
             response = msgr.send(command)
         else:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
-        logger.debug("Recieved response: %s", response)
+        LOGGER.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)
 
@@ -626,18 +688,18 @@ class Client:
                   "rpt": rpt,
                   "path": path,
                   "http_method": http_method
-                  }
+                 }
 
         command["params"] = params
 
-        logger.debug("Sending command `uma_rs_check_access` with params %s", params)
+        LOGGER.debug("Sending command `uma_rs_check_access` with params %s", params)
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
             response = msgr.send(command)
         else:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
-        logger.debug("Received response: %s", response)
+        LOGGER.debug("Received response: %s", response)
 
         return self.__clear_data(response)
 
@@ -740,14 +802,14 @@ class Client:
 
         command["params"] = params
 
-        logger.debug("Sending command `uma_rs_check_access` with params %s", params)
+        LOGGER.debug("Sending command `uma_rs_check_access` with params %s", params)
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
             response = msgr.send(command)
         else:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
-        logger.debug("Recieved response: %s", response)
+        LOGGER.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)
 
@@ -780,11 +842,11 @@ class Client:
                   "claims_redirect_uri": claims_redirect_uri,
                   "ticket": ticket,
                   "protection_access_token": protection_access_token,
-                  }
+                 }
 
         command["params"] = params
 
-        logger.debug("Sending command `uma_rs_check_access` with params %s",
+        LOGGER.debug("Sending command `uma_rs_check_access` with params %s",
                      params)
         if self.conn_type == "local":
             msgr = Messenger(int(self.conn_type_value))
@@ -792,6 +854,6 @@ class Client:
         else:
             msgr = Messenger()
             response = msgr.sendtohttp(params, rest_url)
-        logger.debug("Recieved response: %s", response)
+        LOGGER.debug("Recieved response: %s", response)
 
         return self.__clear_data(response)

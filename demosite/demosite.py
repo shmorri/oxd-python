@@ -1,50 +1,159 @@
 import os
 import sys
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, request, redirect, session
+from flask_sslify import SSLify
+from Login import app_login
+from Uma import app_uma
+import oxdpython
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
-config = os.path.join(this_dir, 'demosite.cfg')
+config_location = os.path.join(this_dir, 'demosite.cfg')
 
 # relative import of oxd-python. Comment out the following 3 lines
 # if the library has been installed with setup.py install
 oxd_path = os.path.dirname(this_dir)
+
 if oxd_path not in sys.path:
     sys.path.insert(0, oxd_path)
 
-import oxdpython
-
 app = Flask(__name__)
-oxc = oxdpython.Client(config)
+sslify = SSLify(app)
+app.secret_key = 'GluuCentroxy'
+
+app.register_blueprint(app_login)
+app.register_blueprint(app_uma)
+
+#oxc = oxdpython.Client(config_location)
 
 
 @app.route('/')
 def home():
     return render_template("home.html")
 
+@app.route('/setupClient', methods=['GET', 'POST'])
+def setupClient():
+    oxc = oxdpython.Client(config_location)
+    if request.method == 'GET':
+        values = oxc.get_config_value()
+        if values:
+            #oxd_id present
+            msg = 'Client already registered'
+        else:
+            msg = 'Enter data to register'
+        return render_template("index.html", op_host=values["op_host"], client_name=values["client_name"], authorization_redirect_uri=values["authorization_redirect_url"],
+                               post_logout_uri=values["post_logout_redirect_uri"], conn_value=values["connection_type_value"], oxd_id=values["id"], clientId=values["client_id"],
+                               clientSecret=values["client_secret"], conn_type=values["connection_type"], msg=msg, dynamic_registration=values["dynamic_registration"])
 
-@app.route('/authorize/')
-def authorize():
-    auth_url = oxc.get_authorization_url()
-    return redirect(auth_url)
+    op_host = request.form['ophost']
+    client_name = request.form['client_name']
+    authorization_redirect_uri = request.form['redirect_uri']
+    post_logout_uri = request.form['post_logout_uri']
+    conn_type = request.form['conn_type_radio']
+    conn_type_value = request.form['conn_type_name']
+
+    try:
+        clientId = request.form['ClientId']
+        clientSecret = request.form['ClientSecret']
+    except:
+        clientId = ''
+        clientSecret = ''
+
+    ophost_type = oxc.openid_type(op_host)
+
+    if not ophost_type and clientId == '':
+        oxc.config.set("client", "dynamic_registration", "false")
+        return render_template("index.html", op_host=op_host, client_name=client_name, authorization_redirect_uri=authorization_redirect_uri,
+                               post_logout_uri=post_logout_uri, conn_value=conn_type_value, oxd_id='',
+                               msg='Enter clientID and clientSecret', conn_type=conn_type)
+    if ophost_type:
+        oxc.config.set("client", "dynamic_registration", "true")
+
+    dynamic_registration = oxc.config.get("client", "dynamic_registration")
+    client_data = oxc.setup_client(op_host, client_name, authorization_redirect_uri, post_logout_uri, clientId, clientSecret, conn_type, conn_type_value, None)
+
+    oxd_id = client_data.oxd_id
+    msg = "Client Set up completed successfully"
+
+    clientId = client_data.client_id
+    clientSecret = client_data.client_secret
+
+    # delete object
+    del oxc
+
+    return render_template("index.html", op_host=op_host, client_name=client_name, authorization_redirect_uri=authorization_redirect_uri,
+                           post_logout_uri=post_logout_uri, conn_value=conn_type_value, oxd_id=oxd_id,
+                           clientId=clientId, clientSecret=clientSecret, msg=msg, conn_type=conn_type, dynamic_registration=dynamic_registration)
 
 
-@app.route('/callback')
-def callabck():
-    # using request from Flask to parse the query string of the callback
-    code = request.args.get('code')
-    state = request.args.get('state')
 
-    tokens = oxc.get_tokens_by_code(code, state)
+@app.route('/update', methods=['GET', 'POST'])
+def update():
+    oxc = oxdpython.Client(config_location)
+    if request.method == 'GET':
+        values = oxc.get_config_value()
+        return render_template('index.html', op_host=values["op_host"], client_name=values["client_name"], authorization_redirect_uri=values["authorization_redirect_url"],
+                               post_logout_uri=values["post_logout_redirect_uri"], conn_value=values["connection_type_value"], oxd_id=values["id"], msg='click on edit to change', dynamic_registration=values["dynamic_registration"])
 
-    user = oxc.get_user_info(tokens.access_token)
+    conn_type = request.form['conn_type_radio']
+    conn_type_value = request.form['conn_type_name']
+    try:
+        clientId = request.form['ClientId']
+        clientSecret = request.form['ClientSecret']
+    except:
+        clientId = oxc.config.get("client", "client_id")
+        clientSecret = oxc.config.get("client", "client_secret")
 
-    return render_template("home.html", user=user)
+    dynamic_registration = oxc.config.get("client", "dynamic_registration")
+
+    if dynamic_registration == 'true':
+
+        redirect_uri = request.form['redirect_uri']
+        client_name = request.form['client_name']
+        post_logout_uri = request.form['post_logout_uri']
+
+        response = oxc.get_client_token()
+        protection_access_token = response.access_token
+        status = oxc.update_site_registration(protection_access_token, client_name, redirect_uri, post_logout_uri, conn_type_value, conn_type)
+    else:
+        oxc.config.set("oxd", "connection_type", conn_type)
+        oxc.config.set("oxd", "connection_type_value", conn_type_value)
+        oxc.config.set("client", "client_id", clientId)
+        oxc.config.set("client", "client_secret", clientSecret)
+        status = "ok"
+
+    values = oxc.get_config_value()
+    if status == "ok":
+        msg = 'Client updated successfully'
+    else:
+        msg = 'update failure'
+
+    # delete object
+    del oxc
+
+    return render_template("index.html", op_host=values["op_host"], client_name=values["client_name"], authorization_redirect_uri=values["authorization_redirect_url"],
+                          post_logout_uri=values["post_logout_redirect_uri"], conn_value=values["connection_type_value"], oxd_id=values["id"], clientId=values["client_id"],
+                           clientSecret=values["client_secret"], conn_type=values["connection_type"], msg=msg, dynamic_registration=values["dynamic_registration"])
 
 
-@app.route('/logout')
-def logout():
-    logout_url = oxc.get_logout_uri()
-    return redirect(logout_url)
+@app.route('/delete')
+def delete():
+    oxc = oxdpython.Client(config_location)
+    oxc.delete_config()
+    values = oxc.get_config_value()
+    if values["op_host"]:
+        msg = 'delete failure'
+    else:
+        msg = 'Client deleted successfully'
+
+    # delete object
+    del oxc
+
+    return render_template("index.html", op_host=values["op_host"], client_name=values["client_name"], authorization_redirect_uri=values["authorization_redirect_url"], post_logout_uri=values["post_logout_redirect_uri"], port=values["connection_type_value"], oxd_id=values["id"], msg=msg)
+
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    app.run('127.0.0.1', debug=True, port=8080, ssl_context=('cert/demosite.crt','cert/demosite.key'))

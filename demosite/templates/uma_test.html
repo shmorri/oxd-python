@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>uma method test</title>
+</head>
+<body>
+<h2>UMA METHOD TEST</h2>
+
+    <form action="" method="post">
+
+    <a href="protect"><input type="button" value="uma_rs_protect"></a>
+    <br><br>
+    <input type="submit" value="uma_rs_check_access" onclick="this.form.action=('check_access')">
+    <br><br>
+    <label class="control-label col-sm-4 ">Ticket:</label>
+    <input type="text" size="50" value="{{ticket}}" class="form-control ip_box" name="ticket" readonly>
+    <br><br>
+    <input type="submit" value="uma_rp_get_rpt" onclick="this.form.action=('get_rpt')">
+    <br><br>
+    <label class="control-label col-sm-4 ">RPT:</label>
+    <input type="text" size="50" value="{{rpt}}" class="form-control ip_box" name="rpt" readonly>
+    <br><br>
+    <input type="submit" value="uma_rp_get_claims_gathering_url" onclick="this.form.action=('claims_gathering_url')">
+
+    </form>
+    <br><br>
+    RESPONSE:
+    <br>
+<p>{{msg}}</p>
+</body>
+</html>

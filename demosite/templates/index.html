@@ -1,0 +1,283 @@
+<!Doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <!--bootstrap cdn -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <title>Gluu OpenID Setting</title>
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/index.css')}}">
+        <!--<script type="text/javascript" src="{{ url_for('static', filename='static/js/index.js') }}"></script>-->
+        <script>
+        msg = '{{msg}}'
+        oxd_id = '{{oxd_id}}'
+        client_name = '{{client_name}}'
+        clientid = '{{clientId}}'
+        conn_type = '{{conn_type}}'
+        conn_value = '{{conn_value}}'
+        openid_type = '{{openid_type}}'
+        dynamic_registration = '{{dynamic_registration}}'
+
+            function client()
+            {
+                if(msg == 'Client Set up completed successfully' || msg == 'Client updated successfully' || msg == 'Client deleted successfully')
+                    document.getElementById('msg_box').setAttribute('class', 'alert alert-success fade in')
+                else if(msg == 'Client already registered')
+                    document.getElementById('msg_box').setAttribute('class', 'alert alert-info fade in')
+                else if(msg == 'Enter data to register' || msg == 'Enter clientID and clientSecret')
+                    document.getElementById('msg_box').setAttribute('class', 'alert alert-warning')
+                else if(msg == 'update failure' || msg == 'delete failure')
+                    document.getElementById('msg_box').setAttribute('class', 'alert alert-danger fade in')
+
+                if( oxd_id != '' )
+                { //oxd id present
+
+                    //disable the text box if oxd id is present
+                    dis = document.getElementsByClassName("form-control ip_box");
+                    for(var i = 0; i < dis.length; i++)
+                        dis[i].disabled = true;
+
+                    //connection type and address
+                    rad = document.getElementsByName("conn_type_radio");
+                    if(conn_type == 'local')
+                        rad[0].checked = true;
+                    else
+                        rad[1].checked = true;
+                    $("input[type=radio]").attr('disabled', true);
+
+                    ip_box_conn_type();
+
+                    dis = document.getElementsByClassName("form-control ip_box");
+                    for(var i = 0; i < dis.length; i++)
+                        dis[i].disabled = true;
+
+                    //hide register button
+                    if(msg != 'Enter clientID and clientSecret')
+                        $("#reg").hide();
+
+                }
+                else
+                { //oxd id not present
+
+                    //hide edit and delete buttons
+                    $("#edt").hide();
+                    $("#delete").hide();
+                    $("#login").hide();
+
+                     //set action to register
+                    $("form").attr("action", "{{url_for("setupClient")}}");
+
+                }
+
+                if(msg == 'Enter clientID and clientSecret' || clientid != '' )
+                {
+                    var new_label = document.createElement("label");
+                    new_label.innerHTML ="Client Id:";
+                    new_label.setAttribute("class", "control-label col-sm-4");
+
+                    var parent = document.getElementById("set_id_secret values");
+                    parent.appendChild(new_label);
+
+                    var container = document.createElement("input");
+                    container.setAttribute('type' , 'text');
+                    container.setAttribute('class' , 'form-control');
+                    container.setAttribute('size' , '51');
+                    container.setAttribute('name' , 'ClientId');
+                    container.setAttribute('value' , '{{clientId}}');
+                    container.setAttribute('required','required');
+                    container.setAttribute('placeholder' , 'Enter ClientId');
+                    if( msg == 'Client Set up completed successfully' || msg == 'Client already registered' || msg == 'Client updated successfully')
+                        container.setAttribute('disabled' , 'disabled');
+
+                    var div = document.createElement("div");
+                    div.setAttribute("class", "col-sm-6");
+                    div.appendChild(container);
+                    parent.appendChild(div);
+
+                    parent.appendChild(document.createElement('br'));
+                    parent.appendChild(document.createElement('br'));
+
+                    var new_label = document.createElement("label");
+                    new_label.innerHTML ="Client Secret:";
+                    new_label.setAttribute("class", "control-label col-sm-4");
+                    parent.appendChild(new_label);
+                    var container = document.createElement("input");
+                    container.setAttribute('type' , 'text');
+                    container.setAttribute('class' , 'form-control');
+                    container.setAttribute('size' , '51');
+                    container.setAttribute('name' , 'ClientSecret');
+                    container.setAttribute('id' , 'client_secret');
+                    container.setAttribute('value' , '{{ clientSecret }}');
+                    if( msg == 'Client Set up completed successfully' || msg == 'Client already registered' || msg == 'Client updated successfully')
+                        container.setAttribute('disabled' , 'disabled');
+                    container.setAttribute('placeholder' , 'Enter ClientSecret');
+
+                    var div = document.createElement("div");
+                    div.setAttribute("class", "col-sm-6");
+                    div.appendChild(container);
+                    parent.appendChild(div);
+                }
+
+            }
+
+            function edit_enable()
+            {
+                    //for static only clientsecret and id can be updated
+                    if(dynamic_registration != 'true')
+                    {
+                         dis = document.getElementsByClassName("form-control ip_box");
+                         for(var i = dis.length ; i < dis.length; i++)
+                            dis[i].disabled = false;
+                    }
+                    else
+                    {
+                       // enable the input box to enter data
+                        dis = document.getElementsByClassName("form-control ip_box");
+                        for(var i = 1; i < dis.length; i++)   //0 for ophost, which can't be edited
+                            dis[i].disabled = false;
+                    }
+                    $("input[type=radio]").attr('disabled', false);
+                    //conn_value = ""
+                    ip_box_conn_type()
+                    //#("#")
+                    //change edit to update
+                    $("#edt").attr("value", "update");
+                    //set action to register
+                    $("form").attr("action", "{{url_for('update')}}");
+                    $("#edt").click(function(){
+                                $("#edt").attr("type", "submit");
+                                });
+            }
+
+
+            conn_type_select = false;
+            $(document).ready(function(){
+                $('input[type=radio]').click(function(){
+                    ip_box_conn_type();
+                })});
+
+            function ip_box_conn_type()
+            {
+                if(conn_type_select == true)
+                {
+                    $("#conn_ip_box").remove();
+                    document.getElementById("conn_label").innerHTML = "";
+                }
+
+                conn = document.getElementsByName("conn_type_radio");
+
+
+                var $input = $('<input type="number"  name="conn_type_name" size="50" id="conn_ip_box" required>');
+                $input.attr('value' , conn_value);
+                $input.attr('class', "form-control ip_box");
+                if(conn[0].checked == true)
+                {//local
+                    document.getElementById("conn_label").innerHTML = "oxd port:";
+                    $input.attr('type' , 'text');
+                    $input.attr('value' , conn_value);
+                    //$input.attr('name' , port);
+                }
+                else
+                {//web
+                    document.getElementById("conn_label").innerHTML = "oxd web address:";
+                    $input.attr('type' , 'url');
+                    $input.attr('value' , conn_value);
+                }
+
+                $input.attr('value', conn_value);
+                var parent = document.getElementById("conn_ip");
+                $input.appendTo('#conn_ip');
+
+                conn_type_select = true;
+            }
+        </script>
+    </head>
+
+    <body class="container-fluid" onload="client()">
+        <div id='bod_div' class="col-md-12" >
+         <div class="col-md-8" >
+            <h3>Setup Client</h3>
+            <hr class="hr_modified">
+
+            <form action="" method="post" class="form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-sm-4">URI of the OpenID Connect Provider:</label>
+                        <div class="col-sm-6">
+                            <input type="url" value="{{ op_host }}" size="50" class="form-control ip_box" name="ophost" required>
+                        </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-4 ">Client Name:</label>
+                        <div class="col-sm-6">
+                            <input type="text" value="{{ client_name }}" size="50" class="form-control ip_box" name="client_name" required>
+                        </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4 ">Authorization Redirect URI:</label>
+                        <div class="col-sm-6">
+                            <input type="url" value="{{ authorization_redirect_uri }}" size="50" class="form-control ip_box" name="redirect_uri" required>
+                        </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-4 ">Post logout URI:</label>
+                        <div class="col-sm-6">
+                            <input type="url" value="{{ post_logout_uri }}" size="50" class="form-control ip_box" name="post_logout_uri">
+                        </div>
+                </div>
+
+
+            <div class="form-group">
+                <label class="control-label col-sm-4 ">oxd Connection Type:</label>
+                    <div class="ip_box col-sm-6" >
+
+                        <label class="radio-inline"> <input type="radio" name="conn_type_radio" value="local" class="ip_box"> local</label>
+                        <label class="radio-inline"> <input type="radio"  name="conn_type_radio" value="web" class="ip_box"> web</label>
+                    </div>
+                <!-- for setting values-->
+                <label class="control-label col-sm-4 " id="conn_label"></label>
+                <div class="col-sm-6" id="conn_ip">
+                </div>
+                </div>
+
+            <div class="form-group">
+                <div id="set_id_secret values">
+                </div>
+            </div>
+            <br><br>
+             <div class="row">
+                <div class="col-md-6" id="buttons">
+                    <input type="submit" value="Create" class="btn btn-primary space" id="reg">
+                    <input type="button" value="Edit" class="btn btn-primary space" id="edt" onclick="edit_enable()">
+                    <a href="{{url_for('delete')}}"> <input type="button" class="btn btn-info space" id="delete" name="delete" value="delete" > </a>
+                    <a href="/" class="btn btn-default" >Go to Login Page</a>
+                </div>
+            </div>
+
+            </form>
+
+             <div class="form-group">
+                 {% if oxd_id %}
+                    <br><br>
+                    <label class="control-label col-sm-4 ">oxd id:</label>
+                        <div class="col-sm-8">
+                            <p><strong> {{ oxd_id }} </strong></p>
+                        </div>
+                 {% endif %}
+                </div>
+             <br>
+            <div class="form-group">
+                <div class="col-sm-8">
+                    <div id="msg_box">
+                        <strong>{{ msg }}</strong>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </div>
+    </body>
+</html>
