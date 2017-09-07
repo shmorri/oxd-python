@@ -56,15 +56,15 @@ def setupClient():
     conn_type_value = request.form['conn_type_name']
 
     try:
-        clientId = request.form['ClientId']
-        clientSecret = request.form['ClientSecret']
+        client_id = request.form['ClientId']
+        client_secret = request.form['ClientSecret']
     except:
-        clientId = ''
-        clientSecret = ''
+        client_id = ''
+        client_secret = ''
 
     ophost_type = oxc.openid_type(op_host)
 
-    if not ophost_type and clientId == '':
+    if not ophost_type and client_id == '':
         oxc.config.set("client", "dynamic_registration", "false")
         return render_template("index.html", op_host=op_host, client_name=client_name, authorization_redirect_uri=authorization_redirect_uri,
                                post_logout_uri=post_logout_uri, conn_value=conn_type_value, oxd_id='',
@@ -73,20 +73,22 @@ def setupClient():
         oxc.config.set("client", "dynamic_registration", "true")
 
     dynamic_registration = oxc.config.get("client", "dynamic_registration")
-    client_data = oxc.setup_client(op_host, client_name, authorization_redirect_uri, post_logout_uri, clientId, clientSecret, conn_type, conn_type_value, None)
+    client_data = oxc.setup_client(op_host=str(op_host), authorization_redirect_uri=str(authorization_redirect_uri), conn_type=str(conn_type),
+                                   conn_type_value=str(conn_type_value), client_name=str(client_name), post_logout_uri=str(post_logout_uri),
+                                   client_id=str(client_id), client_secret=str(client_secret))
 
     oxd_id = client_data.oxd_id
     msg = "Client Set up completed successfully"
 
-    clientId = client_data.client_id
-    clientSecret = client_data.client_secret
+    client_id = client_data.client_id
+    client_secret = client_data.client_secret
 
     # delete object
     del oxc
 
     return render_template("index.html", op_host=op_host, client_name=client_name, authorization_redirect_uri=authorization_redirect_uri,
                            post_logout_uri=post_logout_uri, conn_value=conn_type_value, oxd_id=oxd_id,
-                           clientId=clientId, clientSecret=clientSecret, msg=msg, conn_type=conn_type, dynamic_registration=dynamic_registration)
+                           clientId=client_id, clientSecret=client_secret, msg=msg, conn_type=conn_type, dynamic_registration=dynamic_registration)
 
 
 
@@ -101,11 +103,11 @@ def update():
     conn_type = request.form['conn_type_radio']
     conn_type_value = request.form['conn_type_name']
     try:
-        clientId = request.form['ClientId']
-        clientSecret = request.form['ClientSecret']
+        client_id = request.form['ClientId']
+        client_secret = request.form['ClientSecret']
     except:
-        clientId = oxc.config.get("client", "client_id")
-        clientSecret = oxc.config.get("client", "client_secret")
+        client_id = oxc.config.get("client", "client_id")
+        client_secret = oxc.config.get("client", "client_secret")
 
     dynamic_registration = oxc.config.get("client", "dynamic_registration")
 
@@ -117,12 +119,13 @@ def update():
 
         response = oxc.get_client_token()
         protection_access_token = response.access_token
-        status = oxc.update_site_registration(protection_access_token, client_name, redirect_uri, post_logout_uri, conn_type_value, conn_type)
+        status = oxc.update_site_registration(client_name=str(client_name), authorization_redirect_uri=str(redirect_uri), post_logout_uri=str(post_logout_uri),
+                                              connection_type_value=str(conn_type_value), connection_type=str(conn_type), protection_access_token=str(protection_access_token))
     else:
         oxc.config.set("oxd", "connection_type", conn_type)
         oxc.config.set("oxd", "connection_type_value", conn_type_value)
-        oxc.config.set("client", "client_id", clientId)
-        oxc.config.set("client", "client_secret", clientSecret)
+        oxc.config.set("client", "client_id", client_id)
+        oxc.config.set("client", "client_secret", client_secret)
         status = "ok"
 
     values = oxc.get_config_value()

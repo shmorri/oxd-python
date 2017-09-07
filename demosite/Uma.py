@@ -45,7 +45,7 @@ def protect():
         }
     ]
 
-    result = oxc.uma_rs_protect(protection_access_token, resources)
+    result = oxc.uma_rs_protect(resources=resources, protection_access_token=str(protection_access_token))
 
     # delete object
     del oxc
@@ -61,7 +61,7 @@ def check_access():
     rpt = request.form['rpt']
     path = '/photo'
     http_method = 'GET'
-    result = oxc.uma_rs_check_access(protection_access_token, rpt, path, http_method)
+    result = oxc.uma_rs_check_access(rpt=str(rpt), path=path, http_method=http_method, protection_access_token=str(protection_access_token))
     ticket = result.ticket
 
     #This is just for work around purpose. Original fix needs to be worked on.
@@ -90,7 +90,7 @@ def getrpt():
     response = oxc.get_client_token()
     protection_access_token = response.access_token
     ticket = request.form['ticket']
-    result = oxc.uma_rp_get_rpt(protection_access_token=protection_access_token, ticket=ticket, scope='sobhan_uma_scope')
+    result = oxc.uma_rp_get_rpt(ticket=str(ticket), scope='sobhan_uma_scope', protection_access_token=str(protection_access_token))
     rpt = result.access_token
 
     # delete object
@@ -105,7 +105,7 @@ def gather():
     response = oxc.get_client_token()
     protection_access_token = response.access_token
     ticket = request.form['ticket']
-    result = oxc.uma_rp_get_claims_gathering_url(protection_access_token=protection_access_token, claims_redirect_uri="https://client.example.com:8080", ticket=ticket)
+    result = oxc.uma_rp_get_claims_gathering_url(ticket=str(ticket), claims_redirect_uri="https://client.example.com:8080", protection_access_token=str(protection_access_token))
 
     # delete object
     del oxc

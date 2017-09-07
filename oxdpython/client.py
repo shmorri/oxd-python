@@ -1,3 +1,43 @@
+"""
+#
+# Gluu-oxd-library
+#
+# An open source application library for Python
+#
+# This content is released under the MIT License (MIT)
+#
+# Copyright (c) 2017, Gluu inc, USA, Austin
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# @package	    Gluu-oxd-library
+# @version      3.1.0
+# @author	    Sobhan Panda
+# @author	    sobhan@centroxy.com
+# @copyright	Copyright (c) 2017, Gluu inc federation (https://gluu.org/)
+# @license	    http://opensource.org/licenses/MIT	MIT License
+# @link         https://gluu.org/
+# @since	    Version 3.1.0
+# @filesource
+#/
+"""
+
 import logging
 import urllib2
 import ssl
@@ -19,6 +59,8 @@ class Client:
 
         if self.conn_type == "web" and self.conn_type_value[-1:] != "/":
             self.conn_type_value += "/"
+
+        self.authorization_redirect_uri = self.config.get("client", "authorization_redirect_uri")
 
         self.oxd_id = self.config.get("oxd", "id")
         self.client_name = self.config.get("client", "client_name")
@@ -78,14 +120,26 @@ class Client:
 
     def set_config_value(self, values):
         """A private method which sets the client attributes"""
-        self.config.set("client", "op_host", values[0])
-        self.config.set("client", "client_name", values[1])
-        self.config.set("client", "authorization_redirect_uri", values[2])
-        self.config.set("client", "post_logout_redirect_uri", values[3])
-        self.config.set("oxd", "connection_type_value", values[4])
-        self.config.set("oxd", "connection_type", values[5])
+        if values[0] != None:
+            self.config.set("client", "op_host", values[0])
+
+        if values[1] != None:
+            self.config.set("client", "client_name", values[1])
+
+        if values[2] != None:
+            self.config.set("client", "authorization_redirect_uri", values[2])
+
+        if values[3] != None:
+            self.config.set("client", "post_logout_redirect_uri", values[3])
+
+        if values[4] != None:
+            self.config.set("oxd", "connection_type_value", values[4])
+
+        if values[5] != None:
+            self.config.set("oxd", "connection_type", values[5])
 
         return
+
 
     def openid_type(self, op_host):
         """Fucntion to know static or dynamic openID Provider.
@@ -116,7 +170,7 @@ class Client:
             self.ophost_type = "static"
             return False
 
-    def register_site(self, protection_access_token):
+    def register_site(self, protection_access_token=None):
         """Function to register the site and generate a unique ID for the site
 
         Returns:
@@ -140,9 +194,8 @@ class Client:
         # add required params for the command
         params = {
             "authorization_redirect_uri": self.config.get("client", "authorization_redirect_uri"),
-            "protection_access_token": protection_access_token
-
         }
+
         # add other optional params if they exist in config
         for param in self.opt_params:
             if self.config.get("client", param):
@@ -153,6 +206,9 @@ class Client:
             if self.config.get("client", param):
                 value = self.config.get("client", param).split(",")
                 params[param] = value
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
         LOGGER.debug("Sending command `register_site` with params %s",
@@ -174,7 +230,7 @@ class Client:
         return self.oxd_id
 
 
-    def setup_client(self, op_host, client_name, authorization_redirect_uri, post_logout_uri, clientId, clientSecret, conn_type, conn_type_value, claims_redirect_uri):
+    def setup_client(self, op_host, authorization_redirect_uri, conn_type, conn_type_value, client_name=None, post_logout_uri=None, client_id=None, client_secret=None, claims_redirect_uri=None):
         """Function to setup the client and generate a Client ID, Client Secret for the site
 
         Returns:
@@ -201,8 +257,8 @@ class Client:
         values = [op_host, client_name, authorization_redirect_uri, post_logout_uri, conn_type_value, conn_type]
 
         self.set_config_value(values)
-        self.config.set("client", "client_id", clientId)
-        self.config.set("client", "client_secret", clientSecret)
+        self.config.set("client", "client_id", client_id)
+        self.config.set("client", "client_secret", client_secret)
 
         if conn_type == "web" and conn_type_value[-1:] != "/":
             conn_type_value += "/"
@@ -214,11 +270,8 @@ class Client:
         # add required params for the command
         params = {"authorization_redirect_uri": authorization_redirect_uri,
                   "op_host": op_host,
-                  "post_logout_redirect_uri": post_logout_uri,
-                  "client_id": clientId,
-                  "client_secret": clientSecret,
                   "oxd_rp_programming_language": 'python',
-                  "claims_redirect_uri": claims_redirect_uri,}
+                  }
 
         # add other optional params if they exist in config
         for param in self.opt_params:
@@ -230,6 +283,21 @@ class Client:
             if self.config.get("client", param):
                 value = self.config.get("client", param).split(",")
                 params[param] = value
+
+        if client_name and isinstance(client_name, str):
+            params["client_name"] = client_name
+
+        if post_logout_uri and isinstance(post_logout_uri, str):
+            params["post_logout_redirect_uri"] = post_logout_uri
+
+        if client_id and isinstance(client_id, str):
+            params["client_id"] = client_id
+
+        if client_secret and isinstance(client_secret, list):
+            params["client_secret"] = client_secret
+
+        if claims_redirect_uri and isinstance(claims_redirect_uri, str):
+            params["claims_redirect_uri"] = claims_redirect_uri
 
         command["params"] = params
         LOGGER.debug("Sending command `setup_client` with params %s",
@@ -258,7 +326,7 @@ class Client:
         return self.__clear_data(response)
 
 
-    def update_site_registration(self, protection_access_token, client_name, authorization_redirect_uri, post_logout_uri, connection_type_value, connection_type):
+    def update_site_registration(self, client_name=None, contacts=None, authorization_redirect_uri=None, post_logout_uri=None, connection_type_value=None, connection_type=None, protection_access_token=None):
         """Fucntion to update the site's information with OpenID Provider.
         This should be called after changing the values in the cfg file.
         Returns:
@@ -267,12 +335,7 @@ class Client:
         command = {"command": "update_site_registration"}
         rest_url = self.conn_type_value + "update-site"
 
-
-        params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
-                  "authorization_redirect_uri": authorization_redirect_uri,
-                  "post_logout_redirect_uri": post_logout_uri,
-                 }
+        params = {"oxd_id": self.oxd_id, }
 
         # add other optional params if they exist in config
         for param in self.opt_params:
@@ -284,6 +347,20 @@ class Client:
             if self.config.get("client", param):
                 value = self.config.get("client", param).split(",")
                 params[param] = value
+
+        if contacts and isinstance(contacts, list):
+            params["contacts"] = contacts
+
+        if authorization_redirect_uri == None:
+            params["authorization_redirect_uri"] = self.config.get("client", "authorization_redirect_uri")
+        else:
+            params["authorization_redirect_uri"] = authorization_redirect_uri
+
+        if post_logout_uri and isinstance(post_logout_uri, str):
+            params["post_logout_redirect_uri"] = post_logout_uri
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
         LOGGER.debug("Sending `update_site_registration` with params %s", params)
@@ -311,7 +388,7 @@ class Client:
         self.config.set("client", "client_id", '')
         self.config.set("client", "client_secret", '')
 
-    def get_authorization_url(self, protection_access_token, acr_values=None, prompt=None, scope=None):
+    def get_authorization_url(self, scope=None, acr_values=None, prompt=None, custom_params=None, protection_access_token=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
@@ -334,9 +411,7 @@ class Client:
         command = {"command": "get_authorization_url"}
         rest_url = self.conn_type_value + "get-authorization-url"
 
-        params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
-                 }
+        params = {"oxd_id": self.oxd_id}
 
         if scope and isinstance(scope, list):
             params["scope"] = scope
@@ -346,6 +421,12 @@ class Client:
 
         if prompt and isinstance(prompt, str):
             params["prompt"] = prompt
+
+        if custom_params and isinstance(custom_params, dict):
+            params["custom_parameters"] = custom_params
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
         LOGGER.debug("Sending command `get_authorization_url` with params %s", params)
@@ -362,7 +443,7 @@ class Client:
         return self.__clear_data(response).authorization_url
 
 
-    def get_tokens_by_code(self, protection_access_token, code, state):
+    def get_tokens_by_code(self, code, state, protection_access_token=None):
         """Function to get access code for getting the user details from the
         OP. It is called after the user authorizies by visiting the auth URL.
 
@@ -403,10 +484,12 @@ class Client:
 
 
         params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
                   "code": code,
                   "state": state
                  }
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
         LOGGER.debug("Sending command `get_tokens_by_code` with params %s", params)
@@ -422,7 +505,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def get_access_token_by_refresh_token(self, protection_access_token, refresh_token, scope=None):
+    def get_access_token_by_refresh_token(self, refresh_token, scope=None, protection_access_token=None):
         """Function to get access code for getting the user details from the
                         OP by using the refresh_token.
                         It is called after getting the refresh_token by using the code and state.
@@ -457,12 +540,14 @@ class Client:
         rest_url = self.conn_type_value + "get-access-token-by-refresh-token"
 
         params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
                   "refresh_token": refresh_token,
                  }
 
         if scope and isinstance(scope, list):
             params["scope"] = scope
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
         LOGGER.debug("Sending command `get_access_token_by_refresh_token` with params %s", params)
@@ -507,7 +592,7 @@ class Client:
 
         return return_data
 
-    def get_user_info(self, protection_access_token, access_token):
+    def get_user_info(self, access_token, protection_access_token=None):
         """Function to get the information about the user using the access code
         obtained from the OP
 
@@ -533,9 +618,11 @@ class Client:
 
 
         params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
                   "access_token": access_token
                  }
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
         LOGGER.debug("Sending command `get_user_info` with params %s", params)
@@ -552,7 +639,7 @@ class Client:
         return self.__clear_data(response).claims
 
 
-    def get_logout_uri(self, protection_access_token, id_token_hint=None, post_logout_redirect_uri=None, state=None, session_state=None):
+    def get_logout_uri(self, id_token_hint=None, post_logout_redirect_uri=None, state=None, session_state=None, protection_access_token=None):
         """Function to logout the user.
         Args:
             id_token_hint (string, optional): oxd server will use last used
@@ -570,10 +657,7 @@ class Client:
         command = {"command": "get_logout_uri"}
         rest_url = self.conn_type_value + "get-logout-uri"
 
-        params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token
-                 }
-
+        params = {"oxd_id": self.oxd_id}
 
         if id_token_hint and isinstance(id_token_hint, str):
             params["id_token_hint"] = id_token_hint
@@ -587,6 +671,8 @@ class Client:
         if session_state and isinstance(session_state, str):
             params["session_state"] = session_state
 
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
 
@@ -603,7 +689,7 @@ class Client:
 
         return self.__clear_data(response).uri
 
-    def uma_rs_protect(self, protection_access_token, resources):
+    def uma_rs_protect(self, resources, protection_access_token=None):
         """Function to be used in a UMA Resource Server to protect resources.
 
         Args:
@@ -617,9 +703,11 @@ class Client:
         rest_url = self.conn_type_value + "uma-rs-protect"
 
         params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
                   "resources": resources
                  }
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         if len(resources) < 1:
             return False
@@ -638,7 +726,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def uma_rs_check_access(self, protection_access_token, rpt, path, http_method):
+    def uma_rs_check_access(self, rpt, path, http_method, protection_access_token=None):
         """Function to be used in a UMA Resource Server to check access.
 
         Args:
@@ -684,11 +772,13 @@ class Client:
         rest_url = self.conn_type_value + "uma-rs-check-access"
 
         params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
                   "rpt": rpt,
                   "path": path,
                   "http_method": http_method
                  }
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
 
@@ -703,7 +793,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def uma_rp_get_rpt(self, protection_access_token, ticket, rpt=None, state=None, claim_token=None, claim_token_format=None, pct=None, scope=None):
+    def uma_rp_get_rpt(self, ticket, claim_token=None, claim_token_format=None, pct=None, rpt=None, scope=None, state=None, protection_access_token=None):
         """Function to be used in a UMA Resource Server to get rpt.
 
                 Args:
@@ -777,8 +867,7 @@ class Client:
         rest_url = self.conn_type_value + "uma-rp-get-rpt"
 
         params = {"oxd_id": self.oxd_id,
-                  "protection_access_token": protection_access_token,
-                  "ticket": ticket,
+                  "ticket": ticket
                  }
 
         if claim_token and isinstance(claim_token, str):
@@ -799,6 +888,8 @@ class Client:
         if state and isinstance(state, str):
             params["state"] = state
 
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
 
@@ -813,7 +904,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def uma_rp_get_claims_gathering_url(self, protection_access_token, claims_redirect_uri, ticket):
+    def uma_rp_get_claims_gathering_url(self, ticket, claims_redirect_uri, protection_access_token=None):
         """Function to be used in a UMA Resource Server to obtain claims gathering url.
 
                 Args:
@@ -839,10 +930,12 @@ class Client:
         rest_url = self.conn_type_value + "uma-rp-get-claims-gathering-url"
 
         params = {"oxd_id": self.oxd_id,
-                  "claims_redirect_uri": claims_redirect_uri,
                   "ticket": ticket,
-                  "protection_access_token": protection_access_token,
+                  "claims_redirect_uri": claims_redirect_uri
                  }
+
+        if protection_access_token and isinstance(protection_access_token, str):
+            params["protection_access_token"] = protection_access_token
 
         command["params"] = params
 

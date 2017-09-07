@@ -1,4 +1,4 @@
-# oxD Python Demo site
+# oxd Python Demo site
 
 This is a demo site for oxd-python written using Python Flask to demonstrate how to use oxd-python to perform authorization with an OpenID Provider and fetch information.
 
