@@ -47,8 +47,6 @@
                         rad[1].checked = true;
                     $("input[type=radio]").attr('disabled', true);
 
-                    ip_box_conn_type();
-
                     dis = document.getElementsByClassName("form-control ip_box");
                     for(var i = 0; i < dis.length; i++)
                         dis[i].disabled = true;
@@ -118,8 +116,14 @@
                     div.setAttribute("class", "col-sm-6");
                     div.appendChild(container);
                     parent.appendChild(div);
-                }
 
+                    radioList = document.getElementsByName("conn_type_radio");
+                    if(conn_type == 'local')
+                        radioList[0].checked = true;
+                    else
+                        radioList[1].checked = true;
+
+                }
             }
 
             function edit_enable()
@@ -128,7 +132,7 @@
                     if(dynamic_registration != 'true')
                     {
                          dis = document.getElementsByClassName("form-control ip_box");
-                         for(var i = dis.length ; i < dis.length; i++)
+                         for(var i = 1 ; i < dis.length; i++)
                             dis[i].disabled = false;
                     }
                     else
@@ -139,10 +143,6 @@
                             dis[i].disabled = false;
                     }
                     $("input[type=radio]").attr('disabled', false);
-                    //conn_value = ""
-                    ip_box_conn_type()
-                    //#("#")
-                    //change edit to update
                     $("#edt").attr("value", "update");
                     //set action to register
                     $("form").attr("action", "{{url_for('update')}}");
@@ -151,47 +151,32 @@
                                 });
             }
 
-
-            conn_type_select = false;
             $(document).ready(function(){
-                $('input[type=radio]').click(function(){
-                    ip_box_conn_type();
-                })});
+                $("input:radio[name='conn_type_radio']").change(function() {
+                    switch($(this).val()) {
+                    case "web" :
+                        $('#connection_label').text("oxd web address:");
+                        break;
+                    case "local" :
+                        $("#connection_label").text("oxd port:");
+                        break;
+                    }
+                });
+            });
 
-            function ip_box_conn_type()
-            {
-                if(conn_type_select == true)
+            $(window).bind("load", function() {
+                if(conn_type == "web")
                 {
-                    $("#conn_ip_box").remove();
-                    document.getElementById("conn_label").innerHTML = "";
-                }
-
-                conn = document.getElementsByName("conn_type_radio");
-
-
-                var $input = $('<input type="number"  name="conn_type_name" size="50" id="conn_ip_box" required>');
-                $input.attr('value' , conn_value);
-                $input.attr('class', "form-control ip_box");
-                if(conn[0].checked == true)
-                {//local
-                    document.getElementById("conn_label").innerHTML = "oxd port:";
-                    $input.attr('type' , 'text');
-                    $input.attr('value' , conn_value);
-                    //$input.attr('name' , port);
+                    $('#connection_label').text("oxd web address:");
                 }
                 else
-                {//web
-                    document.getElementById("conn_label").innerHTML = "oxd web address:";
-                    $input.attr('type' , 'url');
-                    $input.attr('value' , conn_value);
+                {
+                    $("#connection_label").text("oxd port:");
                 }
+                $("input[name=conn_type_radio][value=" + conn_value + "]").attr("checked", "checked");
 
-                $input.attr('value', conn_value);
-                var parent = document.getElementById("conn_ip");
-                $input.appendTo('#conn_ip');
+            });
 
-                conn_type_select = true;
-            }
         </script>
     </head>
 
@@ -234,13 +219,20 @@
                 <label class="control-label col-sm-4 ">oxd Connection Type:</label>
                     <div class="ip_box col-sm-6" >
 
-                        <label class="radio-inline"> <input type="radio" name="conn_type_radio" value="local" class="ip_box"> local</label>
-                        <label class="radio-inline"> <input type="radio"  name="conn_type_radio" value="web" class="ip_box"> web</label>
+                        <label class="radio-inline"> <input type="radio" name="conn_type_radio" value="local" class="ip_box" checked> oxd-server </label>
+                        <label class="radio-inline"> <input type="radio"  name="conn_type_radio" value="web" class="ip_box"> oxd-https-extension </label>
                     </div>
                 <!-- for setting values-->
                 <label class="control-label col-sm-4 " id="conn_label"></label>
                 <div class="col-sm-6" id="conn_ip">
                 </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-4" id="connection_label"></label>
+                        <div class="col-sm-6">
+                            <input type="text" value="{{ conn_value }}" name="conn_type_name" size="50" id="conn_ip_box" class="form-control ip_box" required>
+                        </div>
                 </div>
 
             <div class="form-group">

@@ -103,6 +103,9 @@ def update():
 
     conn_type = request.form['conn_type_radio']
     conn_type_value = request.form['conn_type_name']
+
+    oxc.config.set("oxd", "connection_type_value", conn_type_value)
+
     try:
         client_id = request.form['ClientId']
         client_secret = request.form['ClientSecret']
