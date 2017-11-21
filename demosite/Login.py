@@ -27,7 +27,7 @@ def login():
     oxc = oxdpython.Client(config_location)
     if oxc.config.get("client", "dynamic_registration") == 'true':
         response = oxc.get_client_token()
-        protection_access_token = response.access_token
+        protection_access_token = str(response.access_token)
     else:
         protection_access_token = ''
 
@@ -36,7 +36,7 @@ def login():
             "param2":"value2"
         }
 
-    auth_url = oxc.get_authorization_url(custom_params=custom_params, protection_access_token=str(protection_access_token))
+    auth_url = oxc.get_authorization_url(custom_params, protection_access_token)
 
     # delete object
     del oxc
@@ -52,19 +52,19 @@ def userinfo():
 
     if oxc.config.get("client", "dynamic_registration") == 'true':
         response = oxc.get_client_token()
-        protection_access_token = response.access_token
+        protection_access_token = str(response.access_token)
     else:
         protection_access_token = ''
 
-    tokens = oxc.get_tokens_by_code(code=code, state=state, protection_access_token=str(protection_access_token))
+    tokens = oxc.get_tokens_by_code(code, state, protection_access_token)
 
     if oxc.config.get("client", "dynamic_registration") == 'true':
-        newtokens = oxc.get_access_token_by_refresh_token(refresh_token=tokens.refresh_token, protection_access_token=str(protection_access_token))
+        newtokens = oxc.get_access_token_by_refresh_token(tokens.refresh_token, protection_access_token)
         access_token = newtokens.access_token
     else:
         access_token = tokens.access_token
 
-    user = oxc.get_user_info(access_token=access_token, protection_access_token=str(protection_access_token))
+    user = oxc.get_user_info(access_token, protection_access_token)
 
     session['username'] = user.name[0]
     session['usermail'] = user.email[0]
@@ -83,14 +83,13 @@ def logout():
     oxc = oxdpython.Client(config_location)
     if oxc.config.get("client", "dynamic_registration") == 'true':
         response = oxc.get_client_token()
-        protection_access_token = response.access_token
+        protection_access_token = str(response.access_token)
     else:
         protection_access_token = ''
 
-    logout_url = oxc.get_logout_uri(protection_access_token=str(protection_access_token))
+    logout_url = oxc.get_logout_uri(protection_access_token)
     session.clear()
 
     # delete object
     del oxc
-
     return redirect(logout_url)

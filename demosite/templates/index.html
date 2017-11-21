@@ -22,13 +22,13 @@
 
             function client()
             {
-                if(msg == 'Client Set up completed successfully' || msg == 'Client updated successfully' || msg == 'Client deleted successfully')
+                if(msg == 'Client Set Up Completed Successfully' || msg == 'Client Updated Successfully' || msg == 'Client Deleted Successfully')
                     document.getElementById('msg_box').setAttribute('class', 'alert alert-success fade in')
-                else if(msg == 'Client already registered')
+                else if(msg == 'Client Registered')
                     document.getElementById('msg_box').setAttribute('class', 'alert alert-info fade in')
-                else if(msg == 'Enter data to register' || msg == 'Enter clientID and clientSecret')
+                else if(msg == 'Enter Data to Register' || msg == 'Enter clientID and clientSecret')
                     document.getElementById('msg_box').setAttribute('class', 'alert alert-warning')
-                else if(msg == 'update failure' || msg == 'delete failure')
+                else if(msg == 'Update Failure' || msg == 'Delete Failure')
                     document.getElementById('msg_box').setAttribute('class', 'alert alert-danger fade in')
 
                 if( oxd_id != '' )

@@ -68,6 +68,7 @@ class Client:
         self.client_secret = self.config.get("client", "client_secret")
         self.op_host = self.config.get("client", "op_host")
         self.ophost_type = None
+        self.claims_redirect_uri = self.config.get("client", "claims_redirect_uri")
 
         #list of optional params that can be passed to the oxd-server
         self.opt_params = ["op_host",
@@ -78,7 +79,8 @@ class Client:
                            "client_id",
                            "client_secret",
                            "client_secret_expires_at",
-                           "application_type"]
+                           "application_type",
+                           ]
         self.opt_list_params = ["grant_types",
                                 "acr_values",
                                 "contacts",
@@ -97,6 +99,9 @@ class Client:
         and raises a RuntimeError when it encounters an error
         """
         if response.status == "error":
+            if response.data.error=="need_info":
+                return response.data
+
             error = "oxd Server Error: {0}\nDescription:{1}".format(
                 response.data.error, response.data.error_description)
             LOGGER.error(error)
@@ -230,7 +235,7 @@ class Client:
         return self.oxd_id
 
 
-    def setup_client(self, op_host, authorization_redirect_uri, conn_type, conn_type_value, client_name=None, post_logout_uri=None, client_id=None, client_secret=None, claims_redirect_uri=None):
+    def setup_client(self, op_host, authorization_redirect_uri, conn_type, conn_type_value, client_name=None, post_logout_uri=None, client_id=None, client_secret=None, claims_redirect_uri=["https://client.example.com:8080/GetUMAClaims"]):
         """Function to setup the client and generate a Client ID, Client Secret for the site
 
         Returns:
@@ -266,7 +271,6 @@ class Client:
         command = {"command": "setup_client"}
         rest_url = conn_type_value + "setup-client"
 
-
         # add required params for the command
         params = {"authorization_redirect_uri": authorization_redirect_uri,
                   "op_host": op_host,
@@ -296,7 +300,7 @@ class Client:
         if client_secret and isinstance(client_secret, list):
             params["client_secret"] = client_secret
 
-        if claims_redirect_uri and isinstance(claims_redirect_uri, str):
+        if claims_redirect_uri and isinstance(claims_redirect_uri, list):
             params["claims_redirect_uri"] = claims_redirect_uri
 
         command["params"] = params
@@ -326,7 +330,7 @@ class Client:
         return self.__clear_data(response)
 
 
-    def update_site_registration(self, client_name=None, contacts=None, authorization_redirect_uri=None, post_logout_uri=None, connection_type_value=None, connection_type=None, protection_access_token=None):
+    def update_site_registration(self, client_name=None, authorization_redirect_uri=None, post_logout_uri=None, connection_type_value=None, connection_type=None, protection_access_token=None, contacts=None):
         """Fucntion to update the site's information with OpenID Provider.
         This should be called after changing the values in the cfg file.
         Returns:
@@ -388,7 +392,7 @@ class Client:
         self.config.set("client", "client_id", '')
         self.config.set("client", "client_secret", '')
 
-    def get_authorization_url(self, scope=None, acr_values=None, prompt=None, custom_params=None, protection_access_token=None):
+    def get_authorization_url(self, custom_params=None, protection_access_token=None, scope=None, acr_values=None, prompt=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
@@ -505,7 +509,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def get_access_token_by_refresh_token(self, refresh_token, scope=None, protection_access_token=None):
+    def get_access_token_by_refresh_token(self, refresh_token, protection_access_token=None, scope=None):
         """Function to get access code for getting the user details from the
                         OP by using the refresh_token.
                         It is called after getting the refresh_token by using the code and state.
@@ -639,7 +643,7 @@ class Client:
         return self.__clear_data(response).claims
 
 
-    def get_logout_uri(self, id_token_hint=None, post_logout_redirect_uri=None, state=None, session_state=None, protection_access_token=None):
+    def get_logout_uri(self, protection_access_token=None, id_token_hint=None, post_logout_redirect_uri=None, state=None, session_state=None):
         """Function to logout the user.
         Args:
             id_token_hint (string, optional): oxd server will use last used
@@ -793,7 +797,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def uma_rp_get_rpt(self, ticket, claim_token=None, claim_token_format=None, pct=None, rpt=None, scope=None, state=None, protection_access_token=None):
+    def uma_rp_get_rpt(self, ticket, scope=None, protection_access_token=None, state=None, claim_token=None, claim_token_format=None, pct=None, rpt=None):
         """Function to be used in a UMA Resource Server to get rpt.
 
                 Args:

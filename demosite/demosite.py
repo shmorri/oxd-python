@@ -40,11 +40,11 @@ def setupClient():
     oxc = oxdpython.Client(config_location)
     if request.method == 'GET':
         values = oxc.get_config_value()
-        if values:
+        if values["id"]:
             #oxd_id present
-            msg = 'Client already registered'
+            msg = 'Client Registered'
         else:
-            msg = 'Enter data to register'
+            msg = 'Enter Data to Register'
         return render_template("index.html", op_host=values["op_host"], client_name=values["client_name"], authorization_redirect_uri=values["authorization_redirect_url"],
                                post_logout_uri=values["post_logout_redirect_uri"], conn_value=values["connection_type_value"], oxd_id=values["id"], clientId=values["client_id"],
                                clientSecret=values["client_secret"], conn_type=values["connection_type"], msg=msg, dynamic_registration=values["dynamic_registration"])
@@ -74,12 +74,10 @@ def setupClient():
         oxc.config.set("client", "dynamic_registration", "true")
 
     dynamic_registration = oxc.config.get("client", "dynamic_registration")
-    client_data = oxc.setup_client(op_host=str(op_host), authorization_redirect_uri=str(authorization_redirect_uri), conn_type=str(conn_type),
-                                   conn_type_value=str(conn_type_value), client_name=str(client_name), post_logout_uri=str(post_logout_uri),
-                                   client_id=str(client_id), client_secret=str(client_secret))
+    client_data = oxc.setup_client(op_host, authorization_redirect_uri, conn_type, conn_type_value, client_name, post_logout_uri, client_id, client_secret)
 
     oxd_id = client_data.oxd_id
-    msg = "Client Set up completed successfully"
+    msg = "Client Set Up Completed Successfully"
 
     client_id = client_data.client_id
     client_secret = client_data.client_secret
@@ -123,8 +121,7 @@ def update():
 
         response = oxc.get_client_token()
         protection_access_token = response.access_token
-        status = oxc.update_site_registration(client_name=str(client_name), authorization_redirect_uri=str(redirect_uri), post_logout_uri=str(post_logout_uri),
-                                              connection_type_value=str(conn_type_value), connection_type=str(conn_type), protection_access_token=str(protection_access_token))
+        status = oxc.update_site_registration(client_name, redirect_uri, post_logout_uri, conn_type_value, conn_type, protection_access_token)
     else:
         oxc.config.set("oxd", "connection_type", conn_type)
         oxc.config.set("oxd", "connection_type_value", conn_type_value)
@@ -134,9 +131,9 @@ def update():
 
     values = oxc.get_config_value()
     if status == "ok":
-        msg = 'Client updated successfully'
+        msg = 'Client Updated Successfully'
     else:
-        msg = 'update failure'
+        msg = 'Update Failure'
 
     # delete object
     del oxc
@@ -152,10 +149,11 @@ def delete():
     oxc.delete_config()
     values = oxc.get_config_value()
     if values["op_host"]:
-        msg = 'delete failure'
+        msg = 'Delete Failure'
     else:
-        msg = 'Client deleted successfully'
+        msg = 'Client Deleted Successfully'
 
+    session.clear()
     # delete object
     del oxc
 
