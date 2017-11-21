@@ -5,7 +5,7 @@
         <!--bootstrap cdn -->
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/F84A6653-7057-0E43-8ABD-EF1CD4E1AF1D/main.js" charset="UTF-8"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
         <title>Gluu OpenID Setting</title>
         <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/index.css')}}">
@@ -86,7 +86,7 @@
                     container.setAttribute('value' , '{{clientId}}');
                     container.setAttribute('required','required');
                     container.setAttribute('placeholder' , 'Enter ClientId');
-                    if( msg == 'Client Set up completed successfully' || msg == 'Client already registered' || msg == 'Client updated successfully')
+                    if( msg == 'Client Set Up Completed Successfully' || msg == 'Client Already Registered' || msg == 'Client Updated Successfully')
                         container.setAttribute('disabled' , 'disabled');
 
                     var div = document.createElement("div");
@@ -108,7 +108,7 @@
                     container.setAttribute('name' , 'ClientSecret');
                     container.setAttribute('id' , 'client_secret');
                     container.setAttribute('value' , '{{ clientSecret }}');
-                    if( msg == 'Client Set up completed successfully' || msg == 'Client already registered' || msg == 'Client updated successfully')
+                    if( msg == 'Client Set Up Completed Successfully' || msg == 'Client Already Registered' || msg == 'Client Updated Successfully')
                         container.setAttribute('disabled' , 'disabled');
                     container.setAttribute('placeholder' , 'Enter ClientSecret');
 
