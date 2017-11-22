@@ -86,7 +86,7 @@
                     container.setAttribute('value' , '{{clientId}}');
                     container.setAttribute('required','required');
                     container.setAttribute('placeholder' , 'Enter ClientId');
-                    if( msg == 'Client Set Up Completed Successfully' || msg == 'Client Already Registered' || msg == 'Client Updated Successfully')
+                    if( msg == 'Client Set Up Completed Successfully' || msg == 'Client Registered' || msg == 'Client Updated Successfully')
                         container.setAttribute('disabled' , 'disabled');
 
                     var div = document.createElement("div");
@@ -108,7 +108,7 @@
                     container.setAttribute('name' , 'ClientSecret');
                     container.setAttribute('id' , 'client_secret');
                     container.setAttribute('value' , '{{ clientSecret }}');
-                    if( msg == 'Client Set Up Completed Successfully' || msg == 'Client Already Registered' || msg == 'Client Updated Successfully')
+                    if( msg == 'Client Set Up Completed Successfully' || msg == 'Client Registered' || msg == 'Client Updated Successfully')
                         container.setAttribute('disabled' , 'disabled');
                     container.setAttribute('placeholder' , 'Enter ClientSecret');
 

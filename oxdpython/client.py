@@ -61,7 +61,6 @@ class Client:
             self.conn_type_value += "/"
 
         self.authorization_redirect_uri = self.config.get("client", "authorization_redirect_uri")
-
         self.oxd_id = self.config.get("oxd", "id")
         self.client_name = self.config.get("client", "client_name")
         self.client_id = self.config.get("client", "client_id")
@@ -91,6 +90,7 @@ class Client:
                                 "scope",
                                 "ui_locales",
                                 "claims_locales",
+                                "claims_redirect_uri"
                                ]
 
     @staticmethod
@@ -111,17 +111,17 @@ class Client:
 
     def get_config_value(self):
         """A private method which returns the client attributes"""
-        return {"op_host":self.config.get("client", "op_host"),
-                "client_name":self.config.get("client", "client_name"),
-                "authorization_redirect_url":self.config.get("client", "authorization_redirect_uri"),
-                "post_logout_redirect_uri":self.config.get("client", "post_logout_redirect_uri"),
-                "connection_type_value":self.config.get("oxd", "connection_type_value"),
-                "id":self.config.get("oxd", "id"),
-                "client_id":self.config.get("client", "client_id"),
-                "client_secret":self.config.get("client", "client_secret"),
-                "connection_type":self.config.get("oxd", "connection_type"),
-                "dynamic_registration":self.config.get("client", "dynamic_registration")
-               }
+        return {"op_host": self.config.get("client", "op_host"),
+                "client_name": self.config.get("client", "client_name"),
+                "authorization_redirect_url": self.config.get("client", "authorization_redirect_uri"),
+                "post_logout_redirect_uri": self.config.get("client", "post_logout_redirect_uri"),
+                "connection_type_value": self.config.get("oxd", "connection_type_value"),
+                "id": self.config.get("oxd", "id"),
+                "client_id": self.config.get("client", "client_id"),
+                "client_secret": self.config.get("client", "client_secret"),
+                "connection_type": self.config.get("oxd", "connection_type"),
+                "dynamic_registration": self.config.get("client", "dynamic_registration")
+                }
 
     def set_config_value(self, values):
         """A private method which sets the client attributes"""
@@ -145,6 +145,13 @@ class Client:
 
         return
 
+    def delete_config(self):
+        """A private method which deletes client attributes from the config file"""
+        self.config.set("oxd", "id", '')
+        self.config.set("client", "dynamic_registration", '')
+        self.set_config_value(['', '', '', '', '', ''])
+        self.config.set("client", "client_id", '')
+        self.config.set("client", "client_secret", '')
 
     def openid_type(self, op_host):
         """Fucntion to know static or dynamic openID Provider.
@@ -235,7 +242,7 @@ class Client:
         return self.oxd_id
 
 
-    def setup_client(self, op_host, authorization_redirect_uri, conn_type, conn_type_value, client_name=None, post_logout_uri=None, client_id=None, client_secret=None, claims_redirect_uri=["https://client.example.com:8080/GetUMAClaims"]):
+    def setup_client(self):
         """Function to setup the client and generate a Client ID, Client Secret for the site
 
         Returns:
@@ -259,21 +266,16 @@ class Client:
         Raises:
             RuntimeError: If the site client setup fails.
         """
-        values = [op_host, client_name, authorization_redirect_uri, post_logout_uri, conn_type_value, conn_type]
 
-        self.set_config_value(values)
-        self.config.set("client", "client_id", client_id)
-        self.config.set("client", "client_secret", client_secret)
-
-        if conn_type == "web" and conn_type_value[-1:] != "/":
-            conn_type_value += "/"
+        if self.conn_type == "web" and self.conn_type_value[-1:] != "/":
+            self.conn_type_value += "/"
 
         command = {"command": "setup_client"}
-        rest_url = conn_type_value + "setup-client"
+        rest_url = self.conn_type_value + "setup-client"
 
         # add required params for the command
-        params = {"authorization_redirect_uri": authorization_redirect_uri,
-                  "op_host": op_host,
+        params = {"authorization_redirect_uri": self.authorization_redirect_uri,
+                  "op_host": self.op_host,
                   "oxd_rp_programming_language": 'python',
                   }
 
@@ -288,27 +290,13 @@ class Client:
                 value = self.config.get("client", param).split(",")
                 params[param] = value
 
-        if client_name and isinstance(client_name, str):
-            params["client_name"] = client_name
-
-        if post_logout_uri and isinstance(post_logout_uri, str):
-            params["post_logout_redirect_uri"] = post_logout_uri
-
-        if client_id and isinstance(client_id, str):
-            params["client_id"] = client_id
-
-        if client_secret and isinstance(client_secret, list):
-            params["client_secret"] = client_secret
-
-        if claims_redirect_uri and isinstance(claims_redirect_uri, list):
-            params["claims_redirect_uri"] = claims_redirect_uri
 
         command["params"] = params
         LOGGER.debug("Sending command `setup_client` with params %s",
                      params)
 
-        if conn_type == "local":
-            msgr = Messenger(int(conn_type_value))
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
             response = msgr.send(command)
         else:
             msgr = Messenger()
@@ -330,7 +318,37 @@ class Client:
         return self.__clear_data(response)
 
 
-    def update_site_registration(self, client_name=None, authorization_redirect_uri=None, post_logout_uri=None, connection_type_value=None, connection_type=None, protection_access_token=None, contacts=None):
+    def get_client_token(self):
+        """A method which generates the protection access token"""
+        command = {"command": "get_client_token"}
+        rest_url = self.conn_type_value + "get-client-token"
+
+        #add required params for the command
+        params = {
+            "client_id":  self.client_id,
+            "client_secret":  self.client_secret,
+            "op_host": self.op_host
+        }
+
+        command["params"] = params
+        LOGGER.debug("Sending command `get_client_token` with params %s",
+                     params)
+
+        if self.conn_type == "local":
+            msgr = Messenger(int(self.conn_type_value))
+            response = msgr.send(command)
+        else:
+            msgr = Messenger()
+            response = msgr.sendtohttp(params, rest_url)
+
+        LOGGER.debug("Recieved reponse: %s", response)
+
+        return_data = self.__clear_data(response)
+
+        return return_data
+
+
+    def update_site_registration(self, protection_access_token=None):
         """Fucntion to update the site's information with OpenID Provider.
         This should be called after changing the values in the cfg file.
         Returns:
@@ -352,17 +370,6 @@ class Client:
                 value = self.config.get("client", param).split(",")
                 params[param] = value
 
-        if contacts and isinstance(contacts, list):
-            params["contacts"] = contacts
-
-        if authorization_redirect_uri == None:
-            params["authorization_redirect_uri"] = self.config.get("client", "authorization_redirect_uri")
-        else:
-            params["authorization_redirect_uri"] = authorization_redirect_uri
-
-        if post_logout_uri and isinstance(post_logout_uri, str):
-            params["post_logout_redirect_uri"] = post_logout_uri
-
         if protection_access_token and isinstance(protection_access_token, str):
             params["protection_access_token"] = protection_access_token
 
@@ -378,21 +385,12 @@ class Client:
             response = msgr.sendtohttp(params, rest_url)
 
         LOGGER.debug("Recieved reponse: %s", response)
-        if response.status == 'ok':
-            values = [self.config.get("client", "op_host"), client_name, authorization_redirect_uri, post_logout_uri, connection_type_value, connection_type]
-            self.set_config_value(values)
 
         return response.status
 
-    def delete_config(self):
-        """A private method which deletes client attributes from the config file"""
-        self.config.set("oxd", "id", '')
-        self.config.set("client", "dynamic_registration", '')
-        self.set_config_value(['', '', '', '', '', ''])
-        self.config.set("client", "client_id", '')
-        self.config.set("client", "client_secret", '')
 
-    def get_authorization_url(self, custom_params=None, protection_access_token=None, scope=None, acr_values=None, prompt=None):
+
+    def get_authorization_url(self, scope=None, acr_values=None, prompt=None, custom_params=None, protection_access_token=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
@@ -509,7 +507,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def get_access_token_by_refresh_token(self, refresh_token, protection_access_token=None, scope=None):
+    def get_access_token_by_refresh_token(self, refresh_token, scope=None, protection_access_token=None):
         """Function to get access code for getting the user details from the
                         OP by using the refresh_token.
                         It is called after getting the refresh_token by using the code and state.
@@ -567,34 +565,6 @@ class Client:
 
         return self.__clear_data(response)
 
-    def get_client_token(self):
-        """A method which generates the protection access token"""
-        command = {"command": "get_client_token"}
-        rest_url = self.conn_type_value + "get-client-token"
-
-        #add required params for the command
-        params = {
-            "client_id":  self.client_id,
-            "client_secret":  self.client_secret,
-            "op_host": self.op_host
-        }
-
-        command["params"] = params
-        LOGGER.debug("Sending command `get_client_token` with params %s",
-                     params)
-
-        if self.conn_type == "local":
-            msgr = Messenger(int(self.conn_type_value))
-            response = msgr.send(command)
-        else:
-            msgr = Messenger()
-            response = msgr.sendtohttp(params, rest_url)
-
-        LOGGER.debug("Recieved reponse: %s", response)
-
-        return_data = self.__clear_data(response)
-
-        return return_data
 
     def get_user_info(self, access_token, protection_access_token=None):
         """Function to get the information about the user using the access code
@@ -643,7 +613,7 @@ class Client:
         return self.__clear_data(response).claims
 
 
-    def get_logout_uri(self, protection_access_token=None, id_token_hint=None, post_logout_redirect_uri=None, state=None, session_state=None):
+    def get_logout_uri(self, id_token_hint=None, post_logout_redirect_uri=None, state=None, session_state=None, protection_access_token=None):
         """Function to logout the user.
         Args:
             id_token_hint (string, optional): oxd server will use last used
@@ -797,7 +767,7 @@ class Client:
 
         return self.__clear_data(response)
 
-    def uma_rp_get_rpt(self, ticket, scope=None, protection_access_token=None, state=None, claim_token=None, claim_token_format=None, pct=None, rpt=None):
+    def uma_rp_get_rpt(self, ticket, claim_token=None, claim_token_format=None, pct=None, rpt=None, scope=None, state=None, protection_access_token=None):
         """Function to be used in a UMA Resource Server to get rpt.
 
                 Args:
