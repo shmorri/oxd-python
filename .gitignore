@@ -58,3 +58,6 @@ target/
 
 # generated test config files
 tests/*.cfg
+
+# PyCharm Files
+.idea
