@@ -330,6 +330,14 @@ class Client:
             "op_host": self.op_host
         }
 
+        self.scope = self.config.get("client", "scope").split(",")
+        if self.scope and isinstance(self.scope, list):
+            params["scope"] = self.scope
+
+        self.op_discovery_path = self.config.get("client", "op_discovery_path")
+        if self.op_discovery_path and isinstance(self.op_discovery_path, str):
+            params["op_discovery_path"] = self.op_discovery_path
+
         command["params"] = params
         LOGGER.debug("Sending command `get_client_token` with params %s",
                      params)
