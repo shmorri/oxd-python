@@ -20,10 +20,10 @@ class ClientTest(unittest.TestCase):
         #assert_is_instance(c.msgr, Messenger)
         assert_equal(c.authorization_redirect_uri,"https://client.example.com:8080/userinfo")
 
-    @unittest.skip("WIP")
+
     def test_register_site_command(self):
         # preset register client command response
-        config = os.path.join(this_dir, 'data', 'initial_web.cfg')
+        config = os.path.join(this_dir, 'data', 'register_site_test.cfg')
         oxc = Client(config)
         #oxc = Client(config_location)
         oxc.oxd_id = None
@@ -34,15 +34,6 @@ class ClientTest(unittest.TestCase):
         oxc.register_site(protection_access_token)
         assert_is_not_none(oxc.oxd_id)
 
-    @unittest.skip("WIP")
-    def test_register_raises_runtime_error_for_oxd_error_response(self):
-        config = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
-        c = Client(config)
-        response = c.get_client_token()
-        protection_access_token = response.access_token
-        assert_is_not_none(protection_access_token)
-        with assert_raises(RuntimeError):
-            c.register_site(protection_access_token)
 
     def test_setup_client_command(self):
         # preset setup client command response
@@ -182,7 +173,7 @@ class ClientTest(unittest.TestCase):
 
         command = {"command": "get_tokens_by_code"}
 
-        params = {"oxd_id": c.oxd_id,
+        params = {"oxd_id": oxc.oxd_id,
                   "code": code,
                   "state": state,
                   }
@@ -192,7 +183,7 @@ class ClientTest(unittest.TestCase):
         if(oxc.config.get("client", "protect_commands_with_access_token") == 'false'):
             mock_send.return_value.status = "ok"
             mock_send.return_value.data = "mock-token"
-            token = c.get_tokens_by_code(code=code, state=state)
+            token = oxc.get_tokens_by_code(code=code, state=state)
             mock_send.assert_called_with(command)
             assert_equal(token, "mock-token")
 
@@ -200,7 +191,7 @@ class ClientTest(unittest.TestCase):
             mock_send.return_value.status = "error"
             mock_send.return_value.data.error = "blank_protection_access_token"
             with assert_raises(RuntimeError):
-                c.get_tokens_by_code("code", "state")
+                oxc.get_tokens_by_code("code", "state")
 
 
 
@@ -247,7 +238,7 @@ class ClientTest(unittest.TestCase):
         token = "tokken"
         command = {"command": "get_user_info",
                    "params": {
-                       "oxd_id": c.oxd_id,
+                       "oxd_id": oxc.oxd_id,
                        "access_token": token
                        }}
 
