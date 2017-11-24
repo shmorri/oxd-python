@@ -25,18 +25,26 @@ if oxd_path not in sys.path:
 @app_login.route('/login')
 def login():
     oxc = oxdpython.Client(config_location)
-    if oxc.config.get("client", "dynamic_registration") == 'true':
+
+    dynamic_registration = oxc.config.get("client", "dynamic_registration")
+    connection_type = oxc.config.get("oxd", "connection_type")
+
+    if dynamic_registration == 'true' and connection_type == 'web':
         response = oxc.get_client_token()
-        protection_access_token = response.access_token
+        protection_access_token = str(response.access_token)
     else:
-        protection_access_token = ''
+        protection_access_token = None
 
     custom_params = {
             "param1":"value1",
             "param2":"value2"
         }
 
-    auth_url = oxc.get_authorization_url(custom_params=custom_params, protection_access_token=str(protection_access_token))
+    if connection_type == 'web':
+        auth_url = oxc.get_authorization_url(custom_params=custom_params,
+                                             protection_access_token=protection_access_token)
+    else:
+        auth_url = oxc.get_authorization_url(custom_params=custom_params)
 
     # delete object
     del oxc
@@ -50,47 +58,67 @@ def userinfo():
     code = request.args.get('code')
     state = request.args.get('state')
 
-    if oxc.config.get("client", "dynamic_registration") == 'true':
+    dynamic_registration = oxc.config.get("client", "dynamic_registration")
+    connection_type = oxc.config.get("oxd", "connection_type")
+    if dynamic_registration == 'true' and connection_type == 'web':
         response = oxc.get_client_token()
-        protection_access_token = response.access_token
+        protection_access_token = str(response.access_token)
     else:
-        protection_access_token = ''
+        protection_access_token = None
 
-    tokens = oxc.get_tokens_by_code(code=code, state=state, protection_access_token=str(protection_access_token))
+    if connection_type == 'web':
+        tokens = oxc.get_tokens_by_code(code, state, protection_access_token)
 
-    if oxc.config.get("client", "dynamic_registration") == 'true':
-        newtokens = oxc.get_access_token_by_refresh_token(refresh_token=tokens.refresh_token, protection_access_token=str(protection_access_token))
-        access_token = newtokens.access_token
+        if oxc.config.get("client", "dynamic_registration") == 'true':
+            newtokens = oxc.get_access_token_by_refresh_token(refresh_token=tokens.refresh_token, protection_access_token=protection_access_token)
+            access_token = newtokens.access_token
+        else:
+            access_token = tokens.access_token
+
+        user = oxc.get_user_info(access_token, protection_access_token)
+
+        session['username'] = user.name[0]
+        session['usermail'] = user.email[0]
+
     else:
-        access_token = tokens.access_token
+        tokens = oxc.get_tokens_by_code(code, state)
 
-    user = oxc.get_user_info(access_token=access_token, protection_access_token=str(protection_access_token))
+        if oxc.config.get("client", "dynamic_registration") == 'true':
+            newtokens = oxc.get_access_token_by_refresh_token(refresh_token=tokens.refresh_token)
+            access_token = newtokens.access_token
+        else:
+            access_token = tokens.access_token
 
-    session['username'] = user.name[0]
-    session['usermail'] = user.email[0]
+        user = oxc.get_user_info(access_token)
 
-    userName = session['username']
-    userEmail = session['usermail']
+        session['username'] = user.name[0]
+        session['usermail'] = user.email[0]
 
     # delete object
     del oxc
 
-    return render_template('userinfo.html', userName=userName, userEmail=userEmail)
+    return render_template('userinfo.html', userName=session['username'], userEmail=session['usermail'])
 
 
 @app_login.route('/logout')
 def logout():
     oxc = oxdpython.Client(config_location)
-    if oxc.config.get("client", "dynamic_registration") == 'true':
-        response = oxc.get_client_token()
-        protection_access_token = response.access_token
-    else:
-        protection_access_token = ''
 
-    logout_url = oxc.get_logout_uri(protection_access_token=str(protection_access_token))
+    dynamic_registration = oxc.config.get("client", "dynamic_registration")
+    connection_type = oxc.config.get("oxd", "connection_type")
+    if dynamic_registration == 'true' and connection_type == 'web':
+        response = oxc.get_client_token()
+        protection_access_token = str(response.access_token)
+    else:
+        protection_access_token = None
+
+    if connection_type == 'web':
+        logout_url = oxc.get_logout_uri(protection_access_token=protection_access_token)
+    else:
+        logout_url = oxc.get_logout_uri()
+
     session.clear()
 
     # delete object
     del oxc
-
     return redirect(logout_url)
