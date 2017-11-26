@@ -1,8 +1,6 @@
 import os
+import pytest
 
-from nose.tools import assert_equal, assert_is_instance, assert_true,\
-    assert_raises, assert_is_none, assert_is_not_none, assert_in, \
-    assert_not_equal
 from mock import patch
 
 from oxdpython import Client
@@ -15,59 +13,58 @@ uma_config = os.path.join(this_dir, 'data', 'umaclient.cfg')
 
 def test_initializes_with_config():
     c = Client(config_location)
-    assert_equal(c.config.get('oxd', 'port'), '8099')
-    assert_is_instance(c.msgr, Messenger)
-    assert_equal(c.authorization_redirect_uri,
-                 "https://client.example.com/callback")
+    assert c.config.get('oxd', 'port') == '8099'
+    assert isinstance(c.msgr, Messenger)
+    assert c.authorization_redirect_uri == "https://client.example.com/callback"
 
 
 def test_register_site_command():
     # preset register client command response
     c = Client(config_location)
     c.oxd_id = None
-    assert_is_none(c.oxd_id)
+    assert c.oxd_id is None
     c.register_site()
-    assert_is_not_none(c.oxd_id)
+    assert c.oxd_id is not None
 
 
 def test_register_raises_runtime_error_for_oxd_error_response():
     config = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
     c = Client(config)
-    with assert_raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         c.register_site()
 
 
 def test_get_authorization_url():
     c = Client(config_location)
     auth_url = c.get_authorization_url()
-    assert_in('callback', auth_url)
+    assert 'callback' in auth_url
 
 
 def test_get_authorization_url_works_wihtout_explicit_site_registration():
     c = Client(config_location)
     c.oxd_id = None  # assume the client isn't registered
     auth_url = c.get_authorization_url()
-    assert_in('callback', auth_url)
+    assert 'callback' in auth_url
 
 
 def test_get_auth_url_accepts_optional_params():
     c = Client(config_location)
     # acr values
     auth_url = c.get_authorization_url(["basic", "gplus"])
-    assert_in('basic', auth_url)
-    assert_in('gplus', auth_url)
+    assert 'basic' in auth_url
+    assert 'gplus' in auth_url
 
     # prompt
     auth_url = c.get_authorization_url(["basic"], "login")
-    assert_in('basic', auth_url)
-    assert_in('prompt', auth_url)
+    assert 'basic' in auth_url
+    assert 'prompt' in auth_url
 
     # scope
     auth_url = c.get_authorization_url(["basic"], None,
                                        ["openid", "profile", "email"])
-    assert_in('openid', auth_url)
-    assert_in('profile', auth_url)
-    assert_in('email', auth_url)
+    assert 'openid' in auth_url
+    assert 'profile' in auth_url
+    assert 'email' in auth_url
 
 
 @patch.object(Messenger, 'send')
@@ -85,7 +82,7 @@ def test_get_tokens_by_code(mock_send):
                    }}
     token = c.get_tokens_by_code(code, state)
     mock_send.assert_called_with(command)
-    assert_equal(token, "mock-token")
+    assert token == "mock-token"
 
 
 @patch.object(Messenger, 'send')
@@ -95,7 +92,7 @@ def test_get_tokens_raises_error_if_response_has_error(mock_send):
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "No Tokens in Mock"
 
-    with assert_raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         c.get_tokens_by_code("code", "state")
 
 
@@ -112,13 +109,13 @@ def test_get_user_info(mock_send):
                    }}
     claims = c.get_user_info(token)
     mock_send.assert_called_with(command)
-    assert_equal(claims, {"name": "mocky"})
+    assert claims == {"name": "mocky"}
 
 
 def test_get_user_info_raises_erro_on_invalid_args():
     c = Client(config_location)
     # Empty code should raise error
-    with assert_raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         c.get_user_info("")
 
 
@@ -129,7 +126,7 @@ def test_get_user_info_raises_error_on_oxd_error(mock_send):
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "No Claims for mock"
 
-    with assert_raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         c.get_user_info("some_token")
 
 
@@ -151,7 +148,7 @@ def test_logout(mock_send):
     uri = c.get_logout_uri("some_id")
     command["params"]["id_token_hint"] = "some_id"
     mock_send.assert_called_with(command)
-    assert_equal(uri, "https://example.com/end_session")
+    assert uri == "https://example.com/end_session"
 
     # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri
     uri = c.get_logout_uri("some_id", "https://some.site/logout")
@@ -177,7 +174,7 @@ def test_logout_raises_error_when_oxd_return_error(mock_send):
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "Logout Mock Error"
 
-    with assert_raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         c.get_logout_uri()
 
 
@@ -186,21 +183,21 @@ def test_update_site_registration():
     c.config.set('client', 'post_logout_redirect_uri',
                  'https://client.example.com/')
     status = c.update_site_registration()
-    assert_true(status)
+    assert status
 
 
 def test_uma_rp_get_rpt():
     c = Client(uma_config)
     c.register_site()
     rpt = c.uma_rp_get_rpt()
-    assert_is_instance(rpt, str)
+    assert isinstance(rpt, str)
 
 
 def test_uma_rp_get_rpt_force_new():
     c = Client(uma_config)
     c.register_site()
     rpt2 = c.uma_rp_get_rpt(True)
-    assert_is_instance(rpt2, str)
+    assert isinstance(rpt2, str)
 
 
 def test_uma_rp_authorize_rpt():
@@ -208,7 +205,7 @@ def test_uma_rp_authorize_rpt():
     rpt = 'dummy_rpt'
     ticket = 'dummy_ticket'
     status = c.uma_rp_authorize_rpt(rpt, ticket)
-    assert_true(status)
+    assert status
 
 
 def test_uma_rp_authorize_rpt_throws_errors():
@@ -216,7 +213,7 @@ def test_uma_rp_authorize_rpt_throws_errors():
     rpt = 'invalid_rpt'
     ticket = 'invalid_ticket'
     response = c.uma_rp_authorize_rpt(rpt, ticket)
-    assert_equal(response.status, 'error')
+    assert response.status == 'error'
 
 
 def test_uma_rp_get_gat():
@@ -224,7 +221,7 @@ def test_uma_rp_get_gat():
     scopes = ["http://photoz.example.com/dev/actions/view",
               "http://photoz.example.com/dev/actions/add"]
     gat = c.uma_rp_get_gat(scopes)
-    assert_is_instance(gat, str)
+    assert isinstance(gat, str)
 
 
 def test_uma_rs_protect():
@@ -236,4 +233,4 @@ def test_uma_rs_protect():
                       }]
                   }]
 
-    assert_true(c.uma_rs_protect(resources))
+    assert c.uma_rs_protect(resources)
