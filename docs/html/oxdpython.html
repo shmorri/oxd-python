@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="oxD Python 3.1.1-rc documentation" href="#"/> 
+    <link rel="top" title="oxD Python 3.1.1-rc documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -48,7 +48,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> oxD Python
+            <a href="index.html" class="icon icon-home"> oxD Python
           
 
           
@@ -81,7 +81,14 @@
             
                 <!-- Local TOC -->
                 <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">oxD Python Library Documentation</a></li>
+<li><a class="reference internal" href="#">oxD Python Library Documentation</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-oxdpython.client">oxdpython.client module</a></li>
+<li><a class="reference internal" href="#module-oxdpython.configurer">oxdpython.configurer module</a></li>
+<li><a class="reference internal" href="#module-oxdpython.messenger">oxdpython.messenger module</a></li>
+<li><a class="reference internal" href="#module-oxdpython">Module contents</a></li>
+</ul>
+</li>
 </ul>
 </div>
             
@@ -95,7 +102,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="#">oxD Python</a>
+        <a href="index.html">oxD Python</a>
       </nav>
 
 
@@ -110,7 +117,7 @@
 
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="#">Docs</a> &raquo;</li>
+    <li><a href="index.html">Docs</a> &raquo;</li>
       
     <li>oxD Python Library Documentation</li>
       <li class="wy-breadcrumbs-aside">
@@ -127,21 +134,15 @@
   <div class="section" id="oxd-python-library-documentation">
 <h1>oxD Python Library Documentation<a class="headerlink" href="#oxd-python-library-documentation" title="Permalink to this headline">¶</a></h1>
 <p>Welcome to the oxD Python API reference page. If you are looking for docs on how to use the library <a class="reference external" href="https://gluu.org/docs/oxd/libraries/languages/python/">go here</a>.</p>
-<span class="target" id="module-oxdpython.client"></span><dl class="class">
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-oxdpython.client">
+<span id="oxdpython-client-module"></span><h2>oxdpython.client module<a class="headerlink" href="#module-oxdpython.client" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="oxdpython.client.Client">
 <em class="property">class </em><code class="descclassname">oxdpython.client.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>config_location</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client is the main class that carries out the task of talking with the
-oxd server. The oxd commands are provided as class methods that are called
-to send the command to the oxd server.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_location</strong> (<em>string</em>) &#8211; location of the config file</td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
+<dd><dl class="method">
 <dt id="oxdpython.client.Client.delete_config">
 <code class="descname">delete_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.delete_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.delete_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>A private method which deletes client attributes from the config
@@ -266,8 +267,12 @@ for oxd-https-extension</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The URI to which the user must be directed in order to perform
-the logout</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>The URI to which the user must be directed in order to</dt>
+<dd><p class="first last">perform the logout</p>
+</dd>
+</dl>
+</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
@@ -451,27 +456,27 @@ gathering url.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>claims_redirect_uri</strong> (<em>string</em>) &#8211; the redirect URL for the claims</li>
-<li><strong>ticket</strong> (<em>string</em>) &#8211; ticket value returned by <cite>uma_rs_check_access()</cite></li>
+<li><strong>ticket</strong> (<em>string</em>) &#8211; ticket value returned by the uma_rs_check_access()
+method</li>
 <li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
 for oxd-https-extension</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The access information received in the format
-below:</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The access information received in the format below:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>{
-    &quot;status&quot;: &quot;ok&quot;,
-    &quot;data&quot;: {
-        &quot;url&quot;:&quot;https://as.com/restv1/uma/gather_claims?
-            client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB
-            &amp;ticket=4678a107-e124-416c-af79-7807f3c31457
-            &amp;claims_redirect_uri=https://client.example.com/cb
-            &amp;state=af0ifjsldkj&quot;,
-        &quot;state&quot;:&quot;af0ifjsldkj&quot;
-    }
-}
 </pre></div>
 </div>
+<blockquote>
+<div><p>&#8220;status&#8221;:&#8221;ok&#8221;,
+&#8220;data&#8221;:{</p>
+<blockquote>
+<div><p>&#8220;url&#8221;:&#8221;<a class="reference external" href="https://as.com/restv1/uma/gather_claims?client_id=&#64;!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!AB77!1A2B&amp;ticket=4678a107-e124-416c-af79-7807f3c31457&amp;claims_redirect_uri=https://client.example.com/cb&amp;state=af0ifjsldkj">https://as.com/restv1/uma/gather_claims?client_id=&#64;!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!AB77!1A2B&amp;ticket=4678a107-e124-416c-af79-7807f3c31457&amp;claims_redirect_uri=https://client.example.com/cb&amp;state=af0ifjsldkj</a>&#8221;,
+&#8220;state&#8221;:&#8221;af0ifjsldkj&#8221;</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
 </p>
 </td>
 </tr>
@@ -504,8 +509,9 @@ for oxd-https-extension</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The access information received in the format below.</p>
-<p>Success Response:</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>The access information recieved in the format below.</dt>
+<dd><p class="first">Success Response:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span>
     <span class="s2">&quot;data&quot;</span><span class="p">:{</span>
@@ -554,7 +560,7 @@ for oxd-https-extension</li>
 </pre></div>
 </div>
 <p>Internal oxd server error:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="last highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
     <span class="s2">&quot;data&quot;</span><span class="p">:{</span>
         <span class="s2">&quot;error&quot;</span><span class="p">:</span><span class="s2">&quot;internal_error&quot;</span><span class="p">,</span>
@@ -563,6 +569,8 @@ for oxd-https-extension</li>
 <span class="p">}</span>
 </pre></div>
 </div>
+</dd>
+</dl>
 </p>
 </td>
 </tr>
@@ -585,8 +593,7 @@ for oxd-https-extension</li>
 <li><strong>rpt</strong> (<em>string</em>) &#8211; RPT or blank value if absent (not send by RP)</li>
 <li><strong>path</strong> (<em>string</em>) &#8211; Path of resource (e.g. for <a class="reference external" href="http://rs.com/phones">http://rs.com/phones</a>,
 /phones should be passed)</li>
-<li><strong>http_method</strong> (<em>string</em>) &#8211; Http method of RP request (GET, POST, PUT,
-DELETE)</li>
+<li><strong>http_method</strong> (<em>string</em>) &#8211; DELETE)</li>
 <li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
 for oxd-https-extension</li>
 </ul>
@@ -653,17 +660,76 @@ If the access is granted:</p>
 <dt id="oxdpython.client.Client.update_site_registration">
 <code class="descname">update_site_registration</code><span class="sig-paren">(</span><em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.update_site_registration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.update_site_registration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fucntion to update the site&#8217;s information with OpenID Provider.
-This should be called after changing the values in the cfg file.</p>
+This should be called after changing the values in the cfg file.
+:returns: The status for update. True for success and False for failure
+:rtype: bool</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-oxdpython.configurer">
+<span id="oxdpython-configurer-module"></span><h2>oxdpython.configurer module<a class="headerlink" href="#module-oxdpython.configurer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="oxdpython.configurer.Configurer">
+<em class="property">class </em><code class="descclassname">oxdpython.configurer.</code><code class="descname">Configurer</code><span class="sig-paren">(</span><em>cfg_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/configurer.html#Configurer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.configurer.Configurer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The class which holds all the information about the client and the OP
+metadata</p>
+<dl class="method">
+<dt id="oxdpython.configurer.Configurer.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>section</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/configurer.html#Configurer.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.configurer.Configurer.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get function reads the config value for the requested section and
+key and returns it</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
-for oxd-https-extension</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>section</strong> (<em>string</em>) &#8211; either - oxd, client</li>
+<li><strong>key</strong> (<em>string</em>) &#8211; </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The status for update. True for success and False for failure</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>value (string) - the function returns the value of the key</dt>
+<dd><p class="first last">in the appropriate format if found or returns
+None if such a section or key couldnot be found</p>
+</dd>
+</dl>
+</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>config = Configurer(location)
+oxd_port = config.get(&#8216;oxd&#8217;, &#8216;port&#8217;)  # returns the port of the oxd</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.configurer.Configurer.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>section</em>, <em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/configurer.html#Configurer.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.configurer.Configurer.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>set function sets a particular value for the specified key in the
+specified section and writes it to the config file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>section</strong> (<em>string</em>) &#8211; saved. Only accepted values are - oxd, client</li>
+<li><strong>key</strong> (<em>string</em>) &#8211; </li>
+<li><strong>value</strong> (<em>string</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>success (bool) - a boolean indication of whether the value was</dt>
+<dd><p class="first last">stored successfully in the file</p>
+</dd>
+</dl>
+</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -671,6 +737,65 @@ for oxd-https-extension</td>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-oxdpython.messenger">
+<span id="oxdpython-messenger-module"></span><h2>oxdpython.messenger module<a class="headerlink" href="#module-oxdpython.messenger" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="oxdpython.messenger.Messenger">
+<em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">Messenger</code><span class="sig-paren">(</span><em>port=8099</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class which takes care of the socket communication with oxd Server.
+The object is initialized with the port number</p>
+<dl class="method">
+<dt id="oxdpython.messenger.Messenger.encodeHyphen">
+<code class="descname">encodeHyphen</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.encodeHyphen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.encodeHyphen" title="Permalink to this definition">¶</a></dt>
+<dd><p>TO-DO: This is just for work around purpose. Original fix needs to be worked on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.messenger.Messenger.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send function sends the command to the oxd server and recieves the
+response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>dict</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response (dict) - The JSON response from the oxd Server as a dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.messenger.Messenger.sendtohttp">
+<code class="descname">sendtohttp</code><span class="sig-paren">(</span><em>params</em>, <em>rest_url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.sendtohttp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.sendtohttp" title="Permalink to this definition">¶</a></dt>
+<dd><p>send function sends the command to the oxd server and recieves the
+response for web connection type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>params</strong> (<em>dict</em>) &#8211; </li>
+<li><strong>- Url of the rest API</strong> (<em>rest_url</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">response (dict) - The JSON response from the oxd Server as a dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-oxdpython">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-oxdpython" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
