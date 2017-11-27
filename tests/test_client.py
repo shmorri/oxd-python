@@ -152,17 +152,17 @@ def test_logout(mock_send):
     mock_send.assert_called_with(command)
     assert uri == "https://example.com/end_session"
 
-    # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri
+    # called with OPTIONAL id_token_hint + post_logout_redirect_uri
     c.get_logout_uri("some_id", "https://some.site/logout")
     command["params"]["post_logout_redirect_uri"] = "https://some.site/logout"
     mock_send.assert_called_with(command)
 
-    # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri + state
+    # called with OPTIONAL id_token_hint + post_logout_redirect_uri + state
     c.get_logout_uri("some_id", "https://some.site/logout", "some-s")
     command["params"]["state"] = "some-s"
     mock_send.assert_called_with(command)
 
-    # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri
+    # called with OPTIONAL id_token_hint + post_logout_redirect_uri
     c.get_logout_uri("some_id", "https://some.site/logout", "some-s",
                            "some-ss")
     command["params"]["session_state"] = "some-ss"
@@ -224,14 +224,6 @@ def test_uma_rp_authorize_rpt_throws_errors():
     ticket = 'invalid_ticket'
     response = c.uma_rp_authorize_rpt(rpt, ticket)
     assert response.status == 'error'
-
-
-def test_uma_rp_get_gat():
-    c = Client(uma_config)
-    scopes = ["http://photoz.example.com/dev/actions/view",
-              "http://photoz.example.com/dev/actions/add"]
-    gat = c.uma_rp_get_gat(scopes)
-    assert isinstance(gat, str)
 
 
 def test_uma_rs_protect():

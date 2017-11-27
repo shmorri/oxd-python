@@ -549,31 +549,3 @@ class Client:
         logger.debug("Recieved response: %s", response)
 
         return response
-
-    def uma_rp_get_gat(self, scopes):
-        """Function to be used by UMA Requesting Party to get a GAT.
-
-        GAT stands for Gluu Access Token. It is invented by Gluu and is
-        described here:
-        https://ox.gluu.org/doku.php?id=uma:oauth2_access_management
-
-        Args:
-            scopes (list): list of strings which describe the scopes
-
-        Returns:
-            string: The GAT token. If error, returns None.
-        """
-        command = {"command": "uma_rp_get_gat"}
-        params = {"oxd_id": self.oxd_id,
-                  "scopes": scopes
-                  }
-        command["params"] = params
-
-        logger.debug("Sending command `uma_rp_get_gat` with params %s", params)
-        response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
-
-        if response.status == "ok":
-            return str(response.data.rpt)
-        else:
-            return None
