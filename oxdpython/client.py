@@ -309,7 +309,8 @@ class Client:
         """Function to be used in a UMA Resource Server to protect resources.
 
         Args:
-            resources (list): list of resource to protect
+            resources (list): list of resource to protect. See example at
+                <https://gluu.org/docs/oxd/3.1.1/api/#uma-rs-protect-resources>_
 
         Returns:
             bool: The status of the request.
@@ -344,7 +345,7 @@ class Client:
                 DELETE)
 
         Returns:
-            NamedTuple: The access information recieved in the format below.
+            NamedTuple: The access information received in the format below.
             If the access is granted::
 
                 { "access": "granted" }
@@ -384,34 +385,111 @@ class Client:
         logger.debug("Sending command `uma_rs_check_access` with params %s",
                      params)
         response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
+        logger.debug("Received response: %s", response)
 
         return self.__clear_data(response)
 
-    def uma_rp_get_rpt(self, force_new=False):
+    def uma_rp_get_rpt(self, ticket, claim_token=None, claim_token_format=None,
+                       pct=None, rpt=None, scope=None, state=None):
         """Function to be used by a UMA Requesting Party to get RPT token.
 
         Args:
-            force_new (boolean): indicates whether return new RPT, defaults to
-                false, so oxd server can cache/reuse same RPT
+            ticket (str, REQUIRED): ticket
+            claim_token (str, OPTIONAL): claim token
+            claim_token_format (str, OPTIONAL): claim token format
+            pct (str, OPTIONAL): pct
+            rpt (str, OPTIONAL): rpt
+            scope (list, OPTIONAL): scope
+            state (str, OPTIONAL): state that is returned from
+                :function:`uma_rp_get_claims_gathering_url` command
 
         Returns:
-            String: The RPT token (if recived) or None
+            NamedTuple: The response from the OP
+
+            Success Response::
+
+                {
+                    "status":"ok",
+                    "data":{
+                        "access_token":"SSJHBSUSSJHVhjsgvhsgvshgsv",
+                        "token_type":"Bearer",
+                        "pct":"c2F2ZWRjb25zZW50",
+                        "upgraded":true
+                    }
+                }
+
+            Needs Info Error Response::
+
+            {
+                "status":"error",
+                "data":{
+                    "error":"need_info",
+                    "error_description":"The authorization server needs additional information in order to determine whether the client is authorized to have these permissions.",
+                    "details": {
+                        "error":"need_info",
+                        "ticket":"ZXJyb3JfZGV0YWlscw==",
+                        "required_claims":[
+                            {
+                                "claim_token_format":[
+                                    "http://openid.net/specs/openid-connect-core-1_0.html#IDToken"
+                                ],
+                                "claim_type":"urn:oid:0.9.2342.19200300.100.1.3",
+                                "friendly_name":"email",
+                                "issuer":["https://example.com/idp"],
+                                "name":"email23423453ou453"
+                            }
+                        ],
+                    "redirect_user":"https://as.example.com/rqp_claims?id=2346576421"
+                    }
+                }
+            }
+
+            Invalid Ticket Error Response::
+
+            {
+                "status":"error",
+                "data": {
+                    "error":"invalid_ticket",
+                    "error_description":"Ticket is not valid (outdated or not present on Authorization Server)."
+                }
+            }
+
+            Internal oxd-server Error Response::
+
+            {
+                "status":"error",
+                "data": {
+                    "error":"internal_error",
+                    "error_description":"oxd server failed to handle command. Please check logs for details."
+                }
+            }
+
         """
         command = {"command": "uma_rp_get_rpt"}
-        params = {"oxd_id": self.oxd_id,
-                  "force_new": force_new
-                  }
+        params = {
+            "oxd_id": self.oxd_id,
+            "ticket": ticket
+            }
         command["params"] = params
+
+        if claim_token:
+            command["params"]["claim_token"] = claim_token
+        if claim_token_format:
+            command["params"]["claim_token_format"] = claim_token_format
+        if pct:
+            command["params"]["pct"] = pct
+        if rpt:
+            command["params"]["rpt"] = rpt
+        if scope:
+            command["params"]["scope"] = scope
+        if state:
+            command["params"]["state"] = state
 
         logger.debug("Sending command `uma_rp_get_rpt` with params %s", params)
         response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
+        logger.debug("Received response: %s", response)
 
-        if response.status == "ok":
-            return str(response.data.rpt)
-        else:
-            return None
+        return self.__clear_data(response)
 
     def uma_rp_authorize_rpt(self, rpt, ticket):
         """Function to be used by UMA Requesting Party to authorize a RPT token.

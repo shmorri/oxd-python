@@ -28,6 +28,8 @@ def test_register_site_command():
 
 
 def test_register_raises_runtime_error_for_oxd_error_response():
+    # no_oxdid.cfg doesn't have the required param `authorization_redirect_uri`
+    # empty. So the client registration should fail
     config = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
     c = Client(config)
     with pytest.raises(RuntimeError):
@@ -40,7 +42,7 @@ def test_get_authorization_url():
     assert 'callback' in auth_url
 
 
-def test_get_authorization_url_works_wihtout_explicit_site_registration():
+def test_get_authorization_url_works_without_explicit_site_registration():
     c = Client(config_location)
     c.oxd_id = None  # assume the client isn't registered
     auth_url = c.get_authorization_url()
@@ -141,7 +143,7 @@ def test_logout(mock_send):
                "params": params}
 
     # called with no optional params
-    uri = c.get_logout_uri()
+    c.get_logout_uri()
     mock_send.assert_called_with(command)
 
     # called with OPTIONAL id_token_hint
@@ -151,17 +153,17 @@ def test_logout(mock_send):
     assert uri == "https://example.com/end_session"
 
     # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri
-    uri = c.get_logout_uri("some_id", "https://some.site/logout")
+    c.get_logout_uri("some_id", "https://some.site/logout")
     command["params"]["post_logout_redirect_uri"] = "https://some.site/logout"
     mock_send.assert_called_with(command)
 
     # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri + state
-    uri = c.get_logout_uri("some_id", "https://some.site/logout", "some-s")
+    c.get_logout_uri("some_id", "https://some.site/logout", "some-s")
     command["params"]["state"] = "some-s"
     mock_send.assert_called_with(command)
 
     # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri
-    uri = c.get_logout_uri("some_id", "https://some.site/logout", "some-s",
+    c.get_logout_uri("some_id", "https://some.site/logout", "some-s",
                            "some-ss")
     command["params"]["session_state"] = "some-ss"
     mock_send.assert_called_with(command)
@@ -185,19 +187,27 @@ def test_update_site_registration():
     status = c.update_site_registration()
     assert status
 
-
-def test_uma_rp_get_rpt():
+@patch.object(Messenger, 'send')
+def test_uma_rp_get_rpt(mock_send):
     c = Client(uma_config)
-    c.register_site()
-    rpt = c.uma_rp_get_rpt()
-    assert isinstance(rpt, str)
 
+    # Just the ticket
+    c.uma_rp_get_rpt('ticket-string')
+    command = {'command': 'uma_rp_get_rpt',
+               'params': {
+                   'oxd_id': 'dummy-id',
+                   'ticket': 'ticket-string'
+               }}
+    mock_send.assert_called_with(command)
 
-def test_uma_rp_get_rpt_force_new():
-    c = Client(uma_config)
-    c.register_site()
-    rpt2 = c.uma_rp_get_rpt(True)
-    assert isinstance(rpt2, str)
+    c.uma_rp_get_rpt('ticket-string', 'claim-token', 'claim-token-format',
+                     'pct', 'rpt', ['openid', 'scope'], 'state')
+    params = dict(ticket='ticket-string', claim_token='claim-token',
+                  claim_token_format='claim-token-format', pct='pct',
+                  rpt='rpt', scope=['openid', 'scope'], state='state',
+                  oxd_id='dummy-id')
+    command = dict(command='uma_rp_get_rpt', params=params)
+    mock_send.assert_called_with(command)
 
 
 def test_uma_rp_authorize_rpt():
