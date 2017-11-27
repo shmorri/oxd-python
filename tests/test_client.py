@@ -210,22 +210,6 @@ def test_uma_rp_get_rpt(mock_send):
     mock_send.assert_called_with(command)
 
 
-def test_uma_rp_authorize_rpt():
-    c = Client(uma_config)
-    rpt = 'dummy_rpt'
-    ticket = 'dummy_ticket'
-    status = c.uma_rp_authorize_rpt(rpt, ticket)
-    assert status
-
-
-def test_uma_rp_authorize_rpt_throws_errors():
-    c = Client(uma_config)
-    rpt = 'invalid_rpt'
-    ticket = 'invalid_ticket'
-    response = c.uma_rp_authorize_rpt(rpt, ticket)
-    assert response.status == 'error'
-
-
 def test_uma_rs_protect():
     c = Client(uma_config)
     resources = [{"path": "/photo",
