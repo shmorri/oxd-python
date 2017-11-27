@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from mock import patch
+from mock import patch, Mock
 
 from oxdpython import Client
 from oxdpython.messenger import Messenger
@@ -190,6 +190,7 @@ def test_update_site_registration():
 @patch.object(Messenger, 'send')
 def test_uma_rp_get_rpt(mock_send):
     c = Client(uma_config)
+    c.oxd_id = 'dummy-id'
 
     # Just the ticket
     c.uma_rp_get_rpt('ticket-string')
@@ -212,6 +213,7 @@ def test_uma_rp_get_rpt(mock_send):
 
 def test_uma_rs_protect():
     c = Client(uma_config)
+    c.register_site()
     resources = [{"path": "/photo",
                   "conditions": [{
                       "httpMethods": ["GET"],
@@ -220,3 +222,21 @@ def test_uma_rs_protect():
                   }]
 
     assert c.uma_rs_protect(resources)
+
+
+@patch.object(Messenger, 'send')
+def test_get_authorization_url_sends_custom_parameters(mock_send):
+    mock_send.return_value = Mock()
+    mock_send.return_value.status = 'ok'
+    mock_send.return_value.data.authorization_url = 'some url'
+    c = Client(config_location)
+
+    c.get_authorization_url(custom_params=dict(key1='value1', key2='value2'))
+    command = {
+        'command': 'get_authorization_url',
+        'params': {
+            'oxd_id': c.oxd_id,
+            'custom_parameters': dict(key1='value1', key2='value2')
+        }
+    }
+    mock_send.assert_called_with(command)

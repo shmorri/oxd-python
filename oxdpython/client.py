@@ -51,6 +51,7 @@ class Client:
                                 "scope",
                                 "ui_locales",
                                 "claims_locales",
+                                "claims_redirect_uri",
                                 ]
 
     def __clear_data(self, response):
@@ -99,15 +100,17 @@ class Client:
         command["params"] = params
         logger.debug("Sending command `register_site` with params %s",
                      params)
+
         response = self.msgr.send(command)
-        logger.debug("Recieved reponse: %s", response)
+        logger.debug("Received response: %s", response)
 
         self.oxd_id = self.__clear_data(response).oxd_id
         self.config.set("oxd", "id", self.oxd_id)
         logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
         return self.oxd_id
 
-    def get_authorization_url(self, acr_values=None, prompt=None, scope=None):
+    def get_authorization_url(self, acr_values=None, prompt=None, scope=None,
+                              custom_params=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
@@ -115,10 +118,13 @@ class Client:
             acr_values (list, optional): acr values in the order of priority
             prompt (string, optional): prompt=login is required if you want to
                 force alter current user session (in case user is already
-                logged in from site1 and site2 construsts authorization
+                logged in from site1 and site2 constructs authorization
                 request and want to force alter current user session)
             scope (list, optional): scopes required, takes the one provided
                 during site registrations by default
+            custom_params (dict, optional): Any custom arguments that the
+                client wishes to pass on to the OP can be passed on as extra
+                parameters to the function
 
         Returns:
             string: The authorization url that the user must access for
@@ -142,6 +148,9 @@ class Client:
         if prompt and isinstance(prompt, str):
             params["prompt"] = prompt
 
+        if custom_params:
+            params["custom_parameters"] = custom_params
+
         command["params"] = params
         logger.debug("Sending command `get_authorization_url` with params %s",
                      params)
@@ -152,7 +161,7 @@ class Client:
 
     def get_tokens_by_code(self, code, state):
         """Function to get access code for getting the user details from the
-        OP. It is called after the user authorizies by visiting the auth URL.
+        OP. It is called after the user authorizes by visiting the auth URL.
 
         Args:
             code (string): code, parse from the callback URL querystring
@@ -184,18 +193,16 @@ class Client:
 
         Raises:
             RuntimeError: If oxD server throws an error OR if the params code
-                and scopes are of improper datatype.
+                and scopes are of improper data type.
         """
         command = {"command": "get_tokens_by_code"}
-        params = {"oxd_id": self.oxd_id}
-        params["code"] = code
-        params["state"] = state
+        params = dict(oxd_id=self.oxd_id, code=code, state=state)
 
         command["params"] = params
         logger.debug("Sending command `get_tokens_by_code` with params %s",
                      params)
         response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
+        logger.debug("Received response: %s", response)
 
         return self.__clear_data(response)
 
@@ -221,7 +228,7 @@ class Client:
             raise RuntimeError("Empty access code")
 
         command = {"command": "get_user_info"}
-        params = {"oxd_id": self.oxd_id}
+        params = dict(oxd_id=self.oxd_id)
         params["access_token"] = access_token
         command["params"] = params
         logger.debug("Sending command `get_user_info` with params %s",
@@ -470,20 +477,20 @@ class Client:
             "oxd_id": self.oxd_id,
             "ticket": ticket
             }
-        command["params"] = params
-
         if claim_token:
-            command["params"]["claim_token"] = claim_token
+            params["claim_token"] = claim_token
         if claim_token_format:
-            command["params"]["claim_token_format"] = claim_token_format
+            params["claim_token_format"] = claim_token_format
         if pct:
-            command["params"]["pct"] = pct
+            params["pct"] = pct
         if rpt:
-            command["params"]["rpt"] = rpt
+            params["rpt"] = rpt
         if scope:
-            command["params"]["scope"] = scope
+            params["scope"] = scope
         if state:
-            command["params"]["state"] = state
+            params["state"] = state
+
+        command["params"] = params
 
         logger.debug("Sending command `uma_rp_get_rpt` with params %s", params)
         response = self.msgr.send(command)
