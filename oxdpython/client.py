@@ -160,7 +160,14 @@ class Client:
         response = self.msgr.send(command)
         logger.debug("Received response: %s", response)
 
-        return self.__clear_data(response).authorization_url
+        if response.status == 'error':
+            error = 'oxd Server Error: {0}\n{1}'.format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data.authorization_url
+
 
     def get_tokens_by_code(self, code, state):
         """Function to get access code for getting the user details from the
@@ -207,7 +214,13 @@ class Client:
         response = self.msgr.send(command)
         logger.debug("Received response: %s", response)
 
-        return self.__clear_data(response)
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data
 
     def get_user_info(self, access_token):
         """Function to get the information about the user using the access code
@@ -226,10 +239,6 @@ class Client:
             RuntimeError: If the param access_token is empty OR if the oxD
                 Server returns an error.
         """
-        if not access_token:
-            logger.error("Empty access code sent for get_user_info")
-            raise RuntimeError("Empty access code")
-
         command = {"command": "get_user_info"}
         params = dict(oxd_id=self.oxd_id)
         params["access_token"] = access_token
@@ -237,9 +246,16 @@ class Client:
         logger.debug("Sending command `get_user_info` with params %s",
                      params)
         response = self.msgr.send(command)
-        logger.debug("Recieved reponse: %s", response)
+        logger.debug("Received response: %s", response)
 
-        return self.__clear_data(response).claims
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description
+            )
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data.claims
 
     def get_logout_uri(self, id_token_hint=None, post_logout_redirect_uri=None,
                        state=None, session_state=None):
@@ -279,12 +295,18 @@ class Client:
 
         logger.debug("Sending command `get_logout_uri` with params %s", params)
         response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
+        logger.debug("Received response: %s", response)
 
-        return self.__clear_data(response).uri
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data.uri
 
     def update_site_registration(self):
-        """Fucntion to update the site's information with OpenID Provider.
+        """Function to update the site's information with OpenID Provider.
         This should be called after changing the values in the cfg file.
 
         Returns:

@@ -22,6 +22,7 @@ def test_register_site_command_updates_config_file(mock_send, mock_set):
     mock_send.return_value.data.oxd_id = 'test-id'
 
     c = Client(initial_config)
+    c.oxd_id = None
     c.register_site()
 
     # Expected command dictionary to be sent to the messenger
@@ -54,37 +55,66 @@ def test_register_raises_exception_for_invalid_auth_uri(mock_send):
 # --------------------------------------------------------------------------- #
 # Get Authorization URL Command
 # --------------------------------------------------------------------------- #
-def test_get_authorization_url():
+@patch.object(Messenger, 'send')
+def test_get_authorization_url(mock_send):
+    mock_send.return_value.status = 'ok'
+    mock_send.return_value.data.authorization_url = 'https://auth.url'
     c = Client(initial_config)
     auth_url = c.get_authorization_url()
-    assert 'callback' in auth_url
+
+    command = {
+        'command': 'get_authorization_url',
+        'params': {'oxd_id': 'test-id'}
+    }
+    mock_send.assert_called_with(command)
+    assert auth_url == 'https://auth.url'
 
 
-def test_get_authorization_url_works_without_explicit_site_registration():
+@patch.object(Configurer, 'set')
+@patch.object(Messenger, 'send')
+def test_get_authorization_url_works_without_explicit_site_registration(
+        mock_send, mock_set):
+    mock_send.return_value.status = 'ok'
+    mock_send.return_value.data.oxd_id = 'new-registered-id'
+
     c = Client(initial_config)
-    c.oxd_id = None  # assume the client isn't registered
-    auth_url = c.get_authorization_url()
-    assert 'callback' in auth_url
+    c.oxd_id = None
+    c.get_authorization_url()
 
+    command = {
+        'command': 'get_authorization_url',
+        # uses the new id to indicate it was registered implicitly
+        'params': { 'oxd_id': 'new-registered-id'}
+    }
+    mock_send.assert_called_with(command)
 
-def test_get_auth_url_accepts_optional_params():
+@patch.object(Messenger, 'send')
+def test_get_auth_url_accepts_optional_params(mock_send):
+    mock_send.return_value.status = 'ok'
+    mock_send.return_value.data.authorization_url = 'https://auth.url'
     c = Client(initial_config)
+    command = {
+        'command': 'get_authorization_url',
+        'params': {
+            'oxd_id': 'test-id'
+        }
+    }
     # acr values
-    auth_url = c.get_authorization_url(["basic", "gplus"])
-    assert 'basic' in auth_url
-    assert 'gplus' in auth_url
+    c.get_authorization_url(["basic", "gplus"])
+    command['params']['acr_values'] = ['basic', 'gplus']
+    mock_send.assert_called_with(command)
 
     # prompt
-    auth_url = c.get_authorization_url(["basic"], "login")
-    assert 'basic' in auth_url
-    assert 'prompt' in auth_url
+    c.get_authorization_url(["basic"], "login")
+    command['params']['acr_values'] = ['basic']
+    command['params']['prompt'] = 'login'
+    mock_send.assert_called_with(command)
 
     # scope
-    auth_url = c.get_authorization_url(["basic"], None,
-                                       ["openid", "profile", "email"])
-    assert 'openid' in auth_url
-    assert 'profile' in auth_url
-    assert 'email' in auth_url
+    c.get_authorization_url(["basic"], scope=["openid", "profile", "email"])
+    command['params'].pop('prompt')
+    command['params']['scope'] = ["openid", "profile", "email"]
+    mock_send.assert_called_with(command)
 
 
 @patch.object(Messenger, 'send')
@@ -105,6 +135,9 @@ def test_get_authorization_url_sends_custom_parameters(mock_send):
     mock_send.assert_called_with(command)
 
 
+# --------------------------------------------------------------------------- #
+# Get Tokens by Code Command
+# --------------------------------------------------------------------------- #
 @patch.object(Messenger, 'send')
 def test_get_tokens_by_code(mock_send):
     c = Client(initial_config)
@@ -130,16 +163,19 @@ def test_get_tokens_raises_error_if_response_has_error(mock_send):
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "No Tokens in Mock"
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(OxdServerError):
         c.get_tokens_by_code("code", "state")
 
 
+# --------------------------------------------------------------------------- #
+# Get User Info Command
+# --------------------------------------------------------------------------- #
 @patch.object(Messenger, 'send')
 def test_get_user_info(mock_send):
     c = Client(initial_config)
     mock_send.return_value.status = "ok"
     mock_send.return_value.data.claims = {"name": "mocky"}
-    token = "tokken"
+    token = "token"
     command = {"command": "get_user_info",
                "params": {
                    "oxd_id": c.oxd_id,
@@ -150,13 +186,6 @@ def test_get_user_info(mock_send):
     assert claims == {"name": "mocky"}
 
 
-def test_get_user_info_raises_erro_on_invalid_args():
-    c = Client(initial_config)
-    # Empty code should raise error
-    with pytest.raises(RuntimeError):
-        c.get_user_info("")
-
-
 @patch.object(Messenger, 'send')
 def test_get_user_info_raises_error_on_oxd_error(mock_send):
     c = Client(initial_config)
@@ -164,12 +193,12 @@ def test_get_user_info_raises_error_on_oxd_error(mock_send):
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "No Claims for mock"
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(OxdServerError):
         c.get_user_info("some_token")
 
 
 @patch.object(Messenger, 'send')
-def test_logout(mock_send):
+def test_get_logout_uri(mock_send):
     c = Client(initial_config)
     mock_send.return_value.status = "ok"
     mock_send.return_value.data.uri = "https://example.com/end_session"
@@ -212,16 +241,19 @@ def test_logout_raises_error_when_oxd_return_error(mock_send):
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "Logout Mock Error"
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(OxdServerError):
         c.get_logout_uri()
 
 
-def test_update_site_registration():
+@patch.object(Messenger, 'send')
+def test_update_site_registration(mock_send):
+    mock_send.return_value.status = 'ok'
     c = Client(initial_config)
     c.config.set('client', 'post_logout_redirect_uri',
                  'https://client.example.com/')
     status = c.update_site_registration()
     assert status
+
 
 @patch.object(Messenger, 'send')
 def test_uma_rp_get_rpt(mock_send):
@@ -246,8 +278,10 @@ def test_uma_rp_get_rpt(mock_send):
     command = dict(command='uma_rp_get_rpt', params=params)
     mock_send.assert_called_with(command)
 
+@patch.object(Messenger, 'send')
+def test_uma_rs_protect(mock_send):
+    mock_send.return_value.status = 'ok'
 
-def test_uma_rs_protect():
     c = Client(uma_config)
     c.register_site()
     resources = [{"path": "/photo",
