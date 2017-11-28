@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block subtitle %}
+    Post Login Redirect Page
+{% endblock subtitle %}
+
+{% block content %}
+  <div class="alert alert-info">
+    You have been redirected to this page after authentication.
+    Setting the session ID cookie now.
+
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3>URL: <span class="label label-default">/login_callback/</span></h3>
+      <h3>Setting Cookies ...  </h3>
+
+    </div>
+    <div class="col-md-6">
+      <pre class="language-python"><code>@app.route('/login_callback/')
+def login_callback():
+    # using request from Flask to parse the query string of the callback
+    code = request.args.get('code')
+    state = request.args.get('state')
+
+    tokens = oxc.get_tokens_by_code(code, state)
+
+    user = oxc.get_user_info(tokens.access_token)
+
+    resp = make_response(render_template("post_login.html", user=user,
+                                         cookies=request.cookies))
+    resp.set_cookie('user_sub', user.sub[0])
+    resp.set_cookie('session_id', request.args.get('session_id'))
+    return resp
+</code></pre>
+
+    </div>
+  </div>
+  <a href="{{ url_for('browse_site') }}" class="btn btn-block btn-primary">Browse Site as Logged in user</a>
+
+{% endblock content %}

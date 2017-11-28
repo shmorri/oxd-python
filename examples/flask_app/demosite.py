@@ -1,25 +1,19 @@
 import os
-import sys
-from flask import Flask, render_template, redirect, request
+import uuid
+import oxdpython
+
+from flask import Flask, render_template, redirect, request, make_response
+
+app = Flask(__name__)
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 config = os.path.join(this_dir, 'demosite.cfg')
-
-# relative import of oxd-python. Comment out the following 3 lines
-# if the library has been installed with setup.py install
-oxd_path = os.path.dirname(this_dir)
-if oxd_path not in sys.path:
-    sys.path.insert(0, oxd_path)
-
-import oxdpython
-
-app = Flask(__name__)
 oxc = oxdpython.Client(config)
 
 
 @app.route('/')
 def home():
-    return render_template("home.html")
+    return render_template("home.html", cookies=request.cookies)
 
 
 @app.route('/authorize/')
@@ -28,8 +22,8 @@ def authorize():
     return redirect(auth_url)
 
 
-@app.route('/callback')
-def callabck():
+@app.route('/login_callback/')
+def login_callback():
     # using request from Flask to parse the query string of the callback
     code = request.args.get('code')
     state = request.args.get('state')
@@ -38,13 +32,34 @@ def callabck():
 
     user = oxc.get_user_info(tokens.access_token)
 
-    return render_template("home.html", user=user)
+    resp = make_response(render_template("login_callback.html", user=user,
+                                         cookies=request.cookies))
+    resp.set_cookie('user_sub', user.sub[0])
+    resp.set_cookie('session_id', request.args.get('session_id'))
+    return resp
+
+@app.route('/browse_site/')
+def browse_site():
+    return render_template('browse_site.html', cookies=request.cookies)
 
 
-@app.route('/logout')
+@app.route('/logout/')
 def logout():
     logout_url = oxc.get_logout_uri()
     return redirect(logout_url)
 
+
+@app.route('/logout_callback/')
+def logout_callback():
+    """Route called by the OpenID provider when user logs out.
+
+    Clear the cookies here.
+    """
+    resp = make_response('Logging Out')
+    resp.set_cookie('user_sub', 'null', expires=0)
+    resp.set_cookie('session_id', 'null', expires=0)
+    print "cleared all the cookies"
+    return resp
+
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    app.run(debug=True, port=8080, ssl_context='adhoc')
