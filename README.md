@@ -138,27 +138,6 @@ response = client.uma_rs_check_access(rpt, path, http_method)
 #### UMA RP Get RPT
 
 ```python
-rpt = client.uma_rp_get_rpt()
-
-# To force a new RPT
-rpt = client.uma_rp_get_rpt(True)
-```
-
-#### UMA RP Authorize RPT
-
-```python
-rpt = 'rpt-token-string'
-ticket = 'ticket-value-as-string'
-
-response = client.uma_rp_authorize_rpt(rpt, ticket)
-```
-
-#### UMA RP Get GAT
-
-```python
-scopes = ["http://photoz.example.com/dev/actions/add",
-          "http://photoz.example.com/dev/actions/view"
-          ]
-
-gat = client.uma_rp_get_gat(scopes)
+ticket = 'ticket obtained by app after user authorization'
+rpt = client.uma_rp_get_rpt(ticket)
 ```
