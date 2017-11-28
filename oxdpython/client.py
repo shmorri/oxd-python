@@ -2,6 +2,7 @@ import logging
 
 from .configurer import Configurer
 from .messenger import Messenger
+from .exceptions import OxdServerError
 
 logger = logging.getLogger(__name__)
 
@@ -71,40 +72,42 @@ class Client:
 
         Returns:
             string: The ID of the site (also called client id) if the
-            registration is sucessful
+            registration is successful
 
         Raises:
-            RuntimeError: If the site registration fails.
+            OxdServerError: If the site registration fails.
         """
         if self.oxd_id:
             logger.info('Client is already registered. ID: %s', self.oxd_id)
             return self.oxd_id
 
-        command = {"command": "register_site"}
-
         # add required params for the command
         params = {
             "authorization_redirect_uri": self.authorization_redirect_uri,
             }
+
         # add other optional params if they exist in config
-        for param in self.opt_params:
-            if self.config.get("client", param):
-                value = self.config.get("client", param)
-                params[param] = value
+        for op in self.opt_params:
+            if self.config.get("client", op):
+                params[op] = self.config.get("client", op)
 
-        for param in self.opt_list_params:
-            if self.config.get("client", param):
-                value = self.config.get("client", param).split(",")
-                params[param] = value
+        for olp in self.opt_list_params:
+            if self.config.get("client", olp):
+                params[olp] = self.config.get("client", olp).split(",")
 
-        command["params"] = params
-        logger.debug("Sending command `register_site` with params %s",
-                     params)
+        command = {"command": "register_site", "params": params}
+        logger.debug("Sending command `register_site` with params %s", params)
 
         response = self.msgr.send(command)
         logger.debug("Received response: %s", response)
 
-        self.oxd_id = self.__clear_data(response).oxd_id
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n {1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        self.oxd_id = response.data.oxd_id
         self.config.set("oxd", "id", self.oxd_id)
         logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
         return self.oxd_id
@@ -155,7 +158,7 @@ class Client:
         logger.debug("Sending command `get_authorization_url` with params %s",
                      params)
         response = self.msgr.send(command)
-        logger.debug("Recieved reponse: %s", response)
+        logger.debug("Received response: %s", response)
 
         return self.__clear_data(response).authorization_url
 

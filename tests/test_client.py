@@ -3,54 +3,72 @@ import pytest
 
 from mock import patch, Mock
 
-from oxdpython import Client
-from oxdpython.messenger import Messenger
+from oxdpython.client import Client, Messenger, Configurer
+
+from oxdpython.exceptions import OxdServerError
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
-config_location = os.path.join(this_dir, 'data', 'initial.cfg')
+initial_config = os.path.join(this_dir, 'data', 'initial.cfg')
 uma_config = os.path.join(this_dir, 'data', 'umaclient.cfg')
 
 
-def test_initializes_with_config():
-    c = Client(config_location)
-    assert c.config.get('oxd', 'port') == '8099'
-    assert isinstance(c.msgr, Messenger)
-    assert c.authorization_redirect_uri == "https://client.example.com/callback"
+# --------------------------------------------------------------------------- #
+# Register Site Command
+# --------------------------------------------------------------------------- #
+@patch.object(Configurer, 'set')
+@patch.object(Messenger, 'send')
+def test_register_site_command_updates_config_file(mock_send, mock_set):
+    mock_send.return_value.status = 'ok'
+    mock_send.return_value.data.oxd_id = 'test-id'
 
-
-def test_register_site_command():
-    # preset register client command response
-    c = Client(config_location)
-    c.oxd_id = None
-    assert c.oxd_id is None
+    c = Client(initial_config)
     c.register_site()
-    assert c.oxd_id is not None
+
+    # Expected command dictionary to be sent to the messenger
+    command = {
+        'command': 'register_site',
+        'params': {
+            'authorization_redirect_uri': 'https://client.example.com/callback',
+            'post_logout_redirect_uri': 'https://client.example.com/',
+            'client_logout_uris': ['https://client.example.com/logout'],
+            'client_name': 'oxdpython Test Client',
+        }
+    }
+    mock_send.assert_called_with(command)
+    mock_set.assert_called_with('oxd', 'id', 'test-id')
 
 
-def test_register_raises_runtime_error_for_oxd_error_response():
-    # no_oxdid.cfg doesn't have the required param `authorization_redirect_uri`
-    # empty. So the client registration should fail
-    config = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
+@patch.object(Messenger, 'send')
+def test_register_raises_exception_for_invalid_auth_uri(mock_send):
+    mock_send.return_value.status = 'error'
+    mock_send.return_value.data.error = 'invalid_authorization_uri'
+    mock_send.return_value.data.error_description = 'Invalid URI'
+
+    config = os.path.join(this_dir, 'data', 'no_auth_uri.cfg')
     c = Client(config)
-    with pytest.raises(RuntimeError):
+
+    with pytest.raises(OxdServerError):
         c.register_site()
 
 
+# --------------------------------------------------------------------------- #
+# Get Authorization URL Command
+# --------------------------------------------------------------------------- #
 def test_get_authorization_url():
-    c = Client(config_location)
+    c = Client(initial_config)
     auth_url = c.get_authorization_url()
     assert 'callback' in auth_url
 
 
 def test_get_authorization_url_works_without_explicit_site_registration():
-    c = Client(config_location)
+    c = Client(initial_config)
     c.oxd_id = None  # assume the client isn't registered
     auth_url = c.get_authorization_url()
     assert 'callback' in auth_url
 
 
 def test_get_auth_url_accepts_optional_params():
-    c = Client(config_location)
+    c = Client(initial_config)
     # acr values
     auth_url = c.get_authorization_url(["basic", "gplus"])
     assert 'basic' in auth_url
@@ -70,8 +88,26 @@ def test_get_auth_url_accepts_optional_params():
 
 
 @patch.object(Messenger, 'send')
+def test_get_authorization_url_sends_custom_parameters(mock_send):
+    mock_send.return_value = Mock()
+    mock_send.return_value.status = 'ok'
+    mock_send.return_value.data.authorization_url = 'some url'
+    c = Client(initial_config)
+
+    c.get_authorization_url(custom_params=dict(key1='value1', key2='value2'))
+    command = {
+        'command': 'get_authorization_url',
+        'params': {
+            'oxd_id': c.oxd_id,
+            'custom_parameters': dict(key1='value1', key2='value2')
+        }
+    }
+    mock_send.assert_called_with(command)
+
+
+@patch.object(Messenger, 'send')
 def test_get_tokens_by_code(mock_send):
-    c = Client(config_location)
+    c = Client(initial_config)
     mock_send.return_value.status = "ok"
     mock_send.return_value.data = "mock-token"
     code = "code"
@@ -89,7 +125,7 @@ def test_get_tokens_by_code(mock_send):
 
 @patch.object(Messenger, 'send')
 def test_get_tokens_raises_error_if_response_has_error(mock_send):
-    c = Client(config_location)
+    c = Client(initial_config)
     mock_send.return_value.status = "error"
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "No Tokens in Mock"
@@ -100,7 +136,7 @@ def test_get_tokens_raises_error_if_response_has_error(mock_send):
 
 @patch.object(Messenger, 'send')
 def test_get_user_info(mock_send):
-    c = Client(config_location)
+    c = Client(initial_config)
     mock_send.return_value.status = "ok"
     mock_send.return_value.data.claims = {"name": "mocky"}
     token = "tokken"
@@ -115,7 +151,7 @@ def test_get_user_info(mock_send):
 
 
 def test_get_user_info_raises_erro_on_invalid_args():
-    c = Client(config_location)
+    c = Client(initial_config)
     # Empty code should raise error
     with pytest.raises(RuntimeError):
         c.get_user_info("")
@@ -123,7 +159,7 @@ def test_get_user_info_raises_erro_on_invalid_args():
 
 @patch.object(Messenger, 'send')
 def test_get_user_info_raises_error_on_oxd_error(mock_send):
-    c = Client(config_location)
+    c = Client(initial_config)
     mock_send.return_value.status = "error"
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "No Claims for mock"
@@ -134,7 +170,7 @@ def test_get_user_info_raises_error_on_oxd_error(mock_send):
 
 @patch.object(Messenger, 'send')
 def test_logout(mock_send):
-    c = Client(config_location)
+    c = Client(initial_config)
     mock_send.return_value.status = "ok"
     mock_send.return_value.data.uri = "https://example.com/end_session"
 
@@ -171,7 +207,7 @@ def test_logout(mock_send):
 
 @patch.object(Messenger, 'send')
 def test_logout_raises_error_when_oxd_return_error(mock_send):
-    c = Client(config_location)
+    c = Client(initial_config)
     mock_send.return_value.status = "error"
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "Logout Mock Error"
@@ -181,7 +217,7 @@ def test_logout_raises_error_when_oxd_return_error(mock_send):
 
 
 def test_update_site_registration():
-    c = Client(config_location)
+    c = Client(initial_config)
     c.config.set('client', 'post_logout_redirect_uri',
                  'https://client.example.com/')
     status = c.update_site_registration()
@@ -223,20 +259,3 @@ def test_uma_rs_protect():
 
     assert c.uma_rs_protect(resources)
 
-
-@patch.object(Messenger, 'send')
-def test_get_authorization_url_sends_custom_parameters(mock_send):
-    mock_send.return_value = Mock()
-    mock_send.return_value.status = 'ok'
-    mock_send.return_value.data.authorization_url = 'some url'
-    c = Client(config_location)
-
-    c.get_authorization_url(custom_params=dict(key1='value1', key2='value2'))
-    command = {
-        'command': 'get_authorization_url',
-        'params': {
-            'oxd_id': c.oxd_id,
-            'custom_parameters': dict(key1='value1', key2='value2')
-        }
-    }
-    mock_send.assert_called_with(command)
