@@ -1,6 +1,8 @@
 import socket
 import pytest
 
+from mock import patch
+
 from oxdpython.messenger import Messenger
 
 
@@ -26,11 +28,14 @@ def test_messenger_constructor():
     assert mes2.sock.family == socket.AF_INET
 
 
-def test_send():
+@patch('socket.socket')
+def test_send(mock_socket):
     """Messenger.send sends message"""
+    mock_socket.return_value.send.return_value = 5
+    mock_socket.return_value.recv.return_value = '0008{"id":5}'
+
     msgr = Messenger(8099)
-    response = msgr.send({"command": "test"})
-    assert response.status
+    assert msgr.send({"command": "test"}).id == 5
 
 
 def test_send_fail():
@@ -41,8 +46,12 @@ def test_send_fail():
         msgr.send({'command': 'raise_error'})
 
 
-def test_first_connection():
-    """Messenger connects deffered until first send"""
+@patch('socket.socket')
+def test_first_connection(mock_socket):
+    """Messenger connects deferred until first send"""
+    mock_socket.return_value.send.return_value = 5
+    mock_socket.return_value.recv.return_value = '0008{"id":5}'
+
     msgr = Messenger()
     assert not msgr.firstDone
     msgr.send({})
