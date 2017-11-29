@@ -13,7 +13,8 @@ oxc = oxdpython.Client(config)
 
 @app.route('/')
 def home():
-    return render_template("home.html", cookies=request.cookies)
+    return render_template("home.html", url=request.path,
+                           cookies=request.cookies)
 
 
 @app.route('/authorize/')
@@ -34,13 +35,14 @@ def login_callback():
 
     resp = make_response(render_template("login_callback.html", user=user,
                                          cookies=request.cookies))
-    resp.set_cookie('user_sub', user.sub[0])
+    resp.set_cookie('sub', user.sub[0])
     resp.set_cookie('session_id', request.args.get('session_id'))
     return resp
 
 @app.route('/browse_site/')
 def browse_site():
-    return render_template('browse_site.html', cookies=request.cookies)
+    return render_template('home.html', url=request.path,
+                           cookies=request.cookies)
 
 
 @app.route('/logout/')
@@ -60,6 +62,13 @@ def logout_callback():
     resp.set_cookie('session_id', 'null', expires=0)
     print "cleared all the cookies"
     return resp
+
+
+@app.route('/post_logout/')
+def post_logout():
+    return render_template("home.html", url=request.path,
+                           cookies=request.cookies)
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080, ssl_context='adhoc')
