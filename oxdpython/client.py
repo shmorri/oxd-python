@@ -55,18 +55,6 @@ class Client:
                                 "claims_redirect_uri",
                                 ]
 
-    def __clear_data(self, response):
-        """A private method that verifies that the oxd response is error free
-        and raises a RuntimeError when it encounters an error
-        """
-        if response.status == "error":
-            error = "OxD Server Error: {0}\nDescription:{1}".format(
-                    response.data.error, response.data.error_description)
-            logger.error(error)
-            raise RuntimeError(error)
-        elif response.status == "ok":
-            return response.data
-
     def register_site(self):
         """Function to register the site and generate a unique ID for the site
 
@@ -419,7 +407,13 @@ class Client:
         response = self.msgr.send(command)
         logger.debug("Received response: %s", response)
 
-        return self.__clear_data(response)
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data
 
     def uma_rp_get_rpt(self, ticket, claim_token=None, claim_token_format=None,
                        pct=None, rpt=None, scope=None, state=None):
@@ -521,4 +515,11 @@ class Client:
         response = self.msgr.send(command)
         logger.debug("Received response: %s", response)
 
-        return self.__clear_data(response)
+        if response.status == 'error' and \
+                        response.data.error == 'internal_error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data
