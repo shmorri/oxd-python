@@ -268,10 +268,6 @@ class Client:
 
         if post_logout_redirect_uri:
             params["post_logout_redirect_uri"] = post_logout_redirect_uri
-        elif self.config.get("client", "logout_redirect_uri"):
-            params["post_logout_redirect_uri"] = self.config.get(
-                "client", "logout_redirect_uri"
-                )
 
         if state:
             params["state"] = state
@@ -318,12 +314,15 @@ class Client:
         logger.debug("Sending `update_site_registration` with params %s",
                      params)
         response = self.msgr.send(command)
-        logger.debug("Recieved reponse: %s", response)
+        logger.debug("Received response: %s", response)
 
-        if response.status == "ok":
-            return True
-        else:
-            return False
+        if response.status == 'error':
+            error = 'oxd Server Error: {0}\n{1}'.format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return True
 
     def uma_rs_protect(self, resources):
         """Function to be used in a UMA Resource Server to protect resources.
@@ -336,23 +335,20 @@ class Client:
             bool: The status of the request.
         """
         command = {"command": "uma_rs_protect"}
-        params = {"oxd_id": self.oxd_id,
-                  "resources": []}
-
-        if len(resources) < 1:
-            return False
-
-        params["resources"] = resources
+        params = dict(oxd_id=self.oxd_id, resources=resources)
         command["params"] = params
 
         logger.debug("Sending `uma_rs_protect` with params %s", params)
         response = self.msgr.send(command)
-        logger.debug("Recieved response: %s", response)
+        logger.debug("Received response: %s", response)
 
-        if response.status == "ok":
-            return True
-        else:
-            return False
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return True
 
     def uma_rs_check_access(self, rpt, path, http_method):
         """Function to be used in a UMA Resource Server to check access.

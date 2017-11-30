@@ -16,7 +16,7 @@ uma_config = os.path.join(this_dir, 'data', 'umaclient.cfg')
 class RegisterSiteTestCase(unittest.TestCase):
     @patch.object(Configurer, 'set')
     @patch.object(Messenger, 'send')
-    def test_register_site_command_updates_config_file(self, mock_send, mock_set):
+    def test_command_updates_config_file(self, mock_send, mock_set):
         mock_send.return_value.status = 'ok'
         mock_send.return_value.data.oxd_id = 'test-id'
 
@@ -38,7 +38,7 @@ class RegisterSiteTestCase(unittest.TestCase):
         mock_set.assert_called_with('oxd', 'id', 'test-id')
 
     @patch.object(Messenger, 'send')
-    def test_register_raises_exception_for_invalid_auth_uri(self, mock_send):
+    def test_raises_exception_for_invalid_auth_uri(self, mock_send):
         mock_send.return_value.status = 'error'
         mock_send.return_value.data.error = 'invalid_authorization_uri'
         mock_send.return_value.data.error_description = 'Invalid URI'
@@ -52,7 +52,7 @@ class RegisterSiteTestCase(unittest.TestCase):
 
 class GetAuthUrlTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
-    def test_get_authorization_url(self, mock_send):
+    def test_command(self, mock_send):
         mock_send.return_value.status = 'ok'
         mock_send.return_value.data.authorization_url = 'https://auth.url'
         c = Client(initial_config)
@@ -67,8 +67,7 @@ class GetAuthUrlTestCase(unittest.TestCase):
 
     @patch.object(Configurer, 'set')
     @patch.object(Messenger, 'send')
-    def test_get_authorization_url_works_without_explicit_site_registration(
-            self, mock_send, mock_set):
+    def test_automatic_site_registration(self, mock_send, mock_set):
         mock_send.return_value.status = 'ok'
         mock_send.return_value.data.oxd_id = 'new-registered-id'
 
@@ -84,7 +83,7 @@ class GetAuthUrlTestCase(unittest.TestCase):
         mock_send.assert_called_with(command)
 
     @patch.object(Messenger, 'send')
-    def test_get_auth_url_accepts_optional_params(self, mock_send):
+    def test_call_with_optional_params(self, mock_send):
         mock_send.return_value.status = 'ok'
         mock_send.return_value.data.authorization_url = 'https://auth.url'
         c = Client(initial_config)
@@ -112,7 +111,7 @@ class GetAuthUrlTestCase(unittest.TestCase):
         mock_send.assert_called_with(command)
 
     @patch.object(Messenger, 'send')
-    def test_get_authorization_url_sends_custom_parameters(self, mock_send):
+    def test_sending_custom_parameters(self, mock_send):
         mock_send.return_value = Mock()
         mock_send.return_value.status = 'ok'
         mock_send.return_value.data.authorization_url = 'some url'
@@ -128,10 +127,20 @@ class GetAuthUrlTestCase(unittest.TestCase):
         }
         mock_send.assert_called_with(command)
 
+    @patch.object(Messenger, 'send')
+    def test_error_raised_on_oxd_server_error(self, mock_send):
+        c = Client(initial_config)
+        mock_send.return_value.status = "error"
+        mock_send.return_value.data.error = "MockError"
+        mock_send.return_value.data.error_description = "No Tokens in Mock"
+
+        with pytest.raises(OxdServerError):
+            c.get_authorization_url()
+
 
 class GetTokensByCodeTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
-    def test_get_tokens_by_code(self, mock_send):
+    def test_command(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "ok"
         mock_send.return_value.data = "mock-token"
@@ -148,7 +157,7 @@ class GetTokensByCodeTestCase(unittest.TestCase):
         assert token == "mock-token"
 
     @patch.object(Messenger, 'send')
-    def test_get_tokens_raises_error_if_response_has_error(self, mock_send):
+    def test_error_raised_on_oxd_server_error(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "error"
         mock_send.return_value.data.error = "MockError"
@@ -160,22 +169,21 @@ class GetTokensByCodeTestCase(unittest.TestCase):
 
 class GetUserInfoTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
-    def test_get_user_info(self, mock_send):
-        c = Client(initial_config)
+    def test_command(self, mock_send):
         mock_send.return_value.status = "ok"
-        mock_send.return_value.data.claims = {"name": "mocky"}
         token = "token"
         command = {"command": "get_user_info",
                    "params": {
-                       "oxd_id": c.oxd_id,
+                       "oxd_id": 'test-id',
                        "access_token": token
                        }}
-        claims = c.get_user_info(token)
+
+        c = Client(initial_config)
+        c.get_user_info(token)
         mock_send.assert_called_with(command)
-        assert claims == {"name": "mocky"}
 
     @patch.object(Messenger, 'send')
-    def test_get_user_info_raises_error_on_oxd_error(self, mock_send):
+    def test_raises_error_on_oxd_error(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "error"
         mock_send.return_value.data.error = "MockError"
@@ -188,15 +196,15 @@ class GetUserInfoTestCase(unittest.TestCase):
 class GetLogoutUriTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
     def test_get_logout_uri(self, mock_send):
-        c = Client(initial_config)
         mock_send.return_value.status = "ok"
         mock_send.return_value.data.uri = "https://example.com/end_session"
 
-        params = {"oxd_id": c.oxd_id}
+        params = {"oxd_id": "test-id"}
         command = {"command": "get_logout_uri",
                    "params": params}
 
         # called with no optional params
+        c = Client(initial_config)
         c.get_logout_uri()
         mock_send.assert_called_with(command)
 
@@ -223,7 +231,7 @@ class GetLogoutUriTestCase(unittest.TestCase):
         mock_send.assert_called_with(command)
 
     @patch.object(Messenger, 'send')
-    def test_logout_raises_error_when_oxd_return_error(self, mock_send):
+    def test_raises_error_when_oxd_return_error(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "error"
         mock_send.return_value.data.error = "MockError"
@@ -235,7 +243,7 @@ class GetLogoutUriTestCase(unittest.TestCase):
 
 class UpdateSiteRegistrationTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
-    def test_update_site_registration(self, mock_send):
+    def test_command(self, mock_send):
         mock_send.return_value.status = 'ok'
         c = Client(initial_config)
         c.config.set('client', 'post_logout_redirect_uri',
@@ -243,35 +251,62 @@ class UpdateSiteRegistrationTestCase(unittest.TestCase):
         status = c.update_site_registration()
         assert status
 
+    @patch.object(Messenger, 'send')
+    def test_raises_error_when_oxd_returns_error(self, mock_send):
+        mock_send.return_value.status = 'error'
+        mock_send.return_value.data.error = 'test error'
+        mock_send.return_value.data.error_description = 'test error desc'
+
+        c = Client(initial_config)
+        with pytest.raises(OxdServerError):
+            c.update_site_registration()
+
 
 class UmaRpGetRptTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
-    def test_uma_rp_get_rpt(self, mock_send):
+    def test_command(self, mock_send):
         c = Client(uma_config)
-        c.oxd_id = 'dummy-id'
 
         # Just the ticket
         c.uma_rp_get_rpt('ticket-string')
         command = {'command': 'uma_rp_get_rpt',
                    'params': {
-                       'oxd_id': 'dummy-id',
+                       'oxd_id': 'test-id',
                        'ticket': 'ticket-string'
                    }}
         mock_send.assert_called_with(command)
 
+        # Call with all the parameters
         c.uma_rp_get_rpt('ticket-string', 'claim-token', 'claim-token-format',
                          'pct', 'rpt', ['openid', 'scope'], 'state')
         params = dict(ticket='ticket-string', claim_token='claim-token',
                       claim_token_format='claim-token-format', pct='pct',
                       rpt='rpt', scope=['openid', 'scope'], state='state',
-                      oxd_id='dummy-id')
+                      oxd_id='test-id')
         command = dict(command='uma_rp_get_rpt', params=params)
         mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_raises_error_for_oxd_internal_error(self, mock_send):
+        mock_send.return_value.status = 'error'
+        mock_send.return_value.data.error = 'internal_error'
+
+        c = Client(uma_config)
+        with pytest.raises(OxdServerError):
+            c.uma_rp_get_rpt('ticket')
+
+    @patch.object(Messenger, 'send')
+    def test_return_data_for_other_errors(self, mock_send):
+        mock_send.return_value.status = 'error'
+        mock_send.return_value.data.error = 'need_info'
+
+        c = Client(uma_config)
+        assert c.uma_rp_get_rpt('ticket')
 
 
 class UmaRsProtectTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
-    def test_uma_rs_protect(self, mock_send):
+    def test_command(self, mock_send):
         mock_send.return_value.status = 'ok'
 
         c = Client(uma_config)
@@ -285,3 +320,43 @@ class UmaRsProtectTestCase(unittest.TestCase):
 
         assert c.uma_rs_protect(resources)
 
+    @patch.object(Messenger, 'send')
+    def test_raises_error_on_oxd_server_error(self, mock_send):
+        mock_send.return_value.status = 'error'
+        mock_send.return_value.data.error = 'error'
+        mock_send.return_value.data.error_description = 'error desc'
+
+        c = Client(uma_config)
+        with pytest.raises(OxdServerError):
+            c.uma_rs_protect([])
+
+
+class UmaRsCheckAccessTestCase(unittest.TestCase):
+    @patch.object(Messenger, 'send')
+    def test_uma_rs_check_access(self, mock_send):
+        mock_send.return_value.status = 'ok'
+        mock_send.return_value.data = {'access': 'granted'}
+
+        c = Client(uma_config)
+        assert c.uma_rs_check_access('rpt', '/photoz', 'GET')
+
+        command = {
+            'command': 'uma_rs_check_access',
+            'params': {
+                'oxd_id': 'test-id',
+                'rpt': 'rpt',
+                'path': '/photoz',
+                'http_method': 'GET'
+            }
+        }
+        mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_raises_error_on_oxd_server_error(self, mock_send):
+        mock_send.return_value.status = 'error'
+        mock_send.return_value.data.error = 'error'
+        mock_send.return_value.data.error_description = 'error desc'
+
+        c = Client(uma_config)
+        with pytest.raises(OxdServerError):
+            c.uma_rs_check_access('rpt', '/photoz', 'GET')
