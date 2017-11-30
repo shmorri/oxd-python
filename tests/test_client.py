@@ -360,3 +360,28 @@ class UmaRsCheckAccessTestCase(unittest.TestCase):
         c = Client(uma_config)
         with pytest.raises(OxdServerError):
             c.uma_rs_check_access('rpt', '/photoz', 'GET')
+
+class UmaRpGetClaimsGatherUrlTestCase(unittest.TestCase):
+    @patch.object(Messenger, 'send')
+    def test_command(self, mock_send):
+        c = Client(uma_config)
+        assert c.uma_rp_get_claims_gathering_url('ticket')
+
+        command = {
+            'command': 'uma_rp_get_claims_gathering_url',
+            'params': {
+                'oxd_id': 'test-id',
+                'ticket': 'ticket',
+                'claims_redirect_uri': 'https://dummy-uma.client.org/claims_cb'
+            }
+        }
+        mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_raises_error_on_oxd_server_error(self, mock_send):
+        mock_send.return_value.status = 'error'
+
+        c = Client(uma_config)
+        with pytest.raises(OxdServerError):
+            c.uma_rp_get_claims_gathering_url('ticket')
+

@@ -519,3 +519,36 @@ class Client:
             raise OxdServerError(error)
 
         return response.data
+
+    def uma_rp_get_claims_gathering_url(self, ticket):
+        """UMA RP function to get the claims gathering URL.
+
+        Args:
+            ticket (str): ticket to pass to the auth server. for 90% of the
+                cases, this will be obtained from 'need_info' error of get_rpt
+
+        Returns:
+            string specifying the claims gathering url
+        """
+        command = {
+            'command': 'uma_rp_get_claims_gathering_url',
+            'params': {
+                'oxd_id': self.oxd_id,
+                'claims_redirect_uri': self.config.get('client',
+                                                       'claims_redirect_uri'),
+                'ticket': ticket
+            }
+        }
+        logger.debug("Sending command `uma_rp_get_claims_gathering_url` with "
+                     "params %s", command['params'])
+        response = self.msgr.send(command)
+        logger.debug("Received response: %s", response)
+
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data.url
+
