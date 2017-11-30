@@ -40,8 +40,6 @@ class RegisterSiteTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
     def test_raises_exception_for_invalid_auth_uri(self, mock_send):
         mock_send.return_value.status = 'error'
-        mock_send.return_value.data.error = 'invalid_authorization_uri'
-        mock_send.return_value.data.error_description = 'Invalid URI'
 
         config = os.path.join(this_dir, 'data', 'no_auth_uri.cfg')
         c = Client(config)
@@ -112,9 +110,9 @@ class GetAuthUrlTestCase(unittest.TestCase):
 
     @patch.object(Messenger, 'send')
     def test_sending_custom_parameters(self, mock_send):
-        mock_send.return_value = Mock()
         mock_send.return_value.status = 'ok'
         mock_send.return_value.data.authorization_url = 'some url'
+
         c = Client(initial_config)
 
         c.get_authorization_url(custom_params=dict(key1='value1', key2='value2'))
@@ -131,8 +129,6 @@ class GetAuthUrlTestCase(unittest.TestCase):
     def test_error_raised_on_oxd_server_error(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "error"
-        mock_send.return_value.data.error = "MockError"
-        mock_send.return_value.data.error_description = "No Tokens in Mock"
 
         with pytest.raises(OxdServerError):
             c.get_authorization_url()
@@ -160,11 +156,48 @@ class GetTokensByCodeTestCase(unittest.TestCase):
     def test_error_raised_on_oxd_server_error(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "error"
-        mock_send.return_value.data.error = "MockError"
-        mock_send.return_value.data.error_description = "No Tokens in Mock"
 
         with pytest.raises(OxdServerError):
             c.get_tokens_by_code("code", "state")
+
+
+class GetAccessTokenByRefreshTokenTestCase(unittest.TestCase):
+    @patch.object(Messenger, 'send')
+    def test_command(self, mock_send):
+        c = Client(initial_config)
+        assert c.get_access_token_by_refresh_token('refresh_token')
+
+        command = {
+            "command": "get_access_token_by_refresh_token",
+            "params": {
+                "oxd_id": "test-id",
+                "refresh_token": "refresh_token"
+            }
+        }
+        mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_optional_parameters_are_passed(self, mock_send):
+        c = Client(initial_config)
+        assert c.get_access_token_by_refresh_token('refresh_token',
+                                                   ['openid', 'profile'])
+
+        command = {
+            "command": "get_access_token_by_refresh_token",
+            "params": {
+                "oxd_id": "test-id",
+                "refresh_token": "refresh_token",
+                "scope": ["openid", "profile"]
+            }
+        }
+        mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_raises_error_on_oxd_server_error(self, mock_send):
+        mock_send.return_value.status = 'error'
+        c = Client(initial_config)
+        with pytest.raises(OxdServerError):
+            c.get_access_token_by_refresh_token('refresh_token')
 
 
 class GetUserInfoTestCase(unittest.TestCase):
@@ -186,8 +219,6 @@ class GetUserInfoTestCase(unittest.TestCase):
     def test_raises_error_on_oxd_error(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "error"
-        mock_send.return_value.data.error = "MockError"
-        mock_send.return_value.data.error_description = "No Claims for mock"
 
         with pytest.raises(OxdServerError):
             c.get_user_info("some_token")
@@ -234,8 +265,6 @@ class GetLogoutUriTestCase(unittest.TestCase):
     def test_raises_error_when_oxd_return_error(self, mock_send):
         c = Client(initial_config)
         mock_send.return_value.status = "error"
-        mock_send.return_value.data.error = "MockError"
-        mock_send.return_value.data.error_description = "Logout Mock Error"
 
         with pytest.raises(OxdServerError):
             c.get_logout_uri()
@@ -254,8 +283,6 @@ class UpdateSiteRegistrationTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
     def test_raises_error_when_oxd_returns_error(self, mock_send):
         mock_send.return_value.status = 'error'
-        mock_send.return_value.data.error = 'test error'
-        mock_send.return_value.data.error_description = 'test error desc'
 
         c = Client(initial_config)
         with pytest.raises(OxdServerError):
@@ -323,8 +350,6 @@ class UmaRsProtectTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
     def test_raises_error_on_oxd_server_error(self, mock_send):
         mock_send.return_value.status = 'error'
-        mock_send.return_value.data.error = 'error'
-        mock_send.return_value.data.error_description = 'error desc'
 
         c = Client(uma_config)
         with pytest.raises(OxdServerError):
@@ -354,8 +379,6 @@ class UmaRsCheckAccessTestCase(unittest.TestCase):
     @patch.object(Messenger, 'send')
     def test_raises_error_on_oxd_server_error(self, mock_send):
         mock_send.return_value.status = 'error'
-        mock_send.return_value.data.error = 'error'
-        mock_send.return_value.data.error_description = 'error desc'
 
         c = Client(uma_config)
         with pytest.raises(OxdServerError):
@@ -384,4 +407,3 @@ class UmaRpGetClaimsGatherUrlTestCase(unittest.TestCase):
         c = Client(uma_config)
         with pytest.raises(OxdServerError):
             c.uma_rp_get_claims_gathering_url('ticket')
-

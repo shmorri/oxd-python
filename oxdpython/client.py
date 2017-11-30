@@ -210,6 +210,46 @@ class Client:
 
         return response.data
 
+    def get_access_token_by_refresh_token(self, refresh_token, scope=None):
+        """Function that is used to get a new access token using refresh token
+
+        Args:
+            refresh_token (str): refresh_token from get_tokens_by_code command
+            scope (list, optional): a list of scopes. If not specified should
+                grant access with scope provided in previous request
+
+        Returns:
+            NamedTuple: the tokens with expiry time in as shown::
+
+                {
+                    "access_token":"SlAV32hkKG",
+                    "expires_in":3600,
+                    "refresh_token":"aaAV32hkKG1"
+                }
+        """
+        command = {
+            "command": "get_access_token_by_refresh_token",
+            "params": {
+                "oxd_id": self.oxd_id,
+                "refresh_token": refresh_token
+            }
+        }
+        if scope:
+            command['params']['scope'] = scope
+
+        logger.debug("Sending command `get_access_token_by_refresh_token` with"
+                     " params %s", command['params'])
+        response = self.msgr.send(command)
+        logger.debug("Received response: %s", response)
+
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n{1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        return response.data
+
     def get_user_info(self, access_token):
         """Function to get the information about the user using the access code
         obtained from the OP
