@@ -1,5 +1,4 @@
 import os
-import uuid
 import oxdpython
 
 from flask import Flask, render_template, redirect, request, make_response
@@ -13,8 +12,7 @@ oxc = oxdpython.Client(config)
 
 @app.route('/')
 def home():
-    return render_template("home.html", url=request.path,
-                           cookies=request.cookies)
+    return render_template("home.html")
 
 
 @app.route('/authorize/')
@@ -33,16 +31,10 @@ def login_callback():
 
     user = oxc.get_user_info(tokens.access_token)
 
-    resp = make_response(render_template("login_callback.html", user=user,
-                                         cookies=request.cookies))
+    resp = make_response(render_template("home.html"))
     resp.set_cookie('sub', user.sub[0])
     resp.set_cookie('session_id', request.args.get('session_id'))
     return resp
-
-@app.route('/browse_site/')
-def browse_site():
-    return render_template('home.html', url=request.path,
-                           cookies=request.cookies)
 
 
 @app.route('/logout/')
@@ -58,16 +50,14 @@ def logout_callback():
     Clear the cookies here.
     """
     resp = make_response('Logging Out')
-    resp.set_cookie('user_sub', 'null', expires=0)
+    resp.set_cookie('sub', 'null', expires=0)
     resp.set_cookie('session_id', 'null', expires=0)
-    print "cleared all the cookies"
     return resp
 
 
 @app.route('/post_logout/')
 def post_logout():
-    return render_template("home.html", url=request.path,
-                           cookies=request.cookies)
+    return render_template("home.html")
 
 
 if __name__ == "__main__":

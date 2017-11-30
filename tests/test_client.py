@@ -30,7 +30,7 @@ class RegisterSiteTestCase(unittest.TestCase):
             'params': {
                 'authorization_redirect_uri': 'https://client.example.com/callback',
                 'post_logout_redirect_uri': 'https://client.example.com/',
-                'client_logout_uris': ['https://client.example.com/logout'],
+                'client_frontchannel_logout_uris': ['https://client.example.com/logout'],
                 'client_name': 'oxdpython Test Client',
             }
         }

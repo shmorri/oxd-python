@@ -45,7 +45,7 @@ class Client:
         self.opt_list_params = ["grant_types",
                                 "acr_values",
                                 "contacts",
-                                "client_logout_uris",
+                                "client_frontchannel_logout_uris",
                                 "client_request_uris",
                                 "client_sector_identifier_uri",
                                 "response_types",

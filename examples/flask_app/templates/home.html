@@ -6,33 +6,33 @@
 {% block content %}
   <div class="row">
     <div class="col-md-6">
-      <h3>URL: <span class="label label-default">{{ url }}</span></h3>
-
+      <h3>Path: <span id="url_holder" class="label label-default"></span></h3>
+      <h3>Referrer: </h3>
+      <div  style="font-family: monospace; word-wrap: break-word;" class="well">{{ request.referrer }}</div>
     </div>
     <div class="col-md-6">
-      {% if url == '/' %}
-      <pre class="language-python"><code>@app.route('/')
-def home():
-    return render_template("home.html", url=request.path,
-                           cookies=request.cookies)
-</code></pre>
-      {% elif url == '/browse_site/' %}
-        <pre class="language-python"><code>@app.route('/browse_site/')
-def browse_site():
-    return render_template('home.html', url=request.path,
-                           cookies=request.cookies)</code></pre>
-      {% endif %}
-
+      <h3>Cookies:</h3>
+      <pre class="language-ini"><code id="cookie_code"></code></pre>
     </div>
   </div>
 
-  <h3>Cookies:</h3>
-  <pre class="language-js"><code>{{ cookies }}</code></pre>
-  {% if url == '/' %}
+  <div id="authorize" style="display: none;">
     <a href="{{ url_for('authorize') }}" class="btn btn-block btn-primary">Get auth URI and redirect me there</a>
-  {% elif url == '/browse_site/' %}
+  </div>
+
+  <div id="logout" style="display: none;">
     <a href="{{ url_for('logout') }}" class="btn btn-block btn-danger">Logout</a>
-  {% endif %}
+  </div>
+
+  <script>
+    $('#cookie_code').text(document.cookie.split('; ').join('\n'));
+    $('#url_holder').text(document.location.pathname);
+    if (document.cookie !== "") {
+        $('#logout').show();
+    } else {
+        $('#authorize').show();
+    }
+  </script>
 
 
 {% endblock content %}
