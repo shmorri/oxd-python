@@ -36,16 +36,6 @@ class Messenger:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.host, self.port))
 
-    def __json_object_hook(self, d):
-        """function to customized the json.loads to return named tuple instead
-        of a dict"""
-        return namedtuple('response', d.keys())(*d.values())
-
-    def __json2obj(self, data):
-        """Helper function which converts the json string into a namedtuple
-        so the reponse values can be accessed like objects instead of dicts"""
-        return json.loads(data, object_hook=self.__json_object_hook)
-
     def send(self, command):
         """send function sends the command to the oxD server and recieves the
         response.
@@ -78,10 +68,10 @@ class Messenger:
                 self.__connect()
                 logger.info("Reconnected to socket.")
 
-        # Check and recieve the response if available
+        # Check and receive the response if available
         parts = []
         resp_length = 0
-        recieved = 0
+        received = 0
         done = False
         while not done:
             part = self.sock.recv(1024)
@@ -96,12 +86,32 @@ class Messenger:
                 part = part[4:]
 
             # Set Done flag
-            recieved = recieved + len(part)
-            if recieved >= resp_length:
+            received = received + len(part)
+            if received >= resp_length:
                 done = True
 
             parts.append(part)
 
         response = "".join(parts)
         # return the JSON as a namedtuple object
-        return self.__json2obj(response)
+        return json.loads(response)
+
+    def request(self, command, **kwargs):
+        """Function that builds the request and returns the response from
+        oxd-server
+
+        Args:
+            command (str): The command that has to be sent to the oxd-server
+            **kwargs: The parameters that should accompany the request
+
+        Returns:
+            dict: the returned response from oxd-server as a dictionary
+        """
+        payload = {
+            "command": command,
+            "params": dict()
+        }
+        for item in kwargs.keys():
+            payload['params'][item] = kwargs.get(item)
+
+        return self.send(payload)

@@ -35,7 +35,7 @@ def test_send(mock_socket):
     mock_socket.return_value.recv.return_value = '0008{"id":5}'
 
     msgr = Messenger(8099)
-    assert msgr.send({"command": "test"}).id == 5
+    assert msgr.send({"command": "test"}) == {"id": 5}
 
 
 def test_send_fail():
@@ -56,3 +56,13 @@ def test_first_connection(mock_socket):
     assert not msgr.firstDone
     msgr.send({})
     assert msgr.firstDone
+
+@patch('socket.socket')
+def test_request(mock_socket):
+    mock_socket.return_value.send.return_value = 5
+    mock_socket.return_value.recv.return_value = '0008{"id":5}'
+
+    msgr = Messenger()
+    assert msgr.request('get_user_info') == {"id": 5}
+
+
