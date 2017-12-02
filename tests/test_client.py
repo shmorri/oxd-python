@@ -11,6 +11,7 @@ from oxdpython.exceptions import OxdServerError
 this_dir = os.path.dirname(os.path.realpath(__file__))
 initial_config = os.path.join(this_dir, 'data', 'initial.cfg')
 uma_config = os.path.join(this_dir, 'data', 'umaclient.cfg')
+https_config = os.path.join(this_dir, 'data', 'https.cfg')
 
 
 class RegisterSiteTestCase(unittest.TestCase):
@@ -456,3 +457,52 @@ class SetupClientTestCase(unittest.TestCase):
         mock_set.assert_any_call("oxd", "id", "returned-id")
         mock_set.assert_any_call("client", "client_id", "client-id")
         mock_set.assert_any_call("client", "client_secret", "client-secret")
+
+
+class GetClientTokenTestCase(unittest.TestCase):
+    @patch.object(Messenger, 'send')
+    def test_command(self, mock_send):
+        mock_send.return_value.status = 'ok'
+
+        c = Client(https_config)
+        assert c.get_client_token()
+        command = {
+            'command': 'get_client_token',
+            'params': {
+                'client_id': 'client-id-test-string',
+                'client_secret': 'some-super-secret-string',
+                'op_host': 'https://gluu.example.com'
+            }
+        }
+        mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_override_of_client_credentials(self, mock_send):
+        mock_send.return_value.status = 'ok'
+
+        c = Client(https_config)
+        # Override value of client_id, client_secret and op_host
+        assert c.get_client_token('client-id', 'client-secret', 'new_host')
+        command = {
+            'command': 'get_client_token',
+            'params': {
+                'client_id': 'client-id',
+                'client_secret': 'client-secret',
+                'op_host': 'new_host'
+            }
+        }
+        mock_send.assert_called_with(command)
+
+        # add optional arguments op_discovery_path and scope
+        command['params']['op_discovery_path'] = 'https://mag.el/lan'
+        command['params']['scope'] = ['openid', 'profile']
+        assert c.get_client_token('client-id', 'client-secret', 'new_host',
+                                  'https://mag.el/lan', ['openid', 'profile'])
+        mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_throws_error_on_oxd_server_error(self, mock_send):
+        mock_send.return_value.status = 'error'
+        c = Client(https_config)
+        with pytest.raises(OxdServerError):
+            c.get_client_token()

@@ -631,7 +631,7 @@ class Client:
                 params[olp] = self.config.get("client", olp).split(",")
 
         command = {"command": "setup_client", "params": params}
-        logger.debug("Sending command `register_site` with params %s", params)
+        logger.debug("Sending command `setup_client` with params %s", params)
 
         response = self.msgr.send(command)
         logger.debug("Received response: %s", response)
@@ -651,5 +651,68 @@ class Client:
                         response.data.client_registration_client_uri)
         self.config.set("client", "client_id_issued_at",
                         str(response.data.client_id_issued_at))
+
+        return response.data
+
+
+    def get_client_token(self, client_id=None, client_secret=None,
+                         op_host=None, op_discovery_path=None, scope=None):
+        """Function to get the client token which can be used for protection in
+        all future communication.
+
+        Args:
+            client_id (str, optional): client id from OP or from previous
+                `setup_client` call
+            client_secret (str, optional): client secret from the OP or from
+                `setup_client` call
+            op_host (str, optional): OP Host URL, default is read from the site
+                configuration file
+            op_discovery_path (str, optional): op discovery path provided by OP
+            scope (list, optional): scopes of access required, default values
+                are obtained from the config file
+
+        Returns:
+            NamedTuple: The client token and the refresh token in the form::
+
+                {
+                    "access_token":"6F9619FF-8B86-D011-B42D-00CF4FC964FF",
+                    "expires_in": 399,
+                    "refresh_token": "fr459f",
+                    "scope": "openid"
+                }
+
+        """
+        # override the values from config
+        params = dict(client_id=client_id, client_secret=client_secret,
+                      op_host=op_host)
+
+        if op_discovery_path:
+            params['op_discovery_path'] = op_discovery_path
+        if scope and isinstance(scope, list):
+            params['scope'] = scope
+
+        # If client id and secret aren't passed, then just read from the config
+        if not client_id:
+            params["client_id"] = self.config.get("client", "client_id")
+        if not client_secret:
+            params["client_secret"] = self.config.get("client",
+                                                      "client_secret")
+        if not op_host:
+            params["op_host"] = self.config.get("client", "op_host")
+        command = {
+            "command": "get_client_token",
+            "params": params
+        }
+        logger.debug("Sending command `get_client_token` with params %s",
+                     params)
+
+        response = self.msgr.send(command)
+        logger.debug("Received response: %s", response)
+
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n {1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
 
         return response.data
