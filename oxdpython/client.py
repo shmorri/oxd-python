@@ -592,3 +592,64 @@ class Client:
 
         return response.data.url
 
+    def setup_client(self):
+        """The command registers the client for communication protection. This
+        will be used to obtain an access token via the Get Client Token
+        command. The access token will be passed as a protection_access_token
+        parameter to other commands.
+
+        Note:
+            If you are using the oxd-https-extension, you must setup the client
+
+        Returns:
+            NamedTuple: The client data in the format below::
+
+                {
+                    "oxd_id":"6F9619FF-8B86-D011-B42D-00CF4FC964FF",
+                    "op_host": "<op host>",
+                    "client_id":"<client id>"
+                    "client_secret":"<client secret>"
+                    "client_registration_access_token":"<Client registration access token>"
+                    "client_registration_client_uri":"<URI of client registration>"
+                    "client_id_issued_at":"<client_id issued at>"
+                    "client_secret_expires_at":"<client_secret expires at>"
+                }
+
+        """
+        # add required params for the command
+        params = {
+            "authorization_redirect_uri": self.authorization_redirect_uri,
+            }
+
+        # add other optional params if they exist in config
+        for op in self.opt_params:
+            if self.config.get("client", op):
+                params[op] = self.config.get("client", op)
+
+        for olp in self.opt_list_params:
+            if self.config.get("client", olp):
+                params[olp] = self.config.get("client", olp).split(",")
+
+        command = {"command": "setup_client", "params": params}
+        logger.debug("Sending command `register_site` with params %s", params)
+
+        response = self.msgr.send(command)
+        logger.debug("Received response: %s", response)
+
+        if response.status == 'error':
+            error = "oxd Server Error: {0}\n {1}".format(
+                response.data.error, response.data.error_description)
+            logger.error(error)
+            raise OxdServerError(error)
+
+        self.config.set("oxd", "id", response.data.oxd_id)
+        self.config.set("client", "client_id", response.data.client_id)
+        self.config.set("client", "client_secret", response.data.client_secret)
+        self.config.set("client", "client_registration_access_token",
+                        response.data.client_registration_access_token)
+        self.config.set("client", "client_registration_client_uri",
+                        response.data.client_registration_client_uri)
+        self.config.set("client", "client_id_issued_at",
+                        str(response.data.client_id_issued_at))
+
+        return response.data

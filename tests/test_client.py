@@ -407,3 +407,52 @@ class UmaRpGetClaimsGatherUrlTestCase(unittest.TestCase):
         c = Client(uma_config)
         with pytest.raises(OxdServerError):
             c.uma_rp_get_claims_gathering_url('ticket')
+
+
+class SetupClientTestCase(unittest.TestCase):
+    @patch.object(Configurer, 'set')
+    @patch.object(Messenger, 'send')
+    def test_command(self, mock_send, mock_set):
+        mock_send.return_value.status = 'ok'
+
+        c = Client(initial_config)
+        c.oxd_id = None
+        assert c.setup_client()
+
+        command = {
+            "command": "setup_client",
+            "params": {
+                "authorization_redirect_uri":
+                    "https://client.example.com/callback",
+                "post_logout_redirect_uri": "https://client.example.com/",
+                "client_frontchannel_logout_uris":
+                    ["https://client.example.com/logout"],
+                "client_name": "oxdpython Test Client"
+            }
+        }
+        mock_send.assert_called_with(command)
+
+    @patch.object(Messenger, 'send')
+    def test_raises_error_when_oxd_server_errors(self, mock_send):
+        mock_send.return_value.status = 'error'
+
+        c = Client(initial_config)
+        c.oxd_id = None
+        with pytest.raises(OxdServerError):
+            c.setup_client()
+
+    @patch.object(Configurer, 'set')
+    @patch.object(Messenger, 'send')
+    def test_set_client_credentials_upon_setup(self, mock_send, mock_set):
+        mock_send.return_value.status = 'ok'
+        mock_send.return_value.data.oxd_id = "returned-id"
+        mock_send.return_value.data.client_id = "client-id"
+        mock_send.return_value.data.client_secret = "client-secret"
+
+        c = Client(initial_config)
+        c.oxd_id = None
+        assert c.setup_client()
+
+        mock_set.assert_any_call("oxd", "id", "returned-id")
+        mock_set.assert_any_call("client", "client_id", "client-id")
+        mock_set.assert_any_call("client", "client_secret", "client-secret")
