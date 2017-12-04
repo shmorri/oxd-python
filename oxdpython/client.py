@@ -117,7 +117,7 @@ class Client:
             authentication and authorization
 
         Raises:
-            RuntimeError: If the oxD throws an error for any reason.
+            OxdServerError: If the oxD throws an error for any reason.
         """
         if not self.oxd_id:
             self.register_site()

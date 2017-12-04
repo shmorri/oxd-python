@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>oxD Python Library Documentation &mdash; oxD Python 2.4.4-rc documentation</title>
+  <title>oxD Python Library Documentation &mdash; oxD Python 3.1.1-alpha documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="oxD Python 2.4.4-rc documentation" href="#"/> 
+    <link rel="top" title="oxD Python 3.1.1-alpha documentation" href="#"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                2.4.4
+                3.1.1
               </div>
             
           
@@ -213,7 +213,7 @@ authentication and authorization</p>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">string</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the oxD throws an error for any reason.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">OxdServerError</span></code> &#8211; If the oxD throws an error for any reason.</p>
 </td>
 </tr>
 </tbody>
@@ -630,6 +630,26 @@ This should be called after changing the values in the cfg file.</p>
 
 </dd></dl>
 
+<span class="target" id="module-oxdpython.exceptions"></span><dl class="exception">
+<dt id="oxdpython.exceptions.InvalidTicketError">
+<em class="property">exception </em><code class="descclassname">oxdpython.exceptions.</code><code class="descname">InvalidTicketError</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/exceptions.html#InvalidTicketError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.exceptions.InvalidTicketError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error raised when oxd-server returns a &#8220;invalid_ticket&#8221; error for the
+<cite>uma_rp_get_rpt</cite> command.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="oxdpython.exceptions.NeedInfoError">
+<em class="property">exception </em><code class="descclassname">oxdpython.exceptions.</code><code class="descname">NeedInfoError</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/exceptions.html#NeedInfoError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.exceptions.NeedInfoError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error raised when oxd-server returns a &#8220;need_info&#8221; error for the
+<cite>uma_rp_get_rpt</cite> command.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="oxdpython.exceptions.OxdServerError">
+<em class="property">exception </em><code class="descclassname">oxdpython.exceptions.</code><code class="descname">OxdServerError</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/exceptions.html#OxdServerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.exceptions.OxdServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error raises by oxdpython whenever a Oxd Server Error is reported</p>
+</dd></dl>
+
 </div>
 
 
@@ -664,7 +684,7 @@ This should be called after changing the values in the cfg file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.4.4-rc',
+            VERSION:'3.1.1-alpha',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
