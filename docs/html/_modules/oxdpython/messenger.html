@@ -80,8 +80,10 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"></div>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../oxdpython.html">oxdpython package</a></li>
+</ul>
+
             
           
         </div>
@@ -128,17 +130,14 @@
 <span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">urllib2</span>
-<span class="kn">import</span> <span class="nn">ssl</span>
-
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 
-<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Messenger"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.messenger.Messenger">[docs]</a><span class="k">class</span> <span class="nc">Messenger</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;A class which takes care of the socket communication with oxd Server.</span>
+    <span class="sd">&quot;&quot;&quot;A class which takes care of the socket communication with oxD Server.</span>
 <span class="sd">    The object is initialized with the port number</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8099</span><span class="p">):</span>
@@ -151,90 +150,64 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating a AF_INET, SOCK_STREAM socket.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating a AF_INET, SOCK_STREAM socket.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">firstDone</span> <span class="o">=</span> <span class="bp">False</span>
-
-
 
     <span class="k">def</span> <span class="nf">__connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;A helper function to make connection.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Socket connecting to </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Socket connecting to </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
         <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;socket error </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Closing socket and recreating a new one.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;socket error </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Closing socket and recreating a new one.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">__json_object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Function to customize the json.loads to return named tuple instead</span>
-<span class="sd">        of a dict&quot;&quot;&quot;</span>
-
-        <span class="c1">#if a response key contains &#39;-&#39; then replace it with &#39;hyphen&#39;</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encodeHyphen</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;response&#39;</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">())(</span><span class="o">*</span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-
-    <span class="k">def</span> <span class="nf">__json2obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Helper function which converts the json string into a namedtuple</span>
-<span class="sd">        so the reponse values can be accessed like objects instead of dicts&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">object_hook</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__json_object_hook</span><span class="p">)</span>
-
-<div class="viewcode-block" id="Messenger.encodeHyphen"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.messenger.Messenger.encodeHyphen">[docs]</a>    <span class="k">def</span> <span class="nf">encodeHyphen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;TO-DO: This is just for work around purpose. Original fix needs to be worked on.&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
-                <span class="n">newkey</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;hyphen&#39;</span><span class="p">)</span>
-                <span class="n">val</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                <span class="n">d</span><span class="p">[</span><span class="n">newkey</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-        <span class="k">return</span> <span class="n">d</span></div>
-
 <div class="viewcode-block" id="Messenger.send"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.messenger.Messenger.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Send function sends the command to the oxd server and recieves the</span>
+        <span class="sd">&quot;&quot;&quot;send function sends the command to the oxD server and recieves the</span>
 <span class="sd">        response.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            command (dict) - Dict representation of the JSON command string</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            response (dict) - The JSON response from the oxd Server as a dict</span>
+<span class="sd">            response (dict) - The JSON response from the oxD Server as a dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;{:04d}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span> <span class="o">+</span> <span class="n">cmd</span>
         <span class="n">msg_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 
-        <span class="c1"># Makes the first time connection</span>
+        <span class="c1"># make the first time connection</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstDone</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initiating first time socket connection.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initiating first time socket connection.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__connect</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">firstDone</span> <span class="o">=</span> <span class="bp">True</span>
 
-        <span class="c1"># Send the message to the server</span>
+        <span class="c1"># Send the message the to the server</span>
         <span class="n">totalsent</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="n">totalsent</span> <span class="o">&lt;</span> <span class="n">msg_length</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">[</span><span class="n">totalsent</span><span class="p">:])</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">[</span><span class="n">totalsent</span><span class="p">:])</span>
                 <span class="n">sent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="n">totalsent</span><span class="p">:])</span>
                 <span class="n">totalsent</span> <span class="o">=</span> <span class="n">totalsent</span> <span class="o">+</span> <span class="n">sent</span>
             <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Reconneting due to socket error. </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Reconneting due to socket error. </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__connect</span><span class="p">()</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reconnected to socket.&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reconnected to socket.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Check and recieve the response if available</span>
+        <span class="c1"># Check and receive the response if available</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">resp_length</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">recieved</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">received</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
             <span class="n">part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">part</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Socket connection broken, read empty.&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Socket connection broken, read empty.&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__connect</span><span class="p">()</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reconnected to socket.&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reconnected to socket.&quot;</span><span class="p">)</span>
 
             <span class="c1"># Find out the length of the response</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">resp_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -242,48 +215,35 @@
                 <span class="n">part</span> <span class="o">=</span> <span class="n">part</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
 
             <span class="c1"># Set Done flag</span>
-            <span class="n">recieved</span> <span class="o">=</span> <span class="n">recieved</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">recieved</span> <span class="o">&gt;=</span> <span class="n">resp_length</span><span class="p">:</span>
+            <span class="n">received</span> <span class="o">=</span> <span class="n">received</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">received</span> <span class="o">&gt;=</span> <span class="n">resp_length</span><span class="p">:</span>
                 <span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
 
             <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
         <span class="n">response</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
         <span class="c1"># return the JSON as a namedtuple object</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__json2obj</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Messenger.sendtohttp"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.messenger.Messenger.sendtohttp">[docs]</a>    <span class="k">def</span> <span class="nf">sendtohttp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rest_url</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;send function sends the command to the oxd server and recieves the</span>
-<span class="sd">        response for web connection type.</span>
+<div class="viewcode-block" id="Messenger.request"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.messenger.Messenger.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function that builds the request and returns the response from</span>
+<span class="sd">        oxd-server</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            params (dict) - Dict representation of the JSON param string</span>
-<span class="sd">            rest_url - Url of the rest API</span>
+<span class="sd">            command (str): The command that has to be sent to the oxd-server</span>
+<span class="sd">            **kwargs: The parameters that should accompany the request</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            response (dict) - The JSON response from the oxd Server as a dict</span>
+<span class="sd">            dict: the returned response from oxd-server as a dictionary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">command</span><span class="p">,</span>
+            <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-
-        <span class="n">param</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="s1">&#39;protection_access_token&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
-            <span class="n">accessToken</span> <span class="o">=</span> <span class="s1">&#39;Bearer &#39;</span> <span class="o">+</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;protection_access_token&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">accessToken</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-
-        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span> <span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="n">accessToken</span><span class="p">}</span>
-
-        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">rest_url</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
-        <span class="n">gcontext</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">SSLContext</span><span class="p">(</span><span class="n">ssl</span><span class="o">.</span><span class="n">PROTOCOL_TLSv1</span><span class="p">)</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">gcontext</span><span class="p">)</span>
-
-        <span class="n">resp_page</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-
-        <span class="n">response</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resp_page</span><span class="p">)</span>
-        <span class="c1"># return the JSON as a namedtuple object</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__json2obj</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

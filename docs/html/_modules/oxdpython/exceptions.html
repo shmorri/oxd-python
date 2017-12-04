@@ -80,8 +80,10 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"></div>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../oxdpython.html">oxdpython package</a></li>
+</ul>
+
             
           
         </div>
@@ -125,7 +127,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for oxdpython.exceptions</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="OxdServerError"><a class="viewcode-back" href="../../index.html#oxdpython.exceptions.OxdServerError">[docs]</a><span></span><span class="k">class</span> <span class="nc">OxdServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="OxdServerError"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.exceptions.OxdServerError">[docs]</a><span></span><span class="k">class</span> <span class="nc">OxdServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Error raises by oxdpython whenever a Oxd Server Error is reported</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -134,7 +136,7 @@
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error_string</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="InvalidTicketError"><a class="viewcode-back" href="../../index.html#oxdpython.exceptions.InvalidTicketError">[docs]</a><span class="k">class</span> <span class="nc">InvalidTicketError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="InvalidTicketError"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.exceptions.InvalidTicketError">[docs]</a><span class="k">class</span> <span class="nc">InvalidTicketError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Error raised when oxd-server returns a &quot;invalid_ticket&quot; error for the</span>
 <span class="sd">    `uma_rp_get_rpt` command.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -144,7 +146,7 @@
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error_string</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="NeedInfoError"><a class="viewcode-back" href="../../index.html#oxdpython.exceptions.NeedInfoError">[docs]</a><span class="k">class</span> <span class="nc">NeedInfoError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="NeedInfoError"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.exceptions.NeedInfoError">[docs]</a><span class="k">class</span> <span class="nc">NeedInfoError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Error raised when oxd-server returns a &quot;need_info&quot; error for the</span>
 <span class="sd">    `uma_rp_get_rpt` command.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
