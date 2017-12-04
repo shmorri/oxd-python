@@ -282,7 +282,9 @@
 <span class="sd">            state (string): state value parsed from the callback URL</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: The tokens object with the following data structure::</span>
+<span class="sd">            dict: The tokens object with the following data structure.</span>
+
+<span class="sd">            Example response::</span>
 
 <span class="sd">                {</span>
 <span class="sd">                    &quot;access_token&quot;: &quot;&lt;token string&gt;&quot;,</span>
@@ -300,10 +302,6 @@
 <span class="sd">                        &quot;at_hash&quot;: &quot;MTIzNDU2Nzg5MDEyMzQ1Ng&quot;</span>
 <span class="sd">                    }</span>
 <span class="sd">                }</span>
-
-<span class="sd">            Since this would be returned as a NamedTuple, it can be accessed</span>
-<span class="sd">            using the dot notation as :obj:`data.access_token`,</span>
-<span class="sd">            :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            OxdServerError: If oxD server throws an error OR if the params code</span>
@@ -675,18 +673,18 @@
 <span class="sd">            If you are using the oxd-https-extension, you must setup the client</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: the client setup information.</span>
+<span class="sd">            dict: the client setup information</span>
 
 <span class="sd">            Example response::</span>
 
 <span class="sd">                {</span>
 <span class="sd">                    &quot;oxd_id&quot;:&quot;6F9619FF-8B86-D011-B42D-00CF4FC964FF&quot;,</span>
 <span class="sd">                    &quot;op_host&quot;: &quot;&lt;op host&gt;&quot;,</span>
-<span class="sd">                    &quot;client_id&quot;:&quot;&lt;client id&gt;&quot;</span>
-<span class="sd">                    &quot;client_secret&quot;:&quot;&lt;client secret&gt;&quot;</span>
-<span class="sd">                    &quot;client_registration_access_token&quot;:&quot;&lt;Client registration access token&gt;&quot;</span>
-<span class="sd">                    &quot;client_registration_client_uri&quot;:&quot;&lt;URI of client registration&gt;&quot;</span>
-<span class="sd">                    &quot;client_id_issued_at&quot;:&quot;&lt;client_id issued at&gt;&quot;</span>
+<span class="sd">                    &quot;client_id&quot;:&quot;&lt;client id&gt;&quot;,</span>
+<span class="sd">                    &quot;client_secret&quot;:&quot;&lt;client secret&gt;&quot;,</span>
+<span class="sd">                    &quot;client_registration_access_token&quot;:&quot;&lt;Client registration access token&gt;&quot;,</span>
+<span class="sd">                    &quot;client_registration_client_uri&quot;:&quot;&lt;URI of client registration&gt;&quot;,</span>
+<span class="sd">                    &quot;client_id_issued_at&quot;:&quot;&lt;client_id issued at&gt;&quot;,</span>
 <span class="sd">                    &quot;client_secret_expires_at&quot;:&quot;&lt;client_secret expires at&gt;&quot;</span>
 <span class="sd">                }</span>
 

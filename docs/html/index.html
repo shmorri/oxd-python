@@ -306,7 +306,8 @@ OP. It is called after the user authorizes by visiting the auth URL.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The tokens object with the following data structure:</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The tokens object with the following data structure.</p>
+<p>Example response:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
     <span class="s2">&quot;expires_in&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
@@ -325,9 +326,6 @@ OP. It is called after the user authorizes by visiting the auth URL.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Since this would be returned as a NamedTuple, it can be accessed
-using the dot notation as <code class="xref py py-obj docutils literal"><span class="pre">data.access_token</span></code>,
-<code class="xref py py-obj docutils literal"><span class="pre">data.refresh_token</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">data.id_token</span></code>...etc.,</p>
 </p>
 </td>
 </tr>
@@ -416,17 +414,17 @@ parameter to other commands.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the client setup information.<p>Example response:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>{
-    &quot;oxd_id&quot;:&quot;6F9619FF-8B86-D011-B42D-00CF4FC964FF&quot;,
-    &quot;op_host&quot;: &quot;&lt;op host&gt;&quot;,
-    &quot;client_id&quot;:&quot;&lt;client id&gt;&quot;
-    &quot;client_secret&quot;:&quot;&lt;client secret&gt;&quot;
-    &quot;client_registration_access_token&quot;:&quot;&lt;Client registration access token&gt;&quot;
-    &quot;client_registration_client_uri&quot;:&quot;&lt;URI of client registration&gt;&quot;
-    &quot;client_id_issued_at&quot;:&quot;&lt;client_id issued at&gt;&quot;
-    &quot;client_secret_expires_at&quot;:&quot;&lt;client_secret expires at&gt;&quot;
-}
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the client setup information<p>Example response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;oxd_id&quot;</span><span class="p">:</span><span class="s2">&quot;6F9619FF-8B86-D011-B42D-00CF4FC964FF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;op_host&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;op host&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_id&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;client id&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_secret&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;client secret&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_registration_access_token&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;Client registration access token&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_registration_client_uri&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;URI of client registration&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_id_issued_at&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;client_id issued at&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_secret_expires_at&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;client_secret expires at&gt;&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </td>

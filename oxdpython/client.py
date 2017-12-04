@@ -155,7 +155,9 @@ class Client:
             state (string): state value parsed from the callback URL
 
         Returns:
-            dict: The tokens object with the following data structure::
+            dict: The tokens object with the following data structure.
+
+            Example response::
 
                 {
                     "access_token": "<token string>",
@@ -173,10 +175,6 @@ class Client:
                         "at_hash": "MTIzNDU2Nzg5MDEyMzQ1Ng"
                     }
                 }
-
-            Since this would be returned as a NamedTuple, it can be accessed
-            using the dot notation as :obj:`data.access_token`,
-            :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,
 
         Raises:
             OxdServerError: If oxD server throws an error OR if the params code
@@ -548,18 +546,18 @@ class Client:
             If you are using the oxd-https-extension, you must setup the client
 
         Returns:
-            dict: the client setup information.
+            dict: the client setup information
 
             Example response::
 
                 {
                     "oxd_id":"6F9619FF-8B86-D011-B42D-00CF4FC964FF",
                     "op_host": "<op host>",
-                    "client_id":"<client id>"
-                    "client_secret":"<client secret>"
-                    "client_registration_access_token":"<Client registration access token>"
-                    "client_registration_client_uri":"<URI of client registration>"
-                    "client_id_issued_at":"<client_id issued at>"
+                    "client_id":"<client id>",
+                    "client_secret":"<client secret>",
+                    "client_registration_access_token":"<Client registration access token>",
+                    "client_registration_client_uri":"<URI of client registration>",
+                    "client_id_issued_at":"<client_id issued at>",
                     "client_secret_expires_at":"<client_secret expires at>"
                 }
 
