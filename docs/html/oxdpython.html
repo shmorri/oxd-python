@@ -1,0 +1,860 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>oxD Python Library Documentation &mdash; oxD Python 3.1.1-rc documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="oxD Python 3.1.1-rc documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> oxD Python
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">oxD Python Library Documentation</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-oxdpython.client">oxdpython.client module</a></li>
+<li><a class="reference internal" href="#module-oxdpython.configurer">oxdpython.configurer module</a></li>
+<li><a class="reference internal" href="#module-oxdpython.messenger">oxdpython.messenger module</a></li>
+<li><a class="reference internal" href="#module-oxdpython">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">oxD Python</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>oxD Python Library Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="oxd-python-library-documentation">
+<h1>oxD Python Library Documentation<a class="headerlink" href="#oxd-python-library-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to the oxD Python API reference page. If you are looking for docs on how to use the library <a class="reference external" href="https://gluu.org/docs/oxd/libraries/languages/python/">go here</a>.</p>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-oxdpython.client">
+<span id="oxdpython-client-module"></span><h2>oxdpython.client module<a class="headerlink" href="#module-oxdpython.client" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="oxdpython.client.Client">
+<em class="property">class </em><code class="descclassname">oxdpython.client.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>config_location</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="oxdpython.client.Client.delete_config">
+<code class="descname">delete_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.delete_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.delete_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>A private method which deletes client attributes from the config
+file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.get_access_token_by_refresh_token">
+<code class="descname">get_access_token_by_refresh_token</code><span class="sig-paren">(</span><em>refresh_token</em>, <em>scope=None</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_access_token_by_refresh_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_access_token_by_refresh_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to get access code for getting the user details from the
+OP by using the refresh_token. It is called after getting the
+refresh_token by using the code and state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>refresh_token</strong> (<em>string</em>) &#8211; refresh_token is obtained by using the code
+and state</li>
+<li><strong>scope</strong> (<em>list, optional</em>) &#8211; scopes required, takes the one provided
+during site registrations by default</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The tokens object with the following data structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;access_token&quot;</span><span class="p">:</span><span class="s2">&quot;SlAV32hkKG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;expires_in&quot;</span><span class="p">:</span><span class="mi">3600</span><span class="p">,</span>
+        <span class="s2">&quot;refresh_token&quot;</span><span class="p">:</span><span class="s2">&quot;aaAV32hkKG1&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Since this would be returned as a NamedTuple, it can be accessed
+using the dot notation as <code class="xref py py-obj docutils literal"><span class="pre">data.access_token</span></code>,
+<code class="xref py py-obj docutils literal"><span class="pre">data.refresh_token</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">data.id_token</span></code>...etc.,</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">NamedTuple</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If oxd server throws an error OR if the params code
+and scopes are of improper datatype.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.get_authorization_url">
+<code class="descname">get_authorization_url</code><span class="sig-paren">(</span><em>scope=None</em>, <em>acr_values=None</em>, <em>prompt=None</em>, <em>custom_params=None</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_authorization_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_authorization_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to get the authorization url that can be opened in the
+browser for the user to provide authorization and authentication</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>acr_values</strong> (<em>list, optional</em>) &#8211; acr values in the order of priority</li>
+<li><strong>prompt</strong> (<em>string, optional</em>) &#8211; prompt=login is required if you want to
+force alter current user session (in case user is already
+logged in from site1 and site2 construsts authorization
+request and want to force alter current user session)</li>
+<li><strong>scope</strong> (<em>list, optional</em>) &#8211; scopes required, takes the one provided
+during site registrations by default</li>
+<li><strong>custom_params</strong> (<em>dict, optional</em>) &#8211; custom parameters that are wished
+to be sent with the request</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The authorization url that the user must access for
+authentication and authorization</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">string</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the oxd throws an error for any reason.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.get_client_token">
+<code class="descname">get_client_token</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_client_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_client_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>A method which generates the protection access token</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.get_config_value">
+<code class="descname">get_config_value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_config_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_config_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>A private method which returns the client attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.get_logout_uri">
+<code class="descname">get_logout_uri</code><span class="sig-paren">(</span><em>id_token_hint=None</em>, <em>post_logout_redirect_uri=None</em>, <em>state=None</em>, <em>session_state=None</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_logout_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_logout_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to logout the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id_token_hint</strong> (<em>string, optional</em>) &#8211; oxd server will use last used
+ID Token, if not provided</li>
+<li><strong>post_logout_redirect_uri</strong> (<em>string, optional</em>) &#8211; URI to redirect,
+this uri would override the value given in the site-config</li>
+<li><strong>state</strong> (<em>string, optional</em>) &#8211; site state</li>
+<li><strong>session_state</strong> (<em>string, optional</em>) &#8211; session state</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>The URI to which the user must be directed in order to</dt>
+<dd><p class="first last">perform the logout</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.get_tokens_by_code">
+<code class="descname">get_tokens_by_code</code><span class="sig-paren">(</span><em>code</em>, <em>state</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_tokens_by_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_tokens_by_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to get access code for getting the user details from the
+OP. It is called after the user authorizies by visiting the auth URL.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>code</strong> (<em>string</em>) &#8211; code, parse from the callback URL querystring</li>
+<li><strong>state</strong> (<em>string</em>) &#8211; state value parsed from the callback URL</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The tokens object with the following data structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;expires_in&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+    <span class="s2">&quot;refresh_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id_token_claims&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;iss&quot;</span><span class="p">:</span> <span class="s2">&quot;https://server.example.com&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="s2">&quot;24400320&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;aud&quot;</span><span class="p">:</span> <span class="s2">&quot;s6BhdRkqt3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nonce&quot;</span><span class="p">:</span> <span class="s2">&quot;n-0S6_WzA2Mj&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;exp&quot;</span><span class="p">:</span> <span class="mi">1311281970</span><span class="p">,</span>
+        <span class="s2">&quot;iat&quot;</span><span class="p">:</span> <span class="mi">1311280970</span><span class="p">,</span>
+        <span class="s2">&quot;at_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;MTIzNDU2Nzg5MDEyMzQ1Ng&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Since this would be returned as a NamedTuple, it can be accessed
+using the dot notation as <code class="xref py py-obj docutils literal"><span class="pre">data.access_token</span></code>,
+<code class="xref py py-obj docutils literal"><span class="pre">data.refresh_token</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">data.id_token</span></code>...etc.,</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">NamedTuple</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If oxd server throws an error OR if the params code
+and scopes are of improper datatype.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.get_user_info">
+<code class="descname">get_user_info</code><span class="sig-paren">(</span><em>access_token</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_user_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_user_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to get the information about the user using the access code
+obtained from the OP</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>access_token</strong> (<em>string</em>) &#8211; access token from the get_tokens_by_code
+function</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The user data claims that are returned by the OP.
+Refer to the /.well-known/openid-configuration URL of your OP for
+the complete list of the claims for different scopes.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">NamedTuple</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the param access_token is empty OR if the oxd
+Server returns an error.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.openid_type">
+<code class="descname">openid_type</code><span class="sig-paren">(</span><em>op_host</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.openid_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.openid_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fucntion to know static or dynamic openID Provider.
+This should be called after getting the URI of the OpenID Provider,
+Client Redirect URI, Post logout URI, oxd port values from user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True for dynamic and False for static openID provider.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.register_site">
+<code class="descname">register_site</code><span class="sig-paren">(</span><em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.register_site"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.register_site" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to register the site and generate the oxd_id for the site</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The ID of the site (also called client id) if the
+registration is sucessful</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the site registration fails.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.set_config_value">
+<code class="descname">set_config_value</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.set_config_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.set_config_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>A private method which sets the client attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.setup_client">
+<code class="descname">setup_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.setup_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.setup_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to setup the client and generate a Client ID, Client
+Secret for the site</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The tokens object with the following data structure:<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;oxd_id&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;op_host&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_secret&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_registration_access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_registration_client_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token string&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_id_issued_at&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token long&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_secret_expires_at&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;token long&gt;&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Since this would be returned as a NamedTuple, it can be accessed
+using the dot notation as <code class="xref py py-obj docutils literal"><span class="pre">data.oxd_id</span></code>,
+<code class="xref py py-obj docutils literal"><span class="pre">data.client_id</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">data.client_secret</span></code>...etc.,</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">NamedTuple</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; If the site client setup fails.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rp_get_claims_gathering_url">
+<code class="descname">uma_rp_get_claims_gathering_url</code><span class="sig-paren">(</span><em>ticket</em>, <em>claims_redirect_uri</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rp_get_claims_gathering_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rp_get_claims_gathering_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used in a UMA Resource Server to obtain claims
+gathering url.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>claims_redirect_uri</strong> (<em>string</em>) &#8211; the redirect URL for the claims</li>
+<li><strong>ticket</strong> (<em>string</em>) &#8211; ticket value returned by the uma_rs_check_access()
+method</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The access information received in the format below:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>{
+</pre></div>
+</div>
+<blockquote>
+<div><p>&#8220;status&#8221;:&#8221;ok&#8221;,
+&#8220;data&#8221;:{</p>
+<blockquote>
+<div><p>&#8220;url&#8221;:&#8221;<a class="reference external" href="https://as.com/restv1/uma/gather_claims?client_id=&#64;!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!AB77!1A2B&amp;ticket=4678a107-e124-416c-af79-7807f3c31457&amp;claims_redirect_uri=https://client.example.com/cb&amp;state=af0ifjsldkj">https://as.com/restv1/uma/gather_claims?client_id=&#64;!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!AB77!1A2B&amp;ticket=4678a107-e124-416c-af79-7807f3c31457&amp;claims_redirect_uri=https://client.example.com/cb&amp;state=af0ifjsldkj</a>&#8221;,
+&#8220;state&#8221;:&#8221;af0ifjsldkj&#8221;</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">NamedTuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rp_get_rpt">
+<code class="descname">uma_rp_get_rpt</code><span class="sig-paren">(</span><em>ticket</em>, <em>claim_token=None</em>, <em>claim_token_format=None</em>, <em>pct=None</em>, <em>rpt=None</em>, <em>scope=None</em>, <em>state=None</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rp_get_rpt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rp_get_rpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used in a UMA Resource Server to get rpt.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ticket</strong> (<em>string</em>) &#8211; ticket value returned by the uma_rs_check_access()
+method</li>
+<li><strong>claim_token</strong> (<em>string, optional</em>) &#8211; claim token obtained</li>
+<li><strong>claim_token_format</strong> (<em>string, optional</em>) &#8211; format of the claim token</li>
+<li><strong>pct</strong> (<em>string, optional</em>) &#8211; pct</li>
+<li><strong>rpt</strong> (<em>string, optional</em>) &#8211; RPT</li>
+<li><strong>scope</strong> (<em>list, optional</em>) &#8211; scopes</li>
+<li><strong>state</strong> (<em>string, optional</em>) &#8211; state token</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>The access information recieved in the format below.</dt>
+<dd><p class="first">Success Response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;access_token&quot;</span><span class="p">:</span><span class="s2">&quot;SSJHBSUSSJHVhjsgvhsgvshgsv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;token_type&quot;</span><span class="p">:</span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pct&quot;</span><span class="p">:</span><span class="s2">&quot;c2F2ZWRjb25zZW50&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;upgraded&quot;</span><span class="p">:</span><span class="n">true</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Needs info error response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;error&quot;</span><span class="p">:</span><span class="s2">&quot;need_info&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;error_description&quot;</span><span class="p">:</span><span class="s2">&quot;The authorization server needs additional information in order to determine whether the client is authorized to have these permissions.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span><span class="s2">&quot;need_info&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ticket&quot;</span><span class="p">:</span><span class="s2">&quot;ZXJyb3JfZGV0YWlscw==&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;required_claims&quot;</span><span class="p">:[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;claim_token_format&quot;</span><span class="p">:[</span>
+                <span class="s2">&quot;http://openid.net/specs/openid-connect-core-1_0.html#IDToken&quot;</span>
+            <span class="p">],</span>
+                <span class="s2">&quot;claim_type&quot;</span><span class="p">:</span><span class="s2">&quot;urn:oid:0.9.2342.19200300.100.1.3&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;friendly_name&quot;</span><span class="p">:</span><span class="s2">&quot;email&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;issuer&quot;</span><span class="p">:[</span><span class="s2">&quot;https://example.com/idp&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;email23423453ou453&quot;</span>
+            <span class="p">}</span>
+            <span class="p">],</span>
+        <span class="s2">&quot;redirect_user&quot;</span><span class="p">:</span><span class="s2">&quot;https://as.example.com/rqp_claims?id=2346576421&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Invalid ticket error:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;error&quot;</span><span class="p">:</span><span class="s2">&quot;invalid_ticket&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;error_description&quot;</span><span class="p">:</span><span class="s2">&quot;Ticket is not valid (outdated or not present on Authorization Server).&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Internal oxd server error:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;error&quot;</span><span class="p">:</span><span class="s2">&quot;internal_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;error_description&quot;</span><span class="p">:</span><span class="s2">&quot;oxd server failed to handle command. Please check logs for details.&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">NamedTuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rs_check_access">
+<code class="descname">uma_rs_check_access</code><span class="sig-paren">(</span><em>rpt</em>, <em>path</em>, <em>http_method</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rs_check_access"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rs_check_access" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used in a UMA Resource Server to check access.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rpt</strong> (<em>string</em>) &#8211; RPT or blank value if absent (not send by RP)</li>
+<li><strong>path</strong> (<em>string</em>) &#8211; Path of resource (e.g. for <a class="reference external" href="http://rs.com/phones">http://rs.com/phones</a>,
+/phones should be passed)</li>
+<li><strong>http_method</strong> (<em>string</em>) &#8211; DELETE)</li>
+<li><strong>protection_access_token</strong> (<em>string, optional</em>) &#8211; protection access token
+for oxd-https-extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>The access information recieved in the format below.
+If the access is granted:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="s2">&quot;access&quot;</span><span class="p">:</span> <span class="s2">&quot;granted&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>If the access is denied with ticket response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>{
+    &quot;access&quot;: &quot;denied&quot;,
+    &quot;www-authenticate_header&quot;: &quot;UMA realm=&#39;example&#39;,
+        as_uri=&#39;https://as.example.com&#39;,
+        error=&#39;insufficient_scope&#39;,
+        ticket=&#39;016f84e8-f9b9-11e0-bd6f-0021cc6004de&#39;&quot;,
+    &quot;ticket&quot;: &quot;016f84e8-f9b9-11e0-bd6f-0021cc6004de&quot;
+}
+</pre></div>
+</div>
+<p>If the access is denied without ticket response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="s2">&quot;access&quot;</span><span class="p">:</span> <span class="s2">&quot;denied&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>If the resource is not Protected:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>{
+    &quot;error&quot;: &quot;invalid_request&quot;,
+    &quot;error_description&quot;: &quot;Resource is not protected. Please
+        protect your resource first with uma_rs_protect
+        command.&quot;
+}
+</pre></div>
+</div>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">NamedTuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.uma_rs_protect">
+<code class="descname">uma_rs_protect</code><span class="sig-paren">(</span><em>resources</em>, <em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.uma_rs_protect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.uma_rs_protect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be used in a UMA Resource Server to protect resources.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>resources</strong> &#8211; list of resource to protect</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The status of the request.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.client.Client.update_site_registration">
+<code class="descname">update_site_registration</code><span class="sig-paren">(</span><em>protection_access_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.update_site_registration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.update_site_registration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fucntion to update the site&#8217;s information with OpenID Provider.
+This should be called after changing the values in the cfg file.
+:returns: The status for update. True for success and False for failure
+:rtype: bool</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-oxdpython.configurer">
+<span id="oxdpython-configurer-module"></span><h2>oxdpython.configurer module<a class="headerlink" href="#module-oxdpython.configurer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="oxdpython.configurer.Configurer">
+<em class="property">class </em><code class="descclassname">oxdpython.configurer.</code><code class="descname">Configurer</code><span class="sig-paren">(</span><em>cfg_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/configurer.html#Configurer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.configurer.Configurer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The class which holds all the information about the client and the OP
+metadata</p>
+<dl class="method">
+<dt id="oxdpython.configurer.Configurer.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>section</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/configurer.html#Configurer.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.configurer.Configurer.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get function reads the config value for the requested section and
+key and returns it</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>section</strong> (<em>string</em>) &#8211; either - oxd, client</li>
+<li><strong>key</strong> (<em>string</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>value (string) - the function returns the value of the key</dt>
+<dd><p class="first last">in the appropriate format if found or returns
+None if such a section or key couldnot be found</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>config = Configurer(location)
+oxd_port = config.get(&#8216;oxd&#8217;, &#8216;port&#8217;)  # returns the port of the oxd</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.configurer.Configurer.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>section</em>, <em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/configurer.html#Configurer.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.configurer.Configurer.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>set function sets a particular value for the specified key in the
+specified section and writes it to the config file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>section</strong> (<em>string</em>) &#8211; saved. Only accepted values are - oxd, client</li>
+<li><strong>key</strong> (<em>string</em>) &#8211; </li>
+<li><strong>value</strong> (<em>string</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>success (bool) - a boolean indication of whether the value was</dt>
+<dd><p class="first last">stored successfully in the file</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-oxdpython.messenger">
+<span id="oxdpython-messenger-module"></span><h2>oxdpython.messenger module<a class="headerlink" href="#module-oxdpython.messenger" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="oxdpython.messenger.Messenger">
+<em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">Messenger</code><span class="sig-paren">(</span><em>port=8099</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class which takes care of the socket communication with oxd Server.
+The object is initialized with the port number</p>
+<dl class="method">
+<dt id="oxdpython.messenger.Messenger.encodeHyphen">
+<code class="descname">encodeHyphen</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.encodeHyphen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.encodeHyphen" title="Permalink to this definition">¶</a></dt>
+<dd><p>TO-DO: This is just for work around purpose. Original fix needs to be worked on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.messenger.Messenger.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send function sends the command to the oxd server and recieves the
+response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> (<em>dict</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response (dict) - The JSON response from the oxd Server as a dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.messenger.Messenger.sendtohttp">
+<code class="descname">sendtohttp</code><span class="sig-paren">(</span><em>params</em>, <em>rest_url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.sendtohttp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.sendtohttp" title="Permalink to this definition">¶</a></dt>
+<dd><p>send function sends the command to the oxd server and recieves the
+response for web connection type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>params</strong> (<em>dict</em>) &#8211; </li>
+<li><strong>- Url of the rest API</strong> (<em>rest_url</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">response (dict) - The JSON response from the oxd Server as a dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-oxdpython">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-oxdpython" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Gluu.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'3.1.1-rc',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

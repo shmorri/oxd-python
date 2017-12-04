@@ -2,7 +2,7 @@ import logging
 
 from .configurer import Configurer
 from .messenger import Messenger
-from .exceptions import OxdServerError
+from .exceptions import OxdServerError, NeedInfoError, InvalidTicketError
 
 logger = logging.getLogger(__name__)
 
@@ -83,19 +83,14 @@ class Client:
             if self.config.get("client", olp):
                 params[olp] = self.config.get("client", olp).split(",")
 
-        command = {"command": "register_site", "params": params}
         logger.debug("Sending command `register_site` with params %s", params)
-
-        response = self.msgr.send(command)
+        response = self.msgr.request("register_site", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n {1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
 
-        self.oxd_id = response.data.oxd_id
+        self.oxd_id = response["data"]["oxd_id"]
         self.config.set("oxd", "id", self.oxd_id)
         logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
         return self.oxd_id
@@ -124,7 +119,6 @@ class Client:
         Raises:
             RuntimeError: If the oxD throws an error for any reason.
         """
-        command = {"command": "get_authorization_url"}
         if not self.oxd_id:
             self.register_site()
 
@@ -142,19 +136,14 @@ class Client:
         if custom_params:
             params["custom_parameters"] = custom_params
 
-        command["params"] = params
         logger.debug("Sending command `get_authorization_url` with params %s",
                      params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("get_authorization_url", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = 'oxd Server Error: {0}\n{1}'.format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data.authorization_url
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']['authorization_url']
 
 
     def get_tokens_by_code(self, code, state):
@@ -166,7 +155,7 @@ class Client:
             state (string): state value parsed from the callback URL
 
         Returns:
-            NamedTuple: The tokens object with the following data structure::
+            dict: The tokens object with the following data structure::
 
                 {
                     "access_token": "<token string>",
@@ -190,25 +179,19 @@ class Client:
             :obj:`data.refresh_token`, :obj:`data.id_token`...etc.,
 
         Raises:
-            RuntimeError: If oxD server throws an error OR if the params code
+            OxdServerError: If oxD server throws an error OR if the params code
                 and scopes are of improper data type.
         """
-        command = {"command": "get_tokens_by_code"}
         params = dict(oxd_id=self.oxd_id, code=code, state=state)
 
-        command["params"] = params
         logger.debug("Sending command `get_tokens_by_code` with params %s",
                      params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("get_tokens_by_code", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']
 
     def get_access_token_by_refresh_token(self, refresh_token, scope=None):
         """Function that is used to get a new access token using refresh token
@@ -219,71 +202,76 @@ class Client:
                 grant access with scope provided in previous request
 
         Returns:
-            NamedTuple: the tokens with expiry time in as shown::
+            dict: the tokens with expiry time.
+
+            Example response::
 
                 {
                     "access_token":"SlAV32hkKG",
                     "expires_in":3600,
                     "refresh_token":"aaAV32hkKG1"
                 }
+
         """
-        command = {
-            "command": "get_access_token_by_refresh_token",
-            "params": {
-                "oxd_id": self.oxd_id,
-                "refresh_token": refresh_token
-            }
+        params = {
+            "oxd_id": self.oxd_id,
+            "refresh_token": refresh_token
         }
+
         if scope:
-            command['params']['scope'] = scope
+            params['scope'] = scope
 
         logger.debug("Sending command `get_access_token_by_refresh_token` with"
-                     " params %s", command['params'])
-        response = self.msgr.send(command)
+                     " params %s", params)
+        response = self.msgr.request("get_access_token_by_refresh_token",
+                                     **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']
 
     def get_user_info(self, access_token):
         """Function to get the information about the user using the access code
         obtained from the OP
+
+        Note:
+            Refer to the /.well-known/openid-configuration URL of your OP for
+            the complete list of the claims for different scopes.
 
         Args:
             access_token (string): access token from the get_tokens_by_code
                                     function
 
         Returns:
-            NamedTuple: The user data claims that are returned by the OP.
-            Refer to the /.well-known/openid-configuration URL of your OP for
-            the complete list of the claims for different scopes.
+            dict: The user data claims that are returned by the OP in format
+
+            Example response::
+
+                {
+                    "sub": ["248289761001"],
+                    "name": ["Jane Doe"],
+                    "given_name": ["Jane"],
+                    "family_name": ["Doe"],
+                    "preferred_username": ["j.doe"],
+                    "email": ["janedoe@example.com"],
+                    "picture": ["http://example.com/janedoe/me.jpg"]
+                }
 
         Raises:
-            RuntimeError: If the param access_token is empty OR if the oxD
+            OxdServerError: If the param access_token is empty OR if the oxD
                 Server returns an error.
         """
-        command = {"command": "get_user_info"}
-        params = dict(oxd_id=self.oxd_id)
+        params = dict(oxd_id=self.oxd_id, access_token=access_token)
         params["access_token"] = access_token
-        command["params"] = params
         logger.debug("Sending command `get_user_info` with params %s",
                      params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("get_user_info", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description
-            )
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data.claims
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']['claims']
 
     def get_logout_uri(self, id_token_hint=None, post_logout_redirect_uri=None,
                        state=None, session_state=None):
@@ -301,7 +289,6 @@ class Client:
             string: The URI to which the user must be directed in order to
             perform the logout
         """
-        command = {"command": "get_logout_uri"}
         params = {"oxd_id": self.oxd_id}
         if id_token_hint:
             params["id_token_hint"] = id_token_hint
@@ -315,19 +302,13 @@ class Client:
         if session_state:
             params["session_state"] = session_state
 
-        command["params"] = params
-
         logger.debug("Sending command `get_logout_uri` with params %s", params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("get_logout_uri", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data.uri
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']['uri']
 
     def update_site_registration(self):
         """Function to update the site's information with OpenID Provider.
@@ -335,8 +316,10 @@ class Client:
 
         Returns:
             bool: The status for update. True for success and False for failure
+
+        Raises:
+            OxdServerError: When the update fails and oxd server returns error
         """
-        command = {"command": "update_site_registration"}
         params = {"oxd_id": self.oxd_id,
                   "authorization_redirect_uri": self.authorization_redirect_uri
                   }
@@ -350,17 +333,13 @@ class Client:
                 value = self.config.get("client", param).split(",")
                 params[param] = value
 
-        command["params"] = params
         logger.debug("Sending `update_site_registration` with params %s",
                      params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("update_site_registration", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = 'oxd Server Error: {0}\n{1}'.format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
 
         return True
 
@@ -374,20 +353,14 @@ class Client:
         Returns:
             bool: The status of the request.
         """
-        command = {"command": "uma_rs_protect"}
         params = dict(oxd_id=self.oxd_id, resources=resources)
-        command["params"] = params
 
         logger.debug("Sending `uma_rs_protect` with params %s", params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("uma_rs_protect", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
         return True
 
     def uma_rs_check_access(self, rpt, path, http_method):
@@ -401,7 +374,7 @@ class Client:
                 DELETE)
 
         Returns:
-            NamedTuple: The access information received in the format below.
+            dict: The access information received in the format below.
             If the access is granted::
 
                 { "access": "granted" }
@@ -431,25 +404,19 @@ class Client:
                 }
 
         """
-        command = {"command": "uma_rs_check_access"}
         params = {"oxd_id": self.oxd_id,
                   "rpt": rpt,
                   "path": path,
                   "http_method": http_method}
-        command["params"] = params
 
         logger.debug("Sending command `uma_rs_check_access` with params %s",
                      params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("uma_rs_check_access", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']
 
     def uma_rp_get_rpt(self, ticket, claim_token=None, claim_token_format=None,
                        pct=None, rpt=None, scope=None, state=None):
@@ -463,10 +430,10 @@ class Client:
             rpt (str, OPTIONAL): rpt
             scope (list, OPTIONAL): scope
             state (str, OPTIONAL): state that is returned from
-                :function:`uma_rp_get_claims_gathering_url` command
+                `uma_rp_get_claims_gathering_url` command
 
         Returns:
-            NamedTuple: The response from the OP
+            dict: The response from the OP
 
             Success Response::
 
@@ -480,14 +447,22 @@ class Client:
                     }
                 }
 
-            Needs Info Error Response::
+        Raises:
+            OxdServerError: When oxd-server reports a generic internal_error
+            InvalidTicketError: When the oxd server returns a "invalid_ticket"
+                error
+            NeedInfoError: When the oxd server returns the "need_info" error.
+                The details of the error can be obtained from the exception as
+                a dict as shown below::
 
-            {
-                "status":"error",
-                "data":{
-                    "error":"need_info",
-                    "error_description":"The authorization server needs additional information in order to determine whether the client is authorized to have these permissions.",
-                    "details": {
+                    try:
+                        rpt = client.uma_rp_get_rpt('ticket')
+                    except NeedInfoError as e:
+                        details = e.details
+
+                The details dict::
+
+                    {
                         "error":"need_info",
                         "ticket":"ZXJyb3JfZGV0YWlscw==",
                         "required_claims":[
@@ -501,33 +476,10 @@ class Client:
                                 "name":"email23423453ou453"
                             }
                         ],
-                    "redirect_user":"https://as.example.com/rqp_claims?id=2346576421"
+                        "redirect_user":"https://as.example.com/rqp_claims?id=2346576421"
                     }
-                }
-            }
-
-            Invalid Ticket Error Response::
-
-            {
-                "status":"error",
-                "data": {
-                    "error":"invalid_ticket",
-                    "error_description":"Ticket is not valid (outdated or not present on Authorization Server)."
-                }
-            }
-
-            Internal oxd-server Error Response::
-
-            {
-                "status":"error",
-                "data": {
-                    "error":"internal_error",
-                    "error_description":"oxd server failed to handle command. Please check logs for details."
-                }
-            }
 
         """
-        command = {"command": "uma_rp_get_rpt"}
         params = {
             "oxd_id": self.oxd_id,
             "ticket": ticket
@@ -545,20 +497,21 @@ class Client:
         if state:
             params["state"] = state
 
-        command["params"] = params
-
         logger.debug("Sending command `uma_rp_get_rpt` with params %s", params)
-        response = self.msgr.send(command)
+        response = self.msgr.request("uma_rp_get_rpt", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error' and \
-                        response.data.error == 'internal_error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
+        if response['status'] == 'ok':
+            return response['data']
 
-        return response.data
+        if response['data']['error'] == 'internal_error':
+            raise OxdServerError(response['data'])
+
+        if response['data']['error'] == 'need_info':
+            raise NeedInfoError(response['data'])
+
+        if response['data']['error'] == 'invalid_ticket':
+            raise InvalidTicketError(response['data'])
 
     def uma_rp_get_claims_gathering_url(self, ticket):
         """UMA RP function to get the claims gathering URL.
@@ -570,27 +523,20 @@ class Client:
         Returns:
             string specifying the claims gathering url
         """
-        command = {
-            'command': 'uma_rp_get_claims_gathering_url',
-            'params': {
-                'oxd_id': self.oxd_id,
-                'claims_redirect_uri': self.config.get('client',
-                                                       'claims_redirect_uri'),
-                'ticket': ticket
-            }
+        params = {
+            'oxd_id': self.oxd_id,
+            'claims_redirect_uri': self.config.get('client',
+                                                   'claims_redirect_uri'),
+            'ticket': ticket
         }
         logger.debug("Sending command `uma_rp_get_claims_gathering_url` with "
-                     "params %s", command['params'])
-        response = self.msgr.send(command)
+                     "params %s", params)
+        response = self.msgr.request("uma_rp_get_claims_gathering_url", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n{1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data.url
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']['url']
 
     def setup_client(self):
         """The command registers the client for communication protection. This
@@ -602,7 +548,9 @@ class Client:
             If you are using the oxd-https-extension, you must setup the client
 
         Returns:
-            NamedTuple: The client data in the format below::
+            dict: the client setup information.
+
+            Example response::
 
                 {
                     "oxd_id":"6F9619FF-8B86-D011-B42D-00CF4FC964FF",
@@ -630,29 +578,25 @@ class Client:
             if self.config.get("client", olp):
                 params[olp] = self.config.get("client", olp).split(",")
 
-        command = {"command": "setup_client", "params": params}
         logger.debug("Sending command `setup_client` with params %s", params)
 
-        response = self.msgr.send(command)
+        response = self.msgr.request("setup_client", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n {1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        self.config.set("oxd", "id", response.data.oxd_id)
-        self.config.set("client", "client_id", response.data.client_id)
-        self.config.set("client", "client_secret", response.data.client_secret)
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        data = response["data"]
+        self.config.set("oxd", "id", data["oxd_id"])
+        self.config.set("client", "client_id", data["client_id"])
+        self.config.set("client", "client_secret", data["client_secret"])
         self.config.set("client", "client_registration_access_token",
-                        response.data.client_registration_access_token)
+                        data["client_registration_access_token"])
         self.config.set("client", "client_registration_client_uri",
-                        response.data.client_registration_client_uri)
+                        data["client_registration_client_uri"])
         self.config.set("client", "client_id_issued_at",
-                        str(response.data.client_id_issued_at))
+                        str(data["client_id_issued_at"]))
 
-        return response.data
+        return data
 
 
     def get_client_token(self, client_id=None, client_secret=None,
@@ -672,7 +616,9 @@ class Client:
                 are obtained from the config file
 
         Returns:
-            NamedTuple: The client token and the refresh token in the form::
+            dict: The client token and the refresh token in the form.
+
+            Example response ::
 
                 {
                     "access_token":"6F9619FF-8B86-D011-B42D-00CF4FC964FF",
@@ -699,20 +645,12 @@ class Client:
                                                       "client_secret")
         if not op_host:
             params["op_host"] = self.config.get("client", "op_host")
-        command = {
-            "command": "get_client_token",
-            "params": params
-        }
         logger.debug("Sending command `get_client_token` with params %s",
                      params)
 
-        response = self.msgr.send(command)
+        response = self.msgr.request("get_client_token", **params)
         logger.debug("Received response: %s", response)
 
-        if response.status == 'error':
-            error = "oxd Server Error: {0}\n {1}".format(
-                response.data.error, response.data.error_description)
-            logger.error(error)
-            raise OxdServerError(error)
-
-        return response.data
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']
