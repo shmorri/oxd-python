@@ -1,11 +1,51 @@
 import json
 import socket
 import logging
+import urllib2
+
+from . import __version__
 
 logger = logging.getLogger(__name__)
 
+class Messenger(object):
+    """Base class for the different messengers employed by the oxdpython Client
+    """
+    def __init__(self):
+        self._access_token = ''
 
-class SocketMessenger:
+    @staticmethod
+    def create(host='localhost', port='8099', https_extension=False):
+        if https_extension:
+            return HttpMessenger(host)
+        return SocketMessenger(host, port)
+
+    def request(self, command, **kwargs):
+        """Mandatory function that should be implemented by the subclasses. The
+        Client will call this function with the command and the params to be
+        sent to the oxd-server
+
+        Args:
+            command (str): The command that has to be sent to the oxd-server
+            **kwargs: The parameters that should accompany the request
+
+        Returns:
+            dict: the returned response from oxd-server as a dictionary
+        """
+        pass
+
+    @property
+    def access_token(self):
+        return self._access_token
+
+    @access_token.setter
+    def access_token(self, token):
+        if not isinstance(token, str) and not isinstance(token, unicode):
+            raise ValueError("Access token should be a string or Unicode. "
+                             "Received %s" % type(token))
+        self._access_token = token
+
+
+class SocketMessenger(Messenger):
     """A class which takes care of the socket communication with oxD Server.
     The object is initialized with the port number
     """
@@ -17,6 +57,7 @@ class SocketMessenger:
             port (integer) - the port number to bind to the host, default
                              is 8099
         """
+        Messenger.__init__(self)
         self.host = host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -111,11 +152,51 @@ class SocketMessenger:
             "params": dict()
         }
         for item in kwargs.keys():
-            payload['params'][item] = kwargs.get(item)
+            payload["params"][item] = kwargs.get(item)
+
+        if self.access_token:
+            payload["params"]["protection_access_token"] = self.access_token
 
         return self.send(payload)
 
 
-class HttpMessenger(object):
+class HttpMessenger(Messenger):
+    """HttpMessenger provides the communication channel for oxd-https-extension
+
+    Args:
+        host (str): host URL to which the requests are to be made
+    """
     def __init__(self, host):
-        self.host = host
+        Messenger.__init__(self)
+        self.base = self.__base_url(host)
+
+    def __base_url(self, host):
+        if host[-1] != "/":
+            host += "/"
+        if not host.startswith("https://") and \
+                not host.startswith("http://"):
+            host = "https://" + host
+        return host
+
+    def request(self, command, **kwargs):
+        """Function that builds the request and returns the response
+
+        Args:
+            command (str): The command that has to be sent to the oxd-server
+            **kwargs: The parameters that should accompany the request
+
+        Returns:
+            dict: the returned response from oxd-server as a dictionary
+        """
+        url = self.base + command.replace("_", "-")
+        req = urllib2.Request(url, json.dumps(kwargs))
+        req.add_header("User-Agent", "oxdpython/%s" % __version__)
+        req.add_header("Content-type", "application/json; charset=UTF-8")
+
+        # add the protection token if available
+        if self.access_token:
+            req.add_header("Authorization",
+                           "Bearer {0}".format(self.access_token))
+
+        resp = urllib2.urlopen(req)
+        return json.load(resp)
