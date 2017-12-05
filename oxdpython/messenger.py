@@ -159,6 +159,9 @@ class SocketMessenger(Messenger):
 
         return self.send(payload)
 
+    def __str__(self):
+        return "SocketMessenger(%s, %s)" % (self.host, self.port)
+
 
 class HttpMessenger(Messenger):
     """HttpMessenger provides the communication channel for oxd-https-extension
@@ -200,3 +203,6 @@ class HttpMessenger(Messenger):
 
         resp = urllib2.urlopen(req)
         return json.load(resp)
+
+    def __str__(self):
+        return "HttpMessenger(%s)" % self.base

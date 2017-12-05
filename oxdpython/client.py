@@ -24,11 +24,18 @@ class Client:
         self.oxd_id = None
         self.config = Configurer(config_location)
         if self.config.get("oxd", "https_extension"):
+            logger.info("https_extenstion is enabled.")
             self.msgr = Messenger.create(self.config.get("oxd", "host"),
                                          https_extension=True)
         else:
             self.msgr = Messenger.create(self.config.get("oxd", "host"),
                                          int(self.config.get("oxd", "port")))
+
+        if self.config.get("client", "protection_access_token"):
+            logger.info("Protection Token available in config. Setting it to "
+                        "messenger for use in all communication")
+            self.msgr.access_token = self.config.get("client",
+                                                     "protection_access_token")
 
         self.authorization_redirect_uri = self.config.get(
             "client", "authorization_redirect_uri")
@@ -606,7 +613,8 @@ class Client:
     def get_client_token(self, client_id=None, client_secret=None,
                          op_host=None, op_discovery_path=None, scope=None):
         """Function to get the client token which can be used for protection in
-        all future communication.
+        all future communication. The access_token is stored in the config file
+        and used for all future communication by oxdpython.
 
         Args:
             client_id (str, optional): client id from OP or from previous
@@ -657,4 +665,8 @@ class Client:
 
         if response['status'] == 'error':
             raise OxdServerError(response['data'])
+
+        self.config.set("client", "protection_access_token",
+                        response["data"]["access_token"])
+        self.msgr.access_token = response["data"]["access_token"]
         return response['data']
