@@ -2,17 +2,15 @@ import json
 import socket
 import logging
 
-from collections import namedtuple
-
 logger = logging.getLogger(__name__)
 
 
-class Messenger:
+class SocketMessenger:
     """A class which takes care of the socket communication with oxD Server.
     The object is initialized with the port number
     """
     def __init__(self, host='localhost', port=8099):
-        """Constructor for Messenger
+        """Constructor for SocketMessenger
 
         Args:
             host (str) - the host to connect for oxd-server, default localhost
@@ -116,3 +114,8 @@ class Messenger:
             payload['params'][item] = kwargs.get(item)
 
         return self.send(payload)
+
+
+class HttpMessenger(object):
+    def __init__(self, host):
+        self.host = host

@@ -130,7 +130,7 @@
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">from</span> <span class="nn">.configurer</span> <span class="kn">import</span> <span class="n">Configurer</span>
-<span class="kn">from</span> <span class="nn">.messenger</span> <span class="kn">import</span> <span class="n">Messenger</span>
+<span class="kn">from</span> <span class="nn">.messenger</span> <span class="kn">import</span> <span class="n">SocketMessenger</span><span class="p">,</span> <span class="n">HttpMessenger</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">OxdServerError</span><span class="p">,</span> <span class="n">NeedInfoError</span><span class="p">,</span> <span class="n">InvalidTicketError</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
@@ -142,7 +142,7 @@
 <span class="sd">    to send the command to the oxD server via socket.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Client.__init__"><a class="viewcode-back" href="../../index.html#oxdpython.client.Client.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_location</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_location</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor of class Client</span>
 
 <span class="sd">        Args:</span>
@@ -151,7 +151,11 @@
 <span class="sd">                (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Configurer</span><span class="p">(</span><span class="n">config_location</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span> <span class="o">=</span> <span class="n">Messenger</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oxd&quot;</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oxd&quot;</span><span class="p">,</span> <span class="s2">&quot;https_addon&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span> <span class="o">=</span> <span class="n">HttpMessenger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oxd&quot;</span><span class="p">,</span> <span class="s2">&quot;host&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span> <span class="o">=</span> <span class="n">SocketMessenger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oxd&quot;</span><span class="p">,</span> <span class="s2">&quot;host&quot;</span><span class="p">),</span>
+                                        <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oxd&quot;</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">authorization_redirect_uri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="s2">&quot;client&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization_redirect_uri&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span> <span class="o">=</span> <span class="bp">None</span>
@@ -182,7 +186,7 @@
                                 <span class="s2">&quot;ui_locales&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;claims_locales&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;claims_redirect_uri&quot;</span><span class="p">,</span>
-                                <span class="p">]</span></div>
+                                <span class="p">]</span>
 
 <div class="viewcode-block" id="Client.register_site"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.client.Client.register_site">[docs]</a>    <span class="k">def</span> <span class="nf">register_site</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to register the site and generate a unique ID for the site</span>

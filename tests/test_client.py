@@ -4,7 +4,7 @@ import unittest
 
 from mock import patch, Mock, MagicMock
 
-from oxdpython.client import Client, Messenger, Configurer
+from oxdpython.client import Client, SocketMessenger, Configurer
 
 from oxdpython.exceptions import OxdServerError, InvalidTicketError, \
     NeedInfoError
@@ -22,7 +22,7 @@ generic_error = {
 }
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class RegisterSiteTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -57,7 +57,7 @@ class RegisterSiteTestCase(unittest.TestCase):
             c.register_site()
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class GetAuthUrlTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -120,7 +120,7 @@ class GetAuthUrlTestCase(unittest.TestCase):
             self.c.get_authorization_url()
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class GetTokensByCodeTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -155,7 +155,7 @@ class GetTokensByCodeTestCase(unittest.TestCase):
             self.c.get_tokens_by_code("code", "state")
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class GetAccessTokenByRefreshTokenTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -189,7 +189,7 @@ class GetAccessTokenByRefreshTokenTestCase(unittest.TestCase):
             self.c.get_access_token_by_refresh_token('refresh_token')
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class GetUserInfoTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -221,7 +221,7 @@ class GetUserInfoTestCase(unittest.TestCase):
             self.c.get_user_info("some_token")
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class GetLogoutUriTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -263,7 +263,7 @@ class GetLogoutUriTestCase(unittest.TestCase):
             self.c.get_logout_uri()
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class UpdateSiteRegistrationTestCase(unittest.TestCase):
     def test_command(self, request):
         request.return_value = {"status":"ok"}
@@ -282,7 +282,7 @@ class UpdateSiteRegistrationTestCase(unittest.TestCase):
             c.update_site_registration()
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class UmaRpGetRptTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -360,7 +360,7 @@ class UmaRpGetRptTestCase(unittest.TestCase):
             self.c.uma_rp_get_rpt('ticket')
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class UmaRsProtectTestCase(unittest.TestCase):
     def setUp(self):
         self.success = { "status":"ok"}
@@ -385,7 +385,7 @@ class UmaRsProtectTestCase(unittest.TestCase):
             self.c.uma_rs_protect([])
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class UmaRsCheckAccessTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -432,7 +432,7 @@ class UmaRsCheckAccessTestCase(unittest.TestCase):
         with pytest.raises(OxdServerError):
             self.c.uma_rs_check_access('rpt', '/photoz', 'GET')
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class UmaRpGetClaimsGatherUrlTestCase(unittest.TestCase):
     def test_command(self, request):
         request.return_value = {
@@ -452,7 +452,7 @@ class UmaRpGetClaimsGatherUrlTestCase(unittest.TestCase):
             c.uma_rp_get_claims_gathering_url('ticket')
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class SetupClientTestCase(unittest.TestCase):
     @patch.object(Configurer, 'set')
     def test_command(self, mock_set, request):
@@ -491,7 +491,7 @@ class SetupClientTestCase(unittest.TestCase):
             c.setup_client()
 
 
-@patch.object(Messenger, 'request')
+@patch.object(SocketMessenger, 'request')
 class GetClientTokenTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {

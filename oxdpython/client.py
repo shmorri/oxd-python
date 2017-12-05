@@ -1,7 +1,7 @@
 import logging
 
 from .configurer import Configurer
-from .messenger import Messenger
+from .messenger import SocketMessenger, HttpMessenger
 from .exceptions import OxdServerError, NeedInfoError, InvalidTicketError
 
 logger = logging.getLogger(__name__)
@@ -22,8 +22,11 @@ class Client:
                 (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
         """
         self.config = Configurer(config_location)
-        self.msgr = Messenger(self.config.get("oxd", "host"),
-                              int(self.config.get("oxd", "port")))
+        if self.config.get("oxd", "https_addon"):
+            self.msgr = HttpMessenger(self.config.get("oxd", "host"))
+        else:
+            self.msgr = SocketMessenger(self.config.get("oxd", "host"),
+                                        int(self.config.get("oxd", "port")))
         self.authorization_redirect_uri = self.config.get(
             "client", "authorization_redirect_uri")
         self.oxd_id = None

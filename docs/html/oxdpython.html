@@ -723,13 +723,19 @@ specified section and writes it to the config file.</p>
 <div class="section" id="module-oxdpython.messenger">
 <span id="oxdpython-messenger-module"></span><h2>oxdpython.messenger module<a class="headerlink" href="#module-oxdpython.messenger" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="oxdpython.messenger.Messenger">
-<em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">Messenger</code><span class="sig-paren">(</span><em>port=8099</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger" title="Permalink to this definition">¶</a></dt>
+<dt id="oxdpython.messenger.HttpMessenger">
+<em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">HttpMessenger</code><span class="sig-paren">(</span><em>host</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#HttpMessenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.HttpMessenger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="oxdpython.messenger.SocketMessenger">
+<em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">SocketMessenger</code><span class="sig-paren">(</span><em>host='localhost'</em>, <em>port=8099</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#SocketMessenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.SocketMessenger" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class which takes care of the socket communication with oxD Server.
 The object is initialized with the port number</p>
 <dl class="method">
-<dt id="oxdpython.messenger.Messenger.request">
-<code class="descname">request</code><span class="sig-paren">(</span><em>command</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.request" title="Permalink to this definition">¶</a></dt>
+<dt id="oxdpython.messenger.SocketMessenger.request">
+<code class="descname">request</code><span class="sig-paren">(</span><em>command</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#SocketMessenger.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.SocketMessenger.request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that builds the request and returns the response from
 oxd-server</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -753,8 +759,8 @@ oxd-server</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="oxdpython.messenger.Messenger.send">
-<code class="descname">send</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.send" title="Permalink to this definition">¶</a></dt>
+<dt id="oxdpython.messenger.SocketMessenger.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#SocketMessenger.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.SocketMessenger.send" title="Permalink to this definition">¶</a></dt>
 <dd><p>send function sends the command to the oxD server and recieves the
 response.</p>
 <table class="docutils field-list" frame="void" rules="none">
