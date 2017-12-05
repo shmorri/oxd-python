@@ -11,12 +11,15 @@ def test_messenger_constructor():
     mes1 = Messenger()
     assert mes1.port == 8099
 
-    mes2 = Messenger(3000)
+    mes2 = Messenger(port=3000)
     assert mes2.port == 3000
 
     # host assignment
-    assert mes1.host, 'localhost'
-    assert mes2.host, 'localhost'
+    assert mes1.host == 'localhost'
+    assert mes2.host == 'localhost'
+
+    mes3 = Messenger('non-local-host')
+    assert mes3.host ==  'non-local-host'
 
     # socket family and type
     assert isinstance(mes1.sock, socket.SocketType)
@@ -34,14 +37,14 @@ def test_send(mock_socket):
     mock_socket.return_value.send.return_value = 5
     mock_socket.return_value.recv.return_value = '0008{"id":5}'
 
-    msgr = Messenger(8099)
+    msgr = Messenger(port=8099)
     assert msgr.send({"command": "test"}) == {"id": 5}
 
 
 def test_send_fail():
     """Messenger.send raises error for non connected port"""
     # should raise error when oxd server is not running
-    msgr = Messenger(4000)
+    msgr = Messenger(port=4000)
     with pytest.raises(socket.error):
         msgr.send({'command': 'raise_error'})
 

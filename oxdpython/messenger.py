@@ -11,14 +11,15 @@ class Messenger:
     """A class which takes care of the socket communication with oxD Server.
     The object is initialized with the port number
     """
-    def __init__(self, port=8099):
+    def __init__(self, host='localhost', port=8099):
         """Constructor for Messenger
 
         Args:
-            port (integer) - the port number to bind to the localhost, default
+            host (str) - the host to connect for oxd-server, default localhost
+            port (integer) - the port number to bind to the host, default
                              is 8099
         """
-        self.host = 'localhost'
+        self.host = host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         logger.debug("Creating a AF_INET, SOCK_STREAM socket.")

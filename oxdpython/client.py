@@ -22,7 +22,8 @@ class Client:
                 (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
         """
         self.config = Configurer(config_location)
-        self.msgr = Messenger(int(self.config.get("oxd", "port")))
+        self.msgr = Messenger(self.config.get("oxd", "host"),
+                              int(self.config.get("oxd", "port")))
         self.authorization_redirect_uri = self.config.get(
             "client", "authorization_redirect_uri")
         self.oxd_id = None
