@@ -10,15 +10,6 @@ functions.
 2. oxd server - oxd server should be installed locally for localhost based tests
 3. Python 2.7 - for oxd-python
 
-## Running Tests
-
-Run from outside this directory. 
-```bash
-pytest e2e_tests
-```
-
-
-
 ## Test Scripts
 
 1. `openid_commands.py` - Tests the functions relating to OpenID client like

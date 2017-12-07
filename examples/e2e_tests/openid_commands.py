@@ -50,6 +50,7 @@ def run_commands(config):
 
     logging.info("Update site registration")
     updated = c.update_site_registration()
+    c.config.set("client", "scope", "openid,profile")
     logging.info("Received: %s", updated)
 
     logging.info("Getting Logout URI")
@@ -59,7 +60,7 @@ def run_commands(config):
 
 if __name__ == '__main__':
     this_dir = os.path.dirname(os.path.realpath(__file__))
-    config = os.path.join(this_dir, 'openid_https.cfg')
+    config = os.path.join(this_dir, 'openid_socket.cfg')
     test_config = os.path.join(this_dir, 'test.cfg')
 
     with open(test_config, 'w') as of:
