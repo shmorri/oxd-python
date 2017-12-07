@@ -8,6 +8,7 @@ import traceback
 
 from constants import *
 from appLog import *
+from common import *
 
 html = """<HTML><HEAD><TITLE>%(title)s</TITLE></HEAD>
 <BODY>
@@ -20,27 +21,22 @@ html = """<HTML><HEAD><TITLE>%(title)s</TITLE></HEAD>
 
 message = """<P><a href="%s">OpenID Connect Login</a></P>""" % GET_AUTH_URL
 envs = os.environ
+session = get_session(envs)
+
 sub = None
-if 'HTTP_COOKIE' in envs:
-    cookie_string=envs['HTTP_COOKIE']
-    c=Cookie.SimpleCookie()
-    c.load(cookie_string)
-    try:
-        session_id = c['session'].value
-        db = shelve.open(DB_FILENAME)
-        sub = db[session_id]['sub']
-        exp = int(db[session_id]['exp'])
-        db.close()
-        os.environ['TZ'] = TZ
-        time.tzset()
-        expiration_time =  time.strftime('%x %X %Z', time.localtime(exp))
-        message = """Subject: %s
+if session:
+    sub = session['sub']
+    exp = int(session['exp'])
+    os.environ['TZ'] = TZ
+    time.tzset()
+    expiration_time =  time.strftime('%x %X %Z', time.localtime(exp))
+    message = """Subject: %s
 Application Session Expires: %s
 <P><a href="%s">OpenID Connect Logout</a> </P>""" % (sub, expiration_time, GET_LOGOUT_URL)
-    except KeyError:
-        message = "No session found. <BR>" + message
-        logException("Error returning home page...")
-
+else:
+    message = """<P><a href="%s">OpenID Connect Login</a></P>""" % GET_AUTH_URL
+    message = "No session found. <BR>" + message
+    log("Printing login link")
 
 if sub:
     log("Printing homepage for sub %s" % sub)
@@ -53,5 +49,4 @@ d['message'] = message
 
 print "Content-type: text/html"
 print
-print html % d 
-
+print html % d
