@@ -600,10 +600,12 @@ class Client:
         self.config.set("oxd", "id", data["oxd_id"])
         self.config.set("client", "client_id", data["client_id"])
         self.config.set("client", "client_secret", data["client_secret"])
-        self.config.set("client", "client_registration_access_token",
-                        data["client_registration_access_token"])
-        self.config.set("client", "client_registration_client_uri",
-                        data["client_registration_client_uri"])
+        if data["client_registration_access_token"]:
+            self.config.set("client", "client_registration_access_token",
+                            data["client_registration_access_token"])
+        if data["client_registration_client_uri"]:
+            self.config.set("client", "client_registration_client_uri",
+                            data["client_registration_client_uri"])
         self.config.set("client", "client_id_issued_at",
                         str(data["client_id_issued_at"]))
 

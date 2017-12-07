@@ -192,6 +192,12 @@ class HttpMessenger(Messenger):
             dict: the returned response from oxd-server as a dictionary
         """
         url = self.base + command.replace("_", "-")
+
+        # FIXME This is a temporary fix to mitigate the difference between
+        # oxd-server and oxd-https-extension. remove when upstream fix arrives
+        if command == 'update_site_registration':
+            url = self.base + "update-site"
+
         req = urllib2.Request(url, json.dumps(kwargs))
         req.add_header("User-Agent", "oxdpython/%s" % __version__)
         req.add_header("Content-type", "application/json; charset=UTF-8")

@@ -29,10 +29,10 @@ def login_callback():
 
     tokens = oxc.get_tokens_by_code(code, state)
 
-    user = oxc.get_user_info(tokens.access_token)
+    claims = oxc.get_user_info(tokens['access_token'])
 
     resp = make_response(render_template("home.html"))
-    resp.set_cookie('sub', user.sub[0])
+    resp.set_cookie('sub', claims['sub'][0])
     resp.set_cookie('session_id', request.args.get('session_id'))
     return resp
 
