@@ -12,5 +12,13 @@ functions.
 
 ## Test Scripts
 
-1. `openid_commands.py` - Tests the functions relating to OpenID client like
-    dynamic registration, authorization flow, logout.
+* `openid_commands.py` - Tests the functions relating to OpenID client like
+  dynamic registration, authorization flow, logout.
+* This script can be used to test both oxd-server via socket communication and
+  oxd-https-extension via HTTP.
+* Edit the host and op_host values in `openid_https.cfg` and `openid_socket.cfg`
+  to suite the testing environment.
+* Run `python openid_commands.py socket` for running the commands on oxd-server 
+* Run `python openid_commands.py https` for running the commands on oxd-https-extension
+* Run `python openid_commands.py <backend> -v` for verbose output of each command
+* Run `python openid_commands.py -h` for help.
