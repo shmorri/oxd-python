@@ -22,7 +22,7 @@ python setup.py install
 #### Important Links
 
 * [oxd docs](https://gluu.org/docs/oxd)
-* oxd-python [API docs](https://oxd.gluu.org/api-docs/oxd-python/2.4.4/) for in-depth information about the various functions and their parameters.
+* oxd-python [API docs](https://rawgit.com/GluuFederation/oxd-python/master/docs/html/index.html) for in-depth information about the various functions and their parameters.
 * See the code of a [sample Flask app](https://github.com/GluuFederation/oxd-python/blob/master/examples/flask_app) built using oxd-python.
 * Browse the source code is hosted in Github [here](https://github.com/GluuFederation/oxd-python).
 
