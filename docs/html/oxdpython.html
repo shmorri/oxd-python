@@ -219,7 +219,8 @@ authentication and authorization</p>
 <dt id="oxdpython.client.Client.get_client_token">
 <code class="descname">get_client_token</code><span class="sig-paren">(</span><em>client_id=None</em>, <em>client_secret=None</em>, <em>op_host=None</em>, <em>op_discovery_path=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_client_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_client_token" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to get the client token which can be used for protection in
-all future communication.</p>
+all future communication. The access_token is stored in the config file
+and used for all future communication by oxdpython.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -725,13 +726,90 @@ specified section and writes it to the config file.</p>
 <dl class="class">
 <dt id="oxdpython.messenger.HttpMessenger">
 <em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">HttpMessenger</code><span class="sig-paren">(</span><em>host</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#HttpMessenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.HttpMessenger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#oxdpython.messenger.Messenger" title="oxdpython.messenger.Messenger"><code class="xref py py-class docutils literal"><span class="pre">oxdpython.messenger.Messenger</span></code></a></p>
+<p>HttpMessenger provides the communication channel for oxd-https-extension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>host</strong> (<em>str</em>) &#8211; host URL to which the requests are to be made</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="oxdpython.messenger.HttpMessenger.request">
+<code class="descname">request</code><span class="sig-paren">(</span><em>command</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#HttpMessenger.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.HttpMessenger.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that builds the request and returns the response</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> (<em>str</em>) &#8211; The command that has to be sent to the oxd-server</li>
+<li><strong>**kwargs</strong> &#8211; The parameters that should accompany the request</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the returned response from oxd-server as a dictionary</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="oxdpython.messenger.Messenger">
+<em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">Messenger</code><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for the different messengers employed by the oxdpython Client</p>
+<dl class="attribute">
+<dt id="oxdpython.messenger.Messenger.access_token">
+<code class="descname">access_token</code><a class="headerlink" href="#oxdpython.messenger.Messenger.access_token" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="oxdpython.messenger.Messenger.create">
+<em class="property">static </em><code class="descname">create</code><span class="sig-paren">(</span><em>host='localhost'</em>, <em>port='8099'</em>, <em>https_extension=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.create" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="oxdpython.messenger.Messenger.request">
+<code class="descname">request</code><span class="sig-paren">(</span><em>command</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#Messenger.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.Messenger.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mandatory function that should be implemented by the subclasses. The
+Client will call this function with the command and the params to be
+sent to the oxd-server</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> (<em>str</em>) &#8211; The command that has to be sent to the oxd-server</li>
+<li><strong>**kwargs</strong> &#8211; The parameters that should accompany the request</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the returned response from oxd-server as a dictionary</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="oxdpython.messenger.SocketMessenger">
 <em class="property">class </em><code class="descclassname">oxdpython.messenger.</code><code class="descname">SocketMessenger</code><span class="sig-paren">(</span><em>host='localhost'</em>, <em>port=8099</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/messenger.html#SocketMessenger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.messenger.SocketMessenger" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class which takes care of the socket communication with oxD Server.
+<dd><p>Bases: <a class="reference internal" href="#oxdpython.messenger.Messenger" title="oxdpython.messenger.Messenger"><code class="xref py py-class docutils literal"><span class="pre">oxdpython.messenger.Messenger</span></code></a></p>
+<p>A class which takes care of the socket communication with oxD Server.
 The object is initialized with the port number</p>
 <dl class="method">
 <dt id="oxdpython.messenger.SocketMessenger.request">
