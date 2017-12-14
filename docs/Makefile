@@ -94,9 +94,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/oxDPython.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/oxdPython.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/oxDPython.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/oxdPython.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -113,8 +113,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/oxDPython"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/oxDPython"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/oxdPython"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/oxdPython"
 	@echo "# devhelp"
 
 .PHONY: epub

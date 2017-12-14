@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>oxdpython.exceptions &mdash; oxD Python 3.1.1-alpha documentation</title>
+  <title>oxdpython.exceptions &mdash; oxd Python 3.1.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="oxD Python 3.1.1-alpha documentation" href="../../index.html"/>
+    <link rel="top" title="oxd Python 3.1.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> oxD Python
+            <a href="../../index.html" class="icon icon-home"> oxd Python
           
 
           
@@ -81,7 +81,10 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../oxdpython.html">oxdpython package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">oxdpython.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configurer.html">oxdpython.configurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">oxdpython.exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../messenger.html">oxdpython.messenger</a></li>
 </ul>
 
             
@@ -95,7 +98,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">oxD Python</a>
+        <a href="../../index.html">oxd Python</a>
       </nav>
 
 
@@ -127,7 +130,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for oxdpython.exceptions</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="OxdServerError"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.exceptions.OxdServerError">[docs]</a><span></span><span class="k">class</span> <span class="nc">OxdServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="OxdServerError"><a class="viewcode-back" href="../../exceptions.html#oxdpython.exceptions.OxdServerError">[docs]</a><span></span><span class="k">class</span> <span class="nc">OxdServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Error raises by oxdpython whenever a Oxd Server Error is reported</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -136,7 +139,7 @@
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error_string</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="InvalidTicketError"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.exceptions.InvalidTicketError">[docs]</a><span class="k">class</span> <span class="nc">InvalidTicketError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="InvalidTicketError"><a class="viewcode-back" href="../../exceptions.html#oxdpython.exceptions.InvalidTicketError">[docs]</a><span class="k">class</span> <span class="nc">InvalidTicketError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Error raised when oxd-server returns a &quot;invalid_ticket&quot; error for the</span>
 <span class="sd">    `uma_rp_get_rpt` command.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -146,7 +149,7 @@
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error_string</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="NeedInfoError"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.exceptions.NeedInfoError">[docs]</a><span class="k">class</span> <span class="nc">NeedInfoError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="NeedInfoError"><a class="viewcode-back" href="../../exceptions.html#oxdpython.exceptions.NeedInfoError">[docs]</a><span class="k">class</span> <span class="nc">NeedInfoError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Error raised when oxd-server returns a &quot;need_info&quot; error for the</span>
 <span class="sd">    `uma_rp_get_rpt` command.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -188,7 +191,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'3.1.1-alpha',
+            VERSION:'3.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

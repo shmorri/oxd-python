@@ -14,4 +14,4 @@ Package: gluu-oxd-python
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}, python-nose
 Description: Python libs for oxd server
- Python bindings for Gluu OxD server
+ Python bindings for Gluu oxd server

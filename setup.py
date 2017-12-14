@@ -1,7 +1,7 @@
 """
-OxD Python
+oxd Python
 ----------
-Python bindings for Gluu OxD server.
+Python bindings for Gluu oxd server.
 """
 import codecs
 import os
@@ -27,8 +27,8 @@ setup(
     license="MIT",
     author="Gluu",
     author_email="info@gluu.org",
-    description="Python binidings for Gluu OxD server",
-    long_description="oxD Python is a client library for the Gluu oxD Server. For information about oxD, visit http://oxd.gluu.org",
+    description="Python binidings for Gluu oxd server",
+    long_description="oxd Python is a client library for the Gluu oxd Server. For information, visit http://oxd.gluu.org",
     packages=["oxdpython"],
     zip_safe=False,
     install_requires=[],

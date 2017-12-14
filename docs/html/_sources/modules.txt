@@ -1,7 +1,0 @@
-oxdpython
-=========
-
-.. toctree::
-   :maxdepth: 4
-
-   oxdpython

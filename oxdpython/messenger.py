@@ -46,7 +46,7 @@ class Messenger(object):
 
 
 class SocketMessenger(Messenger):
-    """A class which takes care of the socket communication with oxD Server.
+    """A class which takes care of the socket communication with oxd Server.
     The object is initialized with the port number
     """
     def __init__(self, host='localhost', port=8099):
@@ -77,14 +77,14 @@ class SocketMessenger(Messenger):
             self.sock.connect((self.host, self.port))
 
     def send(self, command):
-        """send function sends the command to the oxD server and recieves the
+        """send function sends the command to the oxd server and recieves the
         response.
 
         Args:
             command (dict) - Dict representation of the JSON command string
 
         Returns:
-            response (dict) - The JSON response from the oxD Server as a dict
+            response (dict) - The JSON response from the oxd Server as a dict
         """
         cmd = json.dumps(command)
         cmd = "{:04d}".format(len(cmd)) + cmd

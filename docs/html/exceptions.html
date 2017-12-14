@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python Module Index &mdash; oxd Python 3.1.1 documentation</title>
+  <title>oxdpython.exceptions &mdash; oxd Python 3.1.1 documentation</title>
   
 
   
@@ -31,9 +31,8 @@
 
   
     <link rel="top" title="oxd Python 3.1.1 documentation" href="index.html"/>
- 
-
-
+        <link rel="next" title="oxdpython.messenger" href="messenger.html"/>
+        <link rel="prev" title="oxdpython.configurer" href="configurer.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,10 +81,10 @@
           
             
             
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="client.html">oxdpython.client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configurer.html">oxdpython.configurer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="exceptions.html">oxdpython.exceptions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">oxdpython.exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messenger.html">oxdpython.messenger</a></li>
 </ul>
 
@@ -109,7 +108,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -117,7 +116,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li></li>
+    <li>oxdpython.exceptions</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -129,49 +128,46 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
+  <div class="section" id="module-oxdpython.exceptions">
+<span id="oxdpython-exceptions"></span><h1>oxdpython.exceptions<a class="headerlink" href="#module-oxdpython.exceptions" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="oxdpython.exceptions.InvalidTicketError">
+<em class="property">exception </em><code class="descclassname">oxdpython.exceptions.</code><code class="descname">InvalidTicketError</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/exceptions.html#InvalidTicketError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.exceptions.InvalidTicketError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Error raised when oxd-server returns a &#8220;invalid_ticket&#8221; error for the
+<cite>uma_rp_get_rpt</cite> command.</p>
+</dd></dl>
 
-   <h1>Python Module Index</h1>
+<dl class="exception">
+<dt id="oxdpython.exceptions.NeedInfoError">
+<em class="property">exception </em><code class="descclassname">oxdpython.exceptions.</code><code class="descname">NeedInfoError</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/exceptions.html#NeedInfoError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.exceptions.NeedInfoError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Error raised when oxd-server returns a &#8220;need_info&#8221; error for the
+<cite>uma_rp_get_rpt</cite> command.</p>
+</dd></dl>
 
-   <div class="modindex-jumpbox">
-   <a href="#cap-o"><strong>o</strong></a>
-   </div>
+<dl class="exception">
+<dt id="oxdpython.exceptions.OxdServerError">
+<em class="property">exception </em><code class="descclassname">oxdpython.exceptions.</code><code class="descname">OxdServerError</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/exceptions.html#OxdServerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.exceptions.OxdServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Error raises by oxdpython whenever a Oxd Server Error is reported</p>
+</dd></dl>
 
-   <table class="indextable modindextable" cellspacing="0" cellpadding="2">
-     <tr class="pcap"><td></td><td>&nbsp;</td><td></td></tr>
-     <tr class="cap" id="cap-o"><td></td><td>
-       <strong>o</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">oxdpython</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&nbsp;&nbsp;&nbsp;
-       <a href="client.html#module-oxdpython.client"><code class="xref">oxdpython.client</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&nbsp;&nbsp;&nbsp;
-       <a href="configurer.html#module-oxdpython.configurer"><code class="xref">oxdpython.configurer</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&nbsp;&nbsp;&nbsp;
-       <a href="exceptions.html#module-oxdpython.exceptions"><code class="xref">oxdpython.exceptions</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&nbsp;&nbsp;&nbsp;
-       <a href="messenger.html#module-oxdpython.messenger"><code class="xref">oxdpython.messenger</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+</div>
 
 
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="messenger.html" class="btn btn-neutral float-right" title="oxdpython.messenger" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="configurer.html" class="btn btn-neutral" title="oxdpython.configurer" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

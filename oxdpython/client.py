@@ -133,7 +133,7 @@ class Client:
             authentication and authorization
 
         Raises:
-            OxdServerError: If the oxD throws an error for any reason.
+            OxdServerError: If the oxd throws an error for any reason.
         """
         if not self.oxd_id:
             self.register_site()
@@ -192,7 +192,7 @@ class Client:
                 }
 
         Raises:
-            OxdServerError: If oxD server throws an error OR if the params code
+            OxdServerError: If oxd server throws an error OR if the params code
                 and scopes are of improper data type.
         """
         params = dict(oxd_id=self.oxd_id, code=code, state=state)
@@ -272,7 +272,7 @@ class Client:
                 }
 
         Raises:
-            OxdServerError: If the param access_token is empty OR if the oxD
+            OxdServerError: If the param access_token is empty OR if the oxd
                 Server returns an error.
         """
         params = dict(oxd_id=self.oxd_id, access_token=access_token)

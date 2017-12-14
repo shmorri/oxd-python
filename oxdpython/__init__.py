@@ -1,5 +1,5 @@
 # module metadata
-__description__ = "A Python Client for oxD Server"
+__description__ = "A Python Client for Gluu oxd Server"
 __version__ = "3.1.1.2"
 __author__ = "Gluu"
 
