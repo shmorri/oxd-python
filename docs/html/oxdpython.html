@@ -142,8 +142,18 @@
 <dt id="oxdpython.client.Client">
 <em class="property">class </em><code class="descclassname">oxdpython.client.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>config_location</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client" title="Permalink to this definition">¶</a></dt>
 <dd><p>Client is the main class that carries out the task of talking with the
-oxD server. The oxD commands are provided as class methods that are called
-to send the command to the oxD server via socket.</p>
+oxd server. The oxd commands are provided as class methods that are called
+to send the command to the oxd-server or the oxd-https-extension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_location</strong> (<em>string</em>) &#8211; The complete path of the location
+of the config file. Sample config at
+(<a class="reference external" href="https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg">https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg</a>)</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="oxdpython.client.Client.get_access_token_by_refresh_token">
 <code class="descname">get_access_token_by_refresh_token</code><span class="sig-paren">(</span><em>refresh_token</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_access_token_by_refresh_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_access_token_by_refresh_token" title="Permalink to this definition">¶</a></dt>
@@ -217,10 +227,11 @@ authentication and authorization</p>
 
 <dl class="method">
 <dt id="oxdpython.client.Client.get_client_token">
-<code class="descname">get_client_token</code><span class="sig-paren">(</span><em>client_id=None</em>, <em>client_secret=None</em>, <em>op_host=None</em>, <em>op_discovery_path=None</em>, <em>scope=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_client_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_client_token" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_client_token</code><span class="sig-paren">(</span><em>client_id=None</em>, <em>client_secret=None</em>, <em>op_host=None</em>, <em>op_discovery_path=None</em>, <em>scope=None</em>, <em>auto_update=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oxdpython/client.html#Client.get_client_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#oxdpython.client.Client.get_client_token" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to get the client token which can be used for protection in
-all future communication. The access_token is stored in the config file
-and used for all future communication by oxdpython.</p>
+all future communication. The access token recieved by this method is
+stored in the config file and used as the <cite>protection_access_token</cite>
+for all subsequent calls to oxd.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -235,6 +246,10 @@ configuration file</li>
 <li><strong>op_discovery_path</strong> (<em>str, optional</em>) &#8211; op discovery path provided by OP</li>
 <li><strong>scope</strong> (<em>list, optional</em>) &#8211; scopes of access required, default values
 are obtained from the config file</li>
+<li><strong>auto_update</strong> (<em>bool, optional</em>) &#8211; automatically get a new access_token
+when the current one expires. If this is set to False, then
+the appliacation must call <cite>get_client_token</cite> when the token
+expires to update the client with a new access token.</li>
 </ul>
 </td>
 </tr>

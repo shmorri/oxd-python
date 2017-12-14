@@ -4,34 +4,27 @@ from mock import patch, MagicMock
 
 from oxdpython.messenger import SocketMessenger
 
-@patch('socket.socket')
 class SocketMessengerTestCase(unittest.TestCase):
     def setUp(self):
         self.msgr = SocketMessenger()
+        self.msgr.sock = MagicMock()
+        self.msgr.sock.send.return_value = 5
+        self.msgr.sock.recv.return_value = '0008{"id":5}'
 
-    def test_send(self, mock_socket):
+    def test_send(self):
         """SocketMessenger.send sends message"""
-        mock_socket.return_value.send.return_value = 5
-        mock_socket.return_value.recv.return_value = '0008{"id":5}'
-
         assert self.msgr.send({"command": "test"}) == {"id": 5}
 
-    def test_first_connection(self, mock_socket):
+    def test_first_connection(self):
         """SocketMessenger connects deferred until first send"""
-        mock_socket.return_value.send.return_value = 5
-        mock_socket.return_value.recv.return_value = '0008{"id":5}'
-
         assert not self.msgr.firstDone
         self.msgr.send({})
         assert self.msgr.firstDone
 
-    def test_request(self, mock_socket):
-        mock_socket.return_value.send.return_value = 5
-        mock_socket.return_value.recv.return_value = '0008{"id":5}'
-
+    def test_request(self):
         assert self.msgr.request('get_user_info') == {"id": 5}
 
-    def test_request_adds_protection_token(self, mock_socket):
+    def test_request_adds_protection_token(self):
         self.msgr.send = MagicMock()
 
         self.msgr.access_token = 'test-token'

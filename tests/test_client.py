@@ -4,7 +4,7 @@ import unittest
 
 from mock import patch, MagicMock
 
-from oxdpython.client import Client, Configurer
+from oxdpython.client import Client, Configurer, Timer
 
 from oxdpython.exceptions import OxdServerError, InvalidTicketError, \
     NeedInfoError
@@ -462,6 +462,7 @@ class SetupClientTestCase(unittest.TestCase):
             self.c.setup_client()
 
 
+@patch('oxdpython.client.Timer')
 class GetClientTokenTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {
@@ -476,7 +477,7 @@ class GetClientTokenTestCase(unittest.TestCase):
         self.c = Client(initial_config)
         self.c.msgr.request = MagicMock(return_value=self.success)
 
-    def test_command(self):
+    def test_command(self, mock_timer):
         token = self.c.get_client_token()['access_token']
         assert token == "6F9619FF-8B86-D011-B42D-00CF4FC964FF"
 
@@ -484,7 +485,7 @@ class GetClientTokenTestCase(unittest.TestCase):
         assert "client_secret" in self.c.msgr.request.call_args[1]
         assert "op_host" in self.c.msgr.request.call_args[1]
 
-    def test_override_of_client_credentials(self):
+    def test_override_of_client_credentials(self, mock_timer):
         # Override value of client_id, client_secret and op_host
         self.c.get_client_token('client-id', 'client-secret', 'new-host')
         assert self.c.msgr.request.call_args[1]["client_id"] == 'client-id'
@@ -497,7 +498,7 @@ class GetClientTokenTestCase(unittest.TestCase):
         assert self.c.msgr.request.call_args[1]['op_discovery_path'] == 'https://mag.el/lan'
         assert self.c.msgr.request.call_args[1]['scope'] == ['openid', 'profile']
 
-    def test_throws_error_on_oxd_server_error(self):
+    def test_throws_error_on_oxd_server_error(self, mock_timer):
         self.c.msgr.request.return_value = generic_error
 
         with pytest.raises(OxdServerError):

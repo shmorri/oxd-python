@@ -129,6 +129,8 @@
   <h1>Source code for oxdpython.client</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Timer</span>
+
 <span class="kn">from</span> <span class="nn">.configurer</span> <span class="kn">import</span> <span class="n">Configurer</span>
 <span class="kn">from</span> <span class="nn">.messenger</span> <span class="kn">import</span> <span class="n">Messenger</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">OxdServerError</span><span class="p">,</span> <span class="n">NeedInfoError</span><span class="p">,</span> <span class="n">InvalidTicketError</span>
@@ -138,17 +140,18 @@
 
 <div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.client.Client">[docs]</a><span class="k">class</span> <span class="nc">Client</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Client is the main class that carries out the task of talking with the</span>
-<span class="sd">    oxD server. The oxD commands are provided as class methods that are called</span>
-<span class="sd">    to send the command to the oxD server via socket.</span>
+<span class="sd">    oxd server. The oxd commands are provided as class methods that are called</span>
+<span class="sd">    to send the command to the oxd-server or the oxd-https-extension</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config_location (string): The complete path of the location</span>
+<span class="sd">            of the config file. Sample config at</span>
+<span class="sd">            (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_location</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor of class Client</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            config_location (string): The complete path of the location</span>
-<span class="sd">                of the config file. Sample config at</span>
-<span class="sd">                (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">oxd_id</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Configurer</span><span class="p">(</span><span class="n">config_location</span><span class="p">)</span>
@@ -286,7 +289,6 @@
         <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">OxdServerError</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;authorization_url&#39;</span><span class="p">]</span></div>
-
 
 <div class="viewcode-block" id="Client.get_tokens_by_code"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.client.Client.get_tokens_by_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokens_by_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to get access code for getting the user details from the</span>
@@ -671,7 +673,8 @@
         <span class="p">}</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending command `uma_rp_get_claims_gathering_url` with &quot;</span>
                      <span class="s2">&quot;params </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;uma_rp_get_claims_gathering_url&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;uma_rp_get_claims_gathering_url&quot;</span><span class="p">,</span>
+                                     <span class="o">**</span><span class="n">params</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Received response: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
@@ -740,12 +743,13 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-
 <div class="viewcode-block" id="Client.get_client_token"><a class="viewcode-back" href="../../oxdpython.html#oxdpython.client.Client.get_client_token">[docs]</a>    <span class="k">def</span> <span class="nf">get_client_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">client_secret</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                         <span class="n">op_host</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">op_discovery_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                         <span class="n">op_host</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">op_discovery_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">auto_update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to get the client token which can be used for protection in</span>
-<span class="sd">        all future communication. The access_token is stored in the config file</span>
-<span class="sd">        and used for all future communication by oxdpython.</span>
+<span class="sd">        all future communication. The access token recieved by this method is</span>
+<span class="sd">        stored in the config file and used as the `protection_access_token`</span>
+<span class="sd">        for all subsequent calls to oxd.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            client_id (str, optional): client id from OP or from previous</span>
@@ -757,6 +761,10 @@
 <span class="sd">            op_discovery_path (str, optional): op discovery path provided by OP</span>
 <span class="sd">            scope (list, optional): scopes of access required, default values</span>
 <span class="sd">                are obtained from the config file</span>
+<span class="sd">            auto_update(bool, optional): automatically get a new access_token</span>
+<span class="sd">                when the current one expires. If this is set to False, then</span>
+<span class="sd">                the appliacation must call `get_client_token` when the token</span>
+<span class="sd">                expires to update the client with a new access token.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: The client token and the refresh token in the form.</span>
@@ -800,6 +808,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;client&quot;</span><span class="p">,</span> <span class="s2">&quot;protection_access_token&quot;</span><span class="p">,</span>
                         <span class="n">response</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;access_token&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msgr</span><span class="o">.</span><span class="n">access_token</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;access_token&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Setup a new timer thread to refresh the access token.</span>
+        <span class="k">if</span> <span class="n">auto_update</span><span class="p">:</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;expires_in&#39;</span><span class="p">])</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">client_id</span><span class="p">,</span> <span class="n">client_secret</span><span class="p">,</span> <span class="n">op_host</span><span class="p">,</span> <span class="n">op_discovery_path</span><span class="p">,</span>
+                    <span class="n">scope</span><span class="p">,</span> <span class="n">auto_update</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting up a threading.Timer to get_client_token in &quot;</span>
+                        <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> seconds&quot;</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_client_token</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
         <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span></div></div>
 </pre></div>
 

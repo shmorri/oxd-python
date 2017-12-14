@@ -1,5 +1,7 @@
 import logging
 
+from threading import Timer
+
 from .configurer import Configurer
 from .messenger import Messenger
 from .exceptions import OxdServerError, NeedInfoError, InvalidTicketError
@@ -9,17 +11,18 @@ logger = logging.getLogger(__name__)
 
 class Client:
     """Client is the main class that carries out the task of talking with the
-    oxD server. The oxD commands are provided as class methods that are called
-    to send the command to the oxD server via socket.
+    oxd server. The oxd commands are provided as class methods that are called
+    to send the command to the oxd-server or the oxd-https-extension
+
+    Args:
+        config_location (string): The complete path of the location
+            of the config file. Sample config at
+            (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
     """
 
     def __init__(self, config_location):
         """Constructor of class Client
 
-        Args:
-            config_location (string): The complete path of the location
-                of the config file. Sample config at
-                (https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg)
         """
         self.oxd_id = None
         self.config = Configurer(config_location)
@@ -157,7 +160,6 @@ class Client:
         if response['status'] == 'error':
             raise OxdServerError(response['data'])
         return response['data']['authorization_url']
-
 
     def get_tokens_by_code(self, code, state):
         """Function to get access code for getting the user details from the
@@ -542,7 +544,8 @@ class Client:
         }
         logger.debug("Sending command `uma_rp_get_claims_gathering_url` with "
                      "params %s", params)
-        response = self.msgr.request("uma_rp_get_claims_gathering_url", **params)
+        response = self.msgr.request("uma_rp_get_claims_gathering_url",
+                                     **params)
         logger.debug("Received response: %s", response)
 
         if response['status'] == 'error':
@@ -611,12 +614,13 @@ class Client:
 
         return data
 
-
     def get_client_token(self, client_id=None, client_secret=None,
-                         op_host=None, op_discovery_path=None, scope=None):
+                         op_host=None, op_discovery_path=None, scope=None,
+                         auto_update=True):
         """Function to get the client token which can be used for protection in
-        all future communication. The access_token is stored in the config file
-        and used for all future communication by oxdpython.
+        all future communication. The access token recieved by this method is
+        stored in the config file and used as the `protection_access_token`
+        for all subsequent calls to oxd.
 
         Args:
             client_id (str, optional): client id from OP or from previous
@@ -628,6 +632,10 @@ class Client:
             op_discovery_path (str, optional): op discovery path provided by OP
             scope (list, optional): scopes of access required, default values
                 are obtained from the config file
+            auto_update(bool, optional): automatically get a new access_token
+                when the current one expires. If this is set to False, then
+                the appliacation must call `get_client_token` when the token
+                expires to update the client with a new access token.
 
         Returns:
             dict: The client token and the refresh token in the form.
@@ -671,4 +679,15 @@ class Client:
         self.config.set("client", "protection_access_token",
                         response["data"]["access_token"])
         self.msgr.access_token = response["data"]["access_token"]
+
+        # Setup a new timer thread to refresh the access token.
+        if auto_update:
+            interval = int(response['data']['expires_in'])
+            args = [client_id, client_secret, op_host, op_discovery_path,
+                    scope, auto_update]
+            logger.info("Setting up a threading.Timer to get_client_token in "
+                        "%s seconds", interval)
+            t = Timer(interval, self.get_client_token, args)
+            t.start()
+
         return response['data']
