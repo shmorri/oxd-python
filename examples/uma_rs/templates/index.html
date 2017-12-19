@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form action="{{ url_for('protect') }}" method="post">
+    <div class="from-group">
+      <label for="path">Path</label>
+      <input id="path" type="text" name="path" value="/photos" class="form-control" />
+    </div>
+
+    <div class="from-group">
+      <label for="scope">Scope</label>
+      <input id="scope" type="text" name="scope" value="View Images" class="form-control" />
+    </div>
+
+    <div class="from-group">
+      <label for="http_method">Http Method</label>
+      <input id="http_method" type="text" name="http_method" value="GET" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+
+{% endblock content %}
