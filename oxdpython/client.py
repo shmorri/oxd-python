@@ -691,3 +691,23 @@ class Client:
             t.start()
 
         return response['data']
+
+    def remove_site(self):
+        """Cleans up the data for the site.
+
+        Returns:
+            oxd_id if the process was completed without error
+
+        Raises:
+            OxdServerError if there was an issue with the operation
+        """
+        params = dict(oxd_id=self.oxd_id)
+
+        logger.debug("Sending command `remove_site` with params %s",
+                     params)
+        response = self.msgr.request("remove_site", **params)
+        logger.debug("Received response: %s", response)
+
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']['oxd_id']

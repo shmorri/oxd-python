@@ -503,3 +503,20 @@ class GetClientTokenTestCase(unittest.TestCase):
 
         with pytest.raises(OxdServerError):
             self.c.get_client_token()
+
+
+class RemoveSiteTestCase(unittest.TestCase):
+    def setUp(self):
+        self.success = {
+            "status": "ok",
+            "data": {
+                "oxd_id": "bcad760f-91ba-46e1-a020-05e4281d91b6"
+            }
+        }
+        self.c = Client(initial_config)
+        self.c.msgr.request = MagicMock(return_value=self.success)
+
+    def test_command(self):
+        assert self.c.remove_site()
+
+
