@@ -22,10 +22,6 @@ def run_commands(config):
     tokens = c.get_client_token()
     logging.info("Received: %s", tokens)
 
-    print "\n=> Registering client using register_site()"
-    oxd_id = c.register_site()
-    logging.info("Received: %s", oxd_id)
-
     print "\n=> Update site registration"
     updated = c.update_site_registration()
     c.config.set("client", "scope", "openid,profile")
@@ -60,23 +56,17 @@ def run_commands(config):
 if __name__ == '__main__':
     this_dir = os.path.dirname(os.path.realpath(__file__))
     parser = argparse.ArgumentParser()
-    parser.add_argument("backend", help="'socket' for oxd-server, 'https' for "
-                        "oxd-https-extension")
     parser.add_argument("-v", "--verbose", help="increase output verbosity",
                         action="store_true")
 
     args = parser.parse_args()
-
-    if args.backend == 'https':
-        config = os.path.join(this_dir, 'openid_https.cfg')
-    else:
-        config = os.path.join(this_dir, 'openid_socket.cfg')
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.ERROR)
 
+    config = os.path.join(this_dir, 'openid_https.cfg')
     test_config = os.path.join(this_dir, 'test.cfg')
 
     with open(test_config, 'w') as of:
