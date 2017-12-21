@@ -1,5 +1,6 @@
 import os
 import oxdpython
+from oxdpython.exceptions import OxdServerError
 
 from flask import Flask, render_template, redirect, request, make_response, url_for, jsonify
 
@@ -13,34 +14,56 @@ oxc = oxdpython.Client(config)
 def home():
     return render_template('index.html')
 
-@app.route('/protect', methods=['GET', 'POST'])
+
+@app.route('/protect', methods=['POST'])
 def protect():
     if not oxc.oxd_id:
         oxc.register_site()
 
-    if request.method == 'POST':
-        path = request.form.get('path')
-        scope = request.form.get('scope')
-        http_method = request.form.get('http_method')
+    path = request.form.get('path')
+    scope = request.form.get('scope')
+    http_method = request.form.get('http_method')
 
-        resources = [
-            {
-                "path" : path,
-                "conditions": [{
-                    "httpMethods": [http_method],
-                    "scopes": [scope]
-                }]
-            }
-        ]
+    condition = {}
+    if type(http_method) is list:
+        condition['httpMethods'] = http_method
+    else:
+        condition['httpMethods'] = [http_method]
 
-        print oxc.uma_rs_protect(resources)
+    if type(scope) is list:
+        condition['scopes'] = scope
+    else:
+        condition['scopes'] = [scope]
 
-    return redirect(url_for('home'))
+    resources = [dict(path=path, conditions=[condition])]
 
-@app.route('/photos')
-def photos():
-    status = oxc.uma_rs_check_access(rpt='', path='/photos', http_method='GET')
-    return jsonify(status)
+    protected = oxc.uma_rs_protect(resources)
+    if protected:
+        return '<html><body>Protected. <a href="/">Go Home</a></body></html>'
+    else:
+        return '<html><body>Not protected. <a href="/">Go Home</a></body></html>'
+
+
+@app.route('/resource/<resource>/', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def access_resource(resource):
+    rpt = request.headers.get('Authorization')
+    if rpt and 'Bearer' in rpt:
+        rpt = rpt.split(" ")[1]
+
+    try:
+        status = oxc.uma_rs_check_access(rpt=rpt, path=request.path, http_method=request.method)
+    except OxdServerError as e:
+        return jsonify({"error": "access denied", "description": str(e)})
+
+    # If the rpt is not present, then act as the RP and get the RP
+    if not rpt:
+        rpt = oxc.uma_rp_get_rpt(status['ticket'])
+        status = oxc.uma_rs_check_access(rpt=rpt['access_token'], path=request.path, http_method=request.method)
+
+    if status['access'] == 'granted':
+        return render_template('view_resource.html', resource=resource)
+    else:
+        return jsonify(status)
 
 
 if __name__ == '__main__':
