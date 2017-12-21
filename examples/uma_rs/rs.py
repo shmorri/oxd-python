@@ -55,15 +55,20 @@ def access_resource(resource):
     except OxdServerError as e:
         return jsonify({"error": "access denied", "description": str(e)})
 
-    # If the rpt is not present, then act as the RP and get the RP
-    if not rpt:
-        rpt = oxc.uma_rp_get_rpt(status['ticket'])
-        status = oxc.uma_rs_check_access(rpt=rpt['access_token'], path=request.path, http_method=request.method)
-
-    if status['access'] == 'granted':
-        return render_template('view_resource.html', resource=resource)
+    if request.method == 'GET' and status['access'] == 'granted':
+        image = dict(
+            resource=resource,
+            type="image",
+            url="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tamil_Nadu_Literacy_Map_2011.png"
+        )
+        return jsonify(image)
     else:
         return jsonify(status)
+
+@app.route('/rp/get_rpt/')
+def get_rpt():
+    ticket = request.args.get('ticket')
+    return jsonify(oxc.uma_rp_get_rpt(ticket))
 
 
 if __name__ == '__main__':
