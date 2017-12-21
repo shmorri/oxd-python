@@ -91,7 +91,7 @@ curl -k -H 'Authorization: Bearer ebe71635-1c24-470c-830c-7bc961e33457_140A.BA5B
 {
   "resource": "photos",
   "type": "image",
-  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tamil_Nadu_Literacy_Map_2011.png"
+  "url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tamil_Nadu_Literacy_Map_2011.png"
 }
 ```
 Voila here is our resource.

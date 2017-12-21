@@ -39,9 +39,9 @@ def protect():
 
     protected = oxc.uma_rs_protect(resources)
     if protected:
-        return '<html><body>Protected. <a href="/">Go Home</a></body></html>'
+        return '<html><body><pre>{0}</pre> Protected. <a href="/">Go Home</a></body></html>'.format(resources)
     else:
-        return '<html><body>Not protected. <a href="/">Go Home</a></body></html>'
+        return '<html><body><pre>{0}</pre> Not protected. <a href="/">Go Home</a></body></html>'.format(resources)
 
 
 @app.route('/resource/<resource>/', methods=['GET', 'POST', 'PUT', 'DELETE'])
@@ -59,7 +59,7 @@ def access_resource(resource):
         image = dict(
             resource=resource,
             type="image",
-            url="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tamil_Nadu_Literacy_Map_2011.png"
+            url="https://upload.wikimedia.org/wikipedia/commons/7/7b/Tamil_Nadu_Literacy_Map_2011.png"
         )
         return jsonify(image)
     else:
