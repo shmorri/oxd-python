@@ -18,7 +18,7 @@ protect two resource end points `/resource/photos/` and `/resource/docs/`.
 * Once the endpoints are protected with required *Scopes* and *Http Methods*, they can be accessed to verify the protection.
 * When either of the endpoints `/resource/photos/` or `/resource/docs` is accessed, it asks the AS for validity and returns a response based on the Auth Server's answer.
 
-### Pre-requisites
+### Prerequisites
 
 * A Gluu Server to act as the Authorization Server. Use this server's URL
 as `op_host` in the configuration `rs.cfg`
