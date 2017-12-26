@@ -21,7 +21,7 @@ if 'HTTP_COOKIE' in envs:
         log(message)
     except:
         message = "Error removing session from DB"
-	logException(message)
+        logException(message)
 else:
     log("No Cookie found")
 

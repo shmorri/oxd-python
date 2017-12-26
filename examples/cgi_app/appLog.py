@@ -15,3 +15,5 @@ def log(s):
 def logException(s):
     logger.exception(s)
 
+def logError(s):
+    logger.error(s)

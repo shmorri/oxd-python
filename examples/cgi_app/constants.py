@@ -15,3 +15,6 @@ HOME_URL = "/cgi-bin/home.cgi"
 GET_AUTH_URL = "/cgi-bin/redirect-to-login.cgi"
 GET_LOGOUT_URL = "/cgi-bin/redirect-to-logout.cgi"
 LOGOUT_CONFIRM = "/cgi-bin/logout-confirmation.cgi"
+
+# Resource Server URL
+RS_BASE_URL = "https://localhost:8085/"

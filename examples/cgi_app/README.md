@@ -47,9 +47,9 @@ file permissions.
 2. Clone the demosite and setup for cgi-bin
     ```
     cd /usr/lib/cgi-bin/
-    wget https://github.com/GluuFederation/oxd-python/archive/v3.0.1.tar.gz
-    tar -xvf v3.0.1.tar.gz
-    cp oxd-python-3.0.1/demo-cgi/* .
+    wget https://github.com/GluuFederation/oxd-python/archive/v3.1.1.tar.gz
+    tar -xvf v3.1.1.tar.gz
+    cp oxd-python-3.1.1/examples/cgi_app/* .
     chmod +x *.cgi
     ```
 3. Edit `COOKIE_DOMAIN` in `constants.py` to suit your domain name.

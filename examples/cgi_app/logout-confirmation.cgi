@@ -37,7 +37,7 @@ if 'HTTP_COOKIE' in envs:
             db_session = db[session_id]
             messages.append("DB session not deleted")
         except:
-            messsages.append("DB session deleted")
+            messages.append("DB session deleted")
     except:
         messages.append("Cookie found but not session")
 else:

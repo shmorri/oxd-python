@@ -22,11 +22,11 @@ try:
     tokens = oxc.get_tokens_by_code(code, state)
     
     # get user information
-    at = tokens.access_token
+    at = tokens['access_token']
     log("Trying to get user_info with access token ending in %s" % at[-5:])
     user = oxc.get_user_info(at)
 
-    sub = user.sub[0]
+    sub = user['sub'][0]
     expiration_in_seconds = EXPIRATION_IN_MINUTES * 60
     session_id = str(uuid.uuid4())
     log("Writing session id: %s" % session_id)
