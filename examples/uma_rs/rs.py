@@ -1,17 +1,23 @@
 import os
 import oxdpython
-from oxdpython.exceptions import OxdServerError
 
-from flask import Flask, render_template, redirect, request, make_response, url_for, jsonify
+from flask import Flask, render_template, request, jsonify, abort, make_response
 
 app = Flask(__name__)
-
 this_dir = os.path.dirname(os.path.realpath(__file__))
 config = os.path.join(this_dir, 'rs.cfg')
 oxc = oxdpython.Client(config)
 
+resources = ['photos', 'docs']
+
+photos = [{'id': 1, 'filename': 'https://example.com/photo1.jpg'}]
+docs = [{'id': 1, 'filename': 'https://example.com/document1.pdf'}]
+
+photos_counter = 1
+docs_counter = 1
+
 @app.route('/')
-def home():
+def index():
     return render_template('index.html')
 
 
@@ -21,8 +27,8 @@ def protect():
         oxc.register_site()
 
     path = request.form.get('path')
-    scope = request.form.get('scope')
-    http_method = request.form.get('http_method')
+    scope = request.form.get('scope').split(',')
+    http_method = request.form.getlist('http_method')
 
     condition = {}
     if type(http_method) is list:
@@ -39,37 +45,68 @@ def protect():
 
     protected = oxc.uma_rs_protect(resources)
     if protected:
-        return '<html><body><pre>{0}</pre> Protected. <a href="/">Go Home</a></body></html>'.format(resources)
+        return render_template('index.html', status='protected', resource=path,
+                               scope=scope, http_method=http_method)
     else:
-        return '<html><body><pre>{0}</pre> Not protected. <a href="/">Go Home</a></body></html>'.format(resources)
+        return render_template('index.html', status='failed', resource=path,
+                               scope=scope, http_method=http_method)
 
 
-@app.route('/resource/<resource>/', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def access_resource(resource):
-    rpt = request.headers.get('Authorization')
-    if rpt and 'Bearer' in rpt:
-        rpt = rpt.split(" ")[1]
+@app.route('/api/<rtype>/', methods=['GET', 'POST'])
+def api(rtype):
+    """Function that fetches or adds a particular resource.
 
+    :param rtype: resource type either photos or docs
+    :return: json
+    """
+    status = {'access': 'granted'}
     try:
-        status = oxc.uma_rs_check_access(rpt=rpt, path=request.path, http_method=request.method)
-    except OxdServerError as e:
-        return jsonify({"error": "access denied", "description": str(e)})
+        rpt = request.headers.get('Authorization')
+        if rpt:
+            rpt = rpt.split()[1]
+        status = oxc.uma_rs_check_access(rpt=rpt, path=request.path,
+                                         http_method=request.method)
+    except:
+        print request.path, " seems unprotected"
 
-    if request.method == 'GET' and status['access'] == 'granted':
-        image = dict(
-            resource=resource,
-            type="image",
-            url="https://upload.wikimedia.org/wikipedia/commons/7/7b/Tamil_Nadu_Literacy_Map_2011.png"
-        )
-        return jsonify(image)
+    if not status['access'] == 'granted':
+        return make_response(jsonify(status), 401)
+
+    resource = docs
+    counter = docs_counter
+    if rtype in resources:
+        if rtype == 'photos':
+            resource = photos
+            counter = photos_counter
     else:
-        return jsonify(status)
+        abort(404)
 
+    if request.method == 'GET':
+        return jsonify({rtype: resource})
+
+    if request.method == 'POST':
+        data = request.get_json()
+        if 'filename' in data:
+            counter += 1
+            item = {'id': counter, 'filename': data['filename']}
+            resource.append(item)
+            return make_response(jsonify(item), 201)
+        else:
+            abort(400)
+
+# --------------------------------------------------------------------------- #
+# The /rp/get_rpt is a helper URL for the demo purposes. This should not be a
+# part of the application unless the app is acting as both as a UMA Resource
+# Server as well as the Requesting Party (RP).
+# --------------------------------------------------------------------------- #
 @app.route('/rp/get_rpt/')
 def get_rpt():
     ticket = request.args.get('ticket')
-    return jsonify(oxc.uma_rp_get_rpt(ticket))
+    rpt = oxc.uma_rp_get_rpt(ticket)
+    return jsonify(rpt)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8085, ssl_context='adhoc')
+    oxc.register_site()
+    app.run(port=8085, debug=True, ssl_context='adhoc')
+

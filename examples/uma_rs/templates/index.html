@@ -6,7 +6,38 @@
   </div>
 
   <div class="row">
-    <div class="col-md-offset-3 col-md-6">
+    <div class="col-md-3">
+
+      {% if status == 'protected' %}
+        <div class="alert alert-success" role="alert">
+          <p><i class="glyphicon glyphicon-ok-circle"></i> Resource Protected</p>
+
+        </div>
+      {% elif status == 'failed' %}
+        <div class="alert alert-danger" role="alert">
+          <p><i class="glyphicon glyphicon-remove-circle"></i> Resource Protection Failed</p>
+        </div>
+      {% endif %}
+
+      {% if resource %}
+      <table class="table table-bordered">
+        <tr>
+          <th>Resource</th>
+          <td>{{ resource }}</td>
+        </tr>
+        <tr>
+          <th>Scope</th>
+          <td>{{ scope|join(",") }}</td>
+        </tr>
+        <tr>
+          <th>HTTP Methods</th>
+          <td>{{ http_method|join(",") }}</td>
+        </tr>
+      </table>
+      {% endif %}
+
+    </div>
+    <div class="col-md-6">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">UMA Resource Server</h3>
@@ -15,20 +46,12 @@
           <form action="{{ url_for('protect') }}" method="post">
             <div class="form-group">
               <label for="path">Resource</label>
-              <select name="path" id="path" class="form-control">
-                <option value="/resource/photos/">Photos</option>
-                <option value="/resource/docs/">Docs</option>
-              </select>
+              <input id="path" name="path" type="text" class="form-control">
             </div>
 
             <div class="form-group">
               <label for="scope">Scope</label>
-              <select multiple name="scope" id="scope" class="form-control">
-                <option value="View">View</option>
-                <option value="Edit">Edit</option>
-                <option value="Delete">Delete</option>
-                <option value="All">All</option>
-              </select>
+              <input id="scope" name="scope" type="text" class="form-control">
             </div>
 
             <div class="form-group">
@@ -37,8 +60,6 @@
                       class="form-control">
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
-                <option value="PUT">PUT</option>
-                <option value="DELETE">DELETE</option>
               </select>
             </div>
             <button type="submit" class="btn btn-primary">Protect with Gluu Server</button>
@@ -46,8 +67,6 @@
         </div>
       </div>
 
-    </div>
-    <div class="">
     </div>
 
   </div>

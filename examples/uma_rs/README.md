@@ -49,8 +49,8 @@ Now the RS site should be available at `https://localhost:8085`
 |------------|-------------------|------------------|
 | `/`        | GET               | Home page of the application |
 | `/protect` | POST              | URL where the form is submitted from the homepage for resource protection. |
-| `/resource/<resource>/` | GET, POST, PUT, DELETE | API for accessing and the resource. Use a REST client |
-| `/rp/get_rpt/`| GET            | A utility endpoint to get RPT as an UMA Requesting Party. |
+| `/api/<resource>/` | GET, POST | API for accessing and the resource. `resource`s are *docs* and *photos* |
+| `/rp/get_rpt/`| GET            | A helper to get RPT as an UMA Requesting Party. |
 -------------------------------------------------------------
 
 
@@ -66,16 +66,16 @@ Now the RS site should be available at `https://localhost:8085`
 
 **Note:** Ideally all this should be done by a separate UMA Requesting Party App. For the RS example, lets just use `cURL`
 
-1. Access the URL `https://localhost:8085/resources/photos/` from a REST client.
+1. Access the URL `https://localhost:8085/api/photos/` from a REST client.
 ```
-$ curl -k https://localhost:8085/resource/photos/
+$ curl -k https://localhost:8085/api/photos/
 {
   "access": "denied",
   "ticket": "030db88e-f07f-4558-bd17-3ac2a7400be3",
   "www-authenticate_header": "UMA realm=\"rs\",as_uri=\"https://gluu.example.com\",error=\"insufficient_scope\",ticket=\"030db88e-f07f-4558-bd17-3ac2a7400be3\""
 }
 ```
-2. Use the Requesting Party utility URL to generate RPT Token.
+2. Use the Requesting Party utility URL to generate RPT Token. This app has a helper URL to get the RPT for *demo only*.
 ```
 $ curl -k https://localhost:8085/rp/get_rpt/?ticket=030db88e-f07f-4558-bd17-3ac2a7400be3
 {
@@ -87,11 +87,14 @@ $ curl -k https://localhost:8085/rp/get_rpt/?ticket=030db88e-f07f-4558-bd17-3ac2
 ```
 3. Now access the resource with the RPT access token
 ```
-curl -k -H 'Authorization: Bearer ebe71635-1c24-470c-830c-7bc961e33457_140A.BA5B.556E.9842.0E8F.EFF7.F0AF.12E9' https://localhost:8085/resource/photos/
+curl -k -H 'Authorization: Bearer ebe71635-1c24-470c-830c-7bc961e33457_140A.BA5B.556E.9842.0E8F.EFF7.F0AF.12E9' https://localhost:8085/apt/photos/
 {
-  "resource": "photos",
-  "type": "image",
-  "url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tamil_Nadu_Literacy_Map_2011.png"
+    "photos": [
+        {
+            "filename": "https://example.com/photo1.jpg",
+            "id": 1
+        }
+    ]
 }
 ```
 Voila here is our resource.
