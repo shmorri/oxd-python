@@ -27,11 +27,11 @@ as `op_host` in the configuration `rs.cfg`
 ### Running the app
 
 ```
-git clone https://github.com/GluuFederation/oxd-python.git
-cd oxd-python
-python setup.py install
-pip install flask pyOpenSSL
-cd examples/uma_rs/
+# apt install python-pip
+# pip install oxdpython
+# cd /usr/local
+# git clone https://github.com/GluuFederation/oxd-python.git
+# cd oxd-python/examples/uma_rs/
 
 # Edit the rs.cfg to suit your op_host
 # remove the line with oxd_id if present
