@@ -64,5 +64,3 @@ file permissions.
 
 See the sequence diagram below to get a better picture of the flow of 
 this application.
-
-![Demo Sequence Diagram](https://raw.githubusercontent.com/GluuFederation/oxd-python/master/demo-cgi/sequence_diagram.png)
