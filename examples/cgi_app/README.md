@@ -33,30 +33,30 @@ file permissions.
 2. Edit `/opt/oxd-server/conf/oxd-conf.json` and enter your OXD License details. Edit `/opt/oxd-server/conf/oxd-default-site-conf.json` and enter the value for `op_host` pointing to your Gluu Server installation. Run `service gluu-oxd-server start`
 3. Install oxd-python
     ```
-    apt-get install python-pip
-    pip install oxdpython
+    # apt install python-pip
+    # pip install oxdpython
     ```
 3. Install and configure Apache 2
     ```
-    apt-get install apache2
-    a2enmod cgi
-    a2enmod ssl
-    a2dissite 000-default
-    a2ensite default-ssl
+    # apt install apache2
+    # a2enmod cgi
+    # a2enmod ssl
+    # a2dissite 000-default
+    # a2ensite default-ssl
     ```
 2. Clone the demosite and setup for cgi-bin
     ```
-    cd /usr/lib/cgi-bin/
-    wget https://github.com/GluuFederation/oxd-python/archive/v3.1.1.tar.gz
-    tar -xvf v3.1.1.tar.gz
-    cp oxd-python-3.1.1/examples/cgi_app/* .
-    chmod +x *.cgi
+    # cd /usr/lib/cgi-bin/
+    # wget https://github.com/GluuFederation/oxd-python/archive/v3.1.1.tar.gz
+    # tar -xvf v3.1.1.tar.gz
+    # cp oxd-python-3.1.1/examples/cgi_app/* .
+    # chmod +x *.cgi
     ```
 3. Edit `COOKIE_DOMAIN` in `constants.py` to suit your domain name.
 4. Setup logging and initialize the app
     ```
-    mkdir -p /var/log/sampleapp/
-    python setupDemo.py
+    # mkdir -p /var/log/sampleapp/
+    # python setupDemo.py
     ```
 4. Change the domain names in `/var/log/sampleapp/demosite.cfg` URLs to match yours. (Similar to Step 3)
 5. Visit `https://your-hostname/cgi-bin/home.cgi`
