@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, jsonify, abort, make_response
 
 app = Flask(__name__)
 this_dir = os.path.dirname(os.path.realpath(__file__))
-config = os.path.join(this_dir, 'rs.cfg')
+config = os.path.join(this_dir, 'rs-oxd.cfg')
 oxc = oxdpython.Client(config)
 
 resources = ['photos', 'docs']
@@ -108,5 +108,6 @@ def get_rpt():
 
 if __name__ == '__main__':
     oxc.register_site()
-    app.run(port=8085, debug=True, ssl_context='adhoc')
+    app.config.from_object('app_config')
+    app.run(ssl_context='adhoc')
 
