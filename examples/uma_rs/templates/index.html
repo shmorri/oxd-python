@@ -2,73 +2,85 @@
 
 {% block content %}
   <div class="page-header">
-    <h1>oxd-python UMA Demo Application</h1>
+    <h1>oxd-python demo - UMA Resource Server</h1>
   </div>
 
   <div class="row">
-    <div class="col-md-3">
+  <div class="col-md-12">
+    <p>This is a simple UMA Resource Server. This server responds with JSON to the following resource calls</p>
+  </div>
+  </div>
 
-      {% if status == 'protected' %}
-        <div class="alert alert-success" role="alert">
-          <p><i class="glyphicon glyphicon-ok-circle"></i> Resource Protected</p>
+  <div class="row">
 
-        </div>
-      {% elif status == 'failed' %}
-        <div class="alert alert-danger" role="alert">
-          <p><i class="glyphicon glyphicon-remove-circle"></i> Resource Protection Failed</p>
-        </div>
-      {% endif %}
+    <div class="col-md-offset-2 col-md-8">
 
-      {% if resource %}
-      <table class="table table-bordered">
-        <tr>
-          <th>Resource</th>
-          <td>{{ resource }}</td>
-        </tr>
-        <tr>
-          <th>Scope</th>
-          <td>{{ scope|join(",") }}</td>
-        </tr>
-        <tr>
-          <th>HTTP Methods</th>
-          <td>{{ http_method|join(",") }}</td>
-        </tr>
-      </table>
-      {% endif %}
-
-    </div>
-    <div class="col-md-6">
-      <div class="panel panel-default">
+      <div class="panel panel-primary">
         <div class="panel-heading">
-          <h3 class="panel-title">UMA Resource Server</h3>
+          <h3 class="panel-title">Resources</h3>
         </div>
-        <div class="panel-body">
-          <form action="{{ url_for('protect') }}" method="post">
-            <div class="form-group">
-              <label for="path">Resource</label>
-              <input id="path" name="path" type="text" class="form-control">
-            </div>
-
-            <div class="form-group">
-              <label for="scope">Scope</label>
-              <input id="scope" name="scope" type="text" class="form-control">
-            </div>
-
-            <div class="form-group">
-              <label for="http_method">Http Method</label>
-              <select multiple name="http_method" id="http_method"
-                      class="form-control">
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-              </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Protect with Gluu Server</button>
-          </form>
-        </div>
+        <table class="table">
+          <tr>
+            <th>Resource</th>
+            <th>Endpoint</th>
+            <th>Protection Status</th>
+            <th>UMA Scopes</th>
+          </tr>
+          <tr>
+            <td>Photos</td>
+            <td><code>/api/photos/</code></td>
+            <td class="success">Protected</td>
+            <td>
+              <ul>
+                <li>https://resource.example.com/uma/scope/view</li>
+                <li>https://resource.example.com/uma/scope/add</li>
+                <li>https://resource.example.com/uma/scope/all</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td>Documents</td>
+            <td><code>/api/docs/</code></td>
+            <td class="danger">NOT protected</td>
+            <td>-</td>
+          </tr>
+        </table>
       </div>
 
     </div>
 
+    <div class="col-md-offset-2 col-md-8">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title">UMA Scope Definitions</h3>
+        </div>
+        <table class="table">
+          <tr>
+            <th>Scope</th>
+            <th>HTTP Methods</th>
+          </tr>
+          <tr>
+            <td>https://resource.example.com/uma/scope/view</td>
+            <td>GET</td>
+          </tr>
+          <tr>
+            <td>https://resource.example.com/uma/scope/add</td>
+            <td>POST</td>
+          </tr>
+          <tr>
+            <td>https://resource.example.com/uma/scope/all</td>
+            <td>GET, POST</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="alert alert-info" role="alert">
+  <strong>Note:</strong>
+    You can open the Gluu Server web interface and configure the policies for these scopes.
   </div>
 
 

@@ -13,43 +13,42 @@ resources = ['photos', 'docs']
 photos = [{'id': 1, 'filename': 'https://example.com/photo1.jpg'}]
 docs = [{'id': 1, 'filename': 'https://example.com/document1.pdf'}]
 
-photos_counter = 1
-docs_counter = 1
+app.config['FIRST_RUN'] = True
+app.config['photos'] = 1
+app.config['docs'] = 1
 
 @app.route('/')
 def index():
+    if app.config.get('FIRST_RUN'):
+        return render_template('setup.html')
     return render_template('index.html')
 
-
-@app.route('/protect', methods=['POST'])
-def protect():
-    if not oxc.oxd_id:
-        oxc.register_site()
-
-    path = request.form.get('path')
-    scope = request.form.get('scope').split(',')
-    http_method = request.form.getlist('http_method')
-
-    condition = {}
-    if type(http_method) is list:
-        condition['httpMethods'] = http_method
-    else:
-        condition['httpMethods'] = [http_method]
-
-    if type(scope) is list:
-        condition['scopes'] = scope
-    else:
-        condition['scopes'] = [scope]
-
-    resources = [dict(path=path, conditions=[condition])]
-
+@app.route('/setup/')
+def setup_resource_server():
+    oxc.register_site()
+    resources = [
+        {
+            "path": "/api/photos/",
+            "conditions": [
+                {
+                    "httpMethods": ["GET"],
+                    "scopes": ["https://resource.example.com/uma/scope/view"]
+                },
+                {
+                    "httpMethods": ["POST"],
+                    "scopes": ["https://resource.example.com/uma/scope/add"]
+                },
+                {
+                    "httpMethods": ["GET", "POST"],
+                    "scopes": ["https://resource.example.com/uma/scope/all"]
+                }
+            ]
+        }
+    ]
     protected = oxc.uma_rs_protect(resources)
     if protected:
-        return render_template('index.html', status='protected', resource=path,
-                               scope=scope, http_method=http_method)
-    else:
-        return render_template('index.html', status='failed', resource=path,
-                               scope=scope, http_method=http_method)
+        app.config['FIRST_RUN'] = False
+        return render_template("index.html")
 
 
 @app.route('/api/<rtype>/', methods=['GET', 'POST'])
@@ -72,14 +71,15 @@ def api(rtype):
     if not status['access'] == 'granted':
         return make_response(jsonify(status), 401)
 
-    resource = docs
-    counter = docs_counter
-    if rtype in resources:
-        if rtype == 'photos':
-            resource = photos
-            counter = photos_counter
-    else:
+    if rtype not in resources:
         abort(404)
+
+    if rtype == 'photos':
+        resource = photos
+        counter = app.config.get('photos')
+    else:
+        resource = docs
+        counter = app.config.get('docs')
 
     if request.method == 'GET':
         return jsonify({rtype: resource})
@@ -90,24 +90,16 @@ def api(rtype):
             counter += 1
             item = {'id': counter, 'filename': data['filename']}
             resource.append(item)
+            if rtype == 'photos':
+                app.config['photos'] = counter
+            else:
+                app.config['docs'] = counter
             return make_response(jsonify(item), 201)
         else:
             abort(400)
 
-# --------------------------------------------------------------------------- #
-# The /rp/get_rpt is a helper URL for the demo purposes. This should not be a
-# part of the application unless the app is acting as both as a UMA Resource
-# Server as well as the Requesting Party (RP).
-# --------------------------------------------------------------------------- #
-@app.route('/rp/get_rpt/')
-def get_rpt():
-    ticket = request.args.get('ticket')
-    rpt = oxc.uma_rp_get_rpt(ticket)
-    return jsonify(rpt)
-
 
 if __name__ == '__main__':
-    oxc.register_site()
     app.config.from_object('app_config')
     app.run(ssl_context='adhoc')
 
