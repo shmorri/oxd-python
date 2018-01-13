@@ -5,7 +5,6 @@ import os
 import oxdpython
 import traceback
 import urllib2
-import json
 import ssl
 
 from constants import *
@@ -36,8 +35,12 @@ ctx.verify_mode = ssl.CERT_NONE
 
 response = {}
 try:
-    response = json.load(urllib2.urlopen(api_url, context=ctx))
-    message = json.dumps(response)
+    response = urllib2.urlopen(api_url, context=ctx)
+    message = response.read()
+except urllib2.HTTPError as e:
+    # Expect a 401 response
+    response = e
+    message = '401 Unauthorized'
 except:
     message = "Error: no content returned"
     logError("Cannot Open URL %s" % api_url)
@@ -45,15 +48,18 @@ except:
 
 # First will be rejected as it is without a Bearer Token, if denied
 # Get the RPT and use the access_token
-if response.get("access") == "denied":
-    rpt = client.uma_rp_get_rpt(ticket=response["ticket"])
+if 'www-authenticate' in response.headers:
+    www_auth = response.headers['www-authenticate']
+    auth_values = dict(x.split('=') for x in www_auth.split(','))
+    rpt = client.uma_rp_get_rpt(ticket=auth_values['ticket'].strip("\""))
     try:
         req = urllib2.Request(api_url)
         req.add_header('Authorization', '%s %s' %(rpt['token_type'], rpt['access_token']))
-        response = json.load(urllib2.urlopen(api_url, context=ctx))
-        message = json.dumps(response)
+        response = urllib2.urlopen(api_url, context=ctx)
+        message = response.read()
     except:
-        logError("Failed to fetch URL with RPT %s" % rpt)
+        message = "Failed to fetch URL with RPT %s" % rpt
+        logError(message)
         logException(traceback.format_exc())
 
 d = {}

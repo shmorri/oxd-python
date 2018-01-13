@@ -32,16 +32,18 @@ def setup_resource_server():
             "conditions": [
                 {
                     "httpMethods": ["GET"],
-                    "scopes": ["https://resource.example.com/uma/scope/view"]
+                    "scopes": [
+                        "https://resource.example.com/uma/scope/view",
+                        "https://resource.example.com/uma/scope/all"
+                    ]
                 },
                 {
                     "httpMethods": ["POST"],
-                    "scopes": ["https://resource.example.com/uma/scope/add"]
+                    "scopes": [
+                        "https://resource.example.com/uma/scope/add",
+                        "https://resource.example.com/uma/scope/all"
+                    ]
                 },
-                {
-                    "httpMethods": ["GET", "POST"],
-                    "scopes": ["https://resource.example.com/uma/scope/all"]
-                }
             ]
         }
     ]
@@ -69,7 +71,11 @@ def api(rtype):
         print request.path, " seems unprotected"
 
     if not status['access'] == 'granted':
-        return make_response(jsonify(status), 401)
+        response =  make_response(status['access'], 401)
+        if 'www-authenticate_header' in status:
+            response.headers['WWW-Authenticate'] = status['www-authenticate_header']
+        return response
+
 
     if rtype not in resources:
         abort(404)
