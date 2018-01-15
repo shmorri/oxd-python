@@ -26,6 +26,10 @@ cookie and DB session are removed.
 file permissions.
 * **appLog.py** Module to centralize logging code
 * **constants.py** Module to centralize constant values
+* **request-resource.cgi** Script that requests data from UMA Resource Server
+* **get-rpt.cgi** Script that gets the RPT token from the Auth Server
+* **callback-claims.cgi** The script parses the response from Authorization
+server and send the ticket to re-fetch RPT on successful authorization
 
 ## Deployment of demosite in Ubuntu
 
@@ -61,5 +65,36 @@ file permissions.
 5. Visit `https://your-hostname/cgi-bin/home.cgi`
 6. To debug check the logs are `/var/log/sampleapp/app.log` and `/var/log/oxd-server.log`
 
-See the sequence diagram below to get a better picture of the flow of
-this application.
+## UMA Demo
+
+Let us set up the three components required for UMA:
+* Authorization Server (AS)  - The Gluu server set as OP host - Already Setup
+* Requesting Party (RP) - `viewInventory.cgi` - Already present as a part of this demo app
+* Resource Server (RS) - The Flask app inside the `uma_rs` directory - Follow instructions below
+
+### Set up demo UMA Resource Server
+
+1. Open a new terminal window and navigate to the `uma_rs` directory
+    ```
+    # cd /usr/lib/cgi-bin/oxd-python/examples/cgi_app/uma_rs
+    ```
+2. Install requirements for the app
+    ```
+    # pip install flask pyOpenSSL
+    ```
+3. Edit the config file `rs-oxd.cfg` and input the `op_host` you are using. The `authorization_redirect_uri` 
+   is a part of the of the OAuth Spec requirement. You DON'T have to have a resolving URL, you can leave the dummy value
+   in place.
+4. Run `python app.py` to start the server.
+5. Visit `https://<your-hostname>:8085/` to see the setup page. Click Setup. This will register the demo resources in
+   the Authorization Server and give you a page containing the details of the resources and their endpoints.
+
+### Seeing UMA RP in action
+
+1. Visit `https://<your-hostname>/cgi-bin/request-resource.cgi`, based on the requirements and configured policies,
+the redirects from this script should lead to fetching the resource.
+
+TODO: Configuring policies and asking for more information from users
+
+Browse the code of `viewInventory.cgi` to see how it is working.
+
