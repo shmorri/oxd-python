@@ -25,8 +25,8 @@ log("Authorization completed. Requesting RPT.")
 ticket = f.getvalue('ticket')
 c['ticket'] = ticket
 print c.output()
-print "Location: /cgi-bin/get-rpt.cgi\r\n"
-print "Connection: close\r\n"
+print "Content-Type: text/html\r\n"
 print ""
-print "Redirecting"
+print "<html><body><a href='/cgi-bin/get-rpt.cgi'>Get RPT</a></body></html>"
+
 
