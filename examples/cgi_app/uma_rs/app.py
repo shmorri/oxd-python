@@ -48,9 +48,12 @@ def setup_resource_server():
         }
     ]
     protected = oxc.uma_rs_protect(resources)
-    if protected:
-        app.config['FIRST_RUN'] = False
-        return render_template("index.html")
+    response_dict = {
+        'protected_resources': resources,
+        'unprotected_resources': [{'path': '/api/docs'}]
+    }
+    app.config['FIRST_RUN'] = False
+    return jsonify(response_dict)
 
 
 @app.route('/api/<rtype>/', methods=['GET', 'POST'])

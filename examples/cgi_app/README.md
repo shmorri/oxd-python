@@ -34,42 +34,46 @@ server and send the ticket to re-fetch RPT on successful authorization
 ## Deployment of demosite in Ubuntu
 
 1. Install [oxd-server](https://gluu.org/docs/oxd/install/)
-2. Edit `/opt/oxd-server/conf/oxd-conf.json` and enter your OXD License details. Edit `/opt/oxd-server/conf/oxd-default-site-conf.json` and enter the value for `op_host` pointing to your Gluu Server installation. Run `service gluu-oxd-server start`
-3. Install oxd-python
+2. Edit `/opt/oxd-server/conf/oxd-conf.json` and enter your OXD License details,
+set `uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client` to false.
+3. Edit `/opt/oxd-server/conf/oxd-default-site-conf.json` and enter the value for
+`op_host` pointing to your Gluu Server installation. Run `service gluu-oxd-server start`.
+4. Install oxd-python
     ```
     # apt install python-pip
     # pip install oxdpython
     ```
-3. Install and configure Apache 2
+5. Install and configure Apache 2
     ```
     # apt install apache2
     # a2enmod cgi
     # a2enmod ssl
     # a2dissite 000-default
     # a2ensite default-ssl
+    # service apache2 reload
     ```
-2. Clone the demosite and setup for cgi-bin
+6. Clone the demosite and setup for cgi-bin
     ```
     # cd /usr/lib/cgi-bin/
     # git clone https://github.com/GluuFederation/oxd-python.git
     # cp oxd-python/examples/cgi_app/* .
     # chmod +x *.cgi
     ```
-3. Edit `COOKIE_DOMAIN` in `constants.py` to suit your domain name.
-4. Setup logging and initialize the app
+7. Edit `COOKIE_DOMAIN` in `constants.py` to suit your domain name.
+8. Setup logging and initialize the app
     ```
     # mkdir -p /var/log/sampleapp/
     # python setupDemo.py
     ```
-4. Change the domain names in `/var/log/sampleapp/demosite.cfg` URLs to match yours. (Similar to Step 3)
-5. Visit `https://your-hostname/cgi-bin/home.cgi`
-6. To debug check the logs are `/var/log/sampleapp/app.log` and `/var/log/oxd-server.log`
+9. Change the domain names in `/var/log/sampleapp/demosite.cfg` URLs to match yours. (Similar to Step 3)
+10. Visit `https://your-hostname/cgi-bin/home.cgi`
+11. To debug check the logs are `/var/log/sampleapp/app.log` and `/var/log/oxd-server.log`
 
 ## UMA Demo
 
 Let us set up the three components required for UMA:
 * Authorization Server (AS)  - The Gluu server set as OP host - Already Setup
-* Requesting Party (RP) - `viewInventory.cgi` - Already present as a part of this demo app
+* Requesting Party (RP) - `request-resource.cgi` - Already present as a part of this demo app
 * Resource Server (RS) - The Flask app inside the `uma_rs` directory - Follow instructions below
 
 ### Set up demo UMA Resource Server
@@ -86,15 +90,12 @@ Let us set up the three components required for UMA:
    is a part of the of the OAuth Spec requirement. You DON'T have to have a resolving URL, you can leave the dummy value
    in place.
 4. Run `python app.py` to start the server.
-5. Visit `https://<your-hostname>:8085/` to see the setup page. Click Setup. This will register the demo resources in
-   the Authorization Server and give you a page containing the details of the resources and their endpoints.
+5. From the old terminal window run `curl https://localhost:8085/setup/`. This will register the demo resources in
+   the Authorization Server and give you a response containing the details of the resources and their endpoints.
 
 ### Seeing UMA RP in action
 
 1. Visit `https://<your-hostname>/cgi-bin/request-resource.cgi`, based on the requirements and configured policies,
-the redirects from this script should lead to fetching the resource.
+the links should get you the resource from the resource server.
 
-TODO: Configuring policies and asking for more information from users
-
-Browse the code of `viewInventory.cgi` to see how it is working.
 
