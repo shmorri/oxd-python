@@ -71,14 +71,6 @@ class GetAuthUrlTestCase(unittest.TestCase):
         auth_url = self.c.get_authorization_url()
         assert auth_url == "https://server.example.com/authorize?"
 
-    def test_automatic_site_registration(self):
-        self.c.oxd_id = None
-        self.c.register_site = MagicMock(return_value="test-id")
-
-        auth_url = self.c.get_authorization_url()
-        self.c.register_site.assert_called_with()
-        assert auth_url == "https://server.example.com/authorize?"
-
     def test_call_with_optional_params(self):
         # Note: call_args is a tuple (args, kwargs) of the mock function call
         # By asserting that they are passed to the request function we assert

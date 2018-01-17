@@ -135,9 +135,6 @@ class Client:
         Raises:
             OxdServerError: If the oxd throws an error for any reason.
         """
-        if not self.oxd_id:
-            self.register_site()
-
         params = {"oxd_id": self.oxd_id}
 
         if scope and isinstance(scope, list):
