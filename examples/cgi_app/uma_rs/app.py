@@ -1,5 +1,8 @@
 import os
 import oxdpython
+import random
+
+from app_config import SCOPE_MAP, RESOURCES
 
 from flask import Flask, render_template, request, jsonify, abort, make_response
 
@@ -8,14 +11,8 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
 config = os.path.join(this_dir, 'rs-oxd.cfg')
 oxc = oxdpython.Client(config)
 
-resources = ['photos', 'docs']
-
-photos = [{'id': 1, 'filename': 'https://example.com/photo1.jpg'}]
-docs = [{'id': 1, 'filename': 'https://example.com/document1.pdf'}]
-
 app.config['FIRST_RUN'] = True
-app.config['photos'] = 1
-app.config['docs'] = 1
+
 
 @app.route('/')
 def index():
@@ -25,32 +22,20 @@ def index():
 
 @app.route('/setup/')
 def setup_resource_server():
+    resource_list = RESOURCES.keys()
     oxc.register_site()
+    conditions = [{"httpMethods": [method], "scopes": scopes}
+                  for method, scopes in SCOPE_MAP.iteritems()]
     resources = [
         {
-            "path": "/api/photos/",
-            "conditions": [
-                {
-                    "httpMethods": ["GET"],
-                    "scopes": [
-                        "https://resource.example.com/uma/scope/view",
-                        "https://resource.example.com/uma/scope/all"
-                    ]
-                },
-                {
-                    "httpMethods": ["POST"],
-                    "scopes": [
-                        "https://resource.example.com/uma/scope/add",
-                        "https://resource.example.com/uma/scope/all"
-                    ]
-                },
-            ]
+            "path": "/api/{0}/".format(resource_list[0]),
+            "conditions": conditions
         }
     ]
     protected = oxc.uma_rs_protect(resources)
     response_dict = {
         'protected_resources': resources,
-        'unprotected_resources': [{'path': '/api/docs'}]
+        'unprotected_resources': ["/api/{0}/".format(r) for r in resource_list[1:]]
     }
     app.config['FIRST_RUN'] = False
     return jsonify(response_dict)
@@ -63,6 +48,7 @@ def api(rtype):
     :param rtype: resource type either photos or docs
     :return: json
     """
+    resources = RESOURCES.keys()
     status = {'access': 'granted'}
     try:
         rpt = request.headers.get('Authorization')
@@ -83,12 +69,7 @@ def api(rtype):
     if rtype not in resources:
         abort(404)
 
-    if rtype == 'photos':
-        resource = photos
-        counter = app.config.get('photos')
-    else:
-        resource = docs
-        counter = app.config.get('docs')
+    resource = RESOURCES[rtype]
 
     if request.method == 'GET':
         return jsonify({rtype: resource})
@@ -96,13 +77,8 @@ def api(rtype):
     if request.method == 'POST':
         data = request.get_json()
         if 'filename' in data:
-            counter += 1
-            item = {'id': counter, 'filename': data['filename']}
+            item = {'id': random.randint(0, 1000), 'filename': data['filename']}
             resource.append(item)
-            if rtype == 'photos':
-                app.config['photos'] = counter
-            else:
-                app.config['docs'] = counter
             return make_response(jsonify(item), 201)
         else:
             abort(400)
