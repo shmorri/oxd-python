@@ -7,17 +7,17 @@ is persisted using the simple python shelve database interface.
 
 This sample consists of the following files
 
-* **demosite.cfg** This file contains the callback urls and other site
-specific settings
 * **home.cgi** This is the main page of the app. Navigate to this page
 first.
-* **redirect-to-login.cgi** This script redirects the user to the
-OpenID Connect login (if no sessioin exists) and authorization pages.
-* **callback-login.cgi** This script uses the authorization code to
-obtain user information, and create a session.
-* **redirect-to-logout.cgi** This script sends the person to the
-OpenID Connect logout page.
-* **callback-logout.cgi** This page is called for OpenID Connect
+* **constants.py** Module to centralize demo app properties
+* **demosite.cfg** This file contains the oxd configuration properties
+* **redirect-to-login.cgi** This script gets the right authorization url from
+oxd, and redirects the user's browser there for authentication / authorization. 
+* **callback-login.cgi** Script that runs post-authorization. The script
+gets the `code` and `state` and requests tokens and user_info from oxd.
+* **redirect-to-logout.cgi** Script that gets the right logout url from oxd,
+and redirects the user's browser there for OpenID Connect front channel logout.
+* **callback-logout.cgi** This page is called by OpenID Connect
 front channel logout. It clears the session and cookie, and redirects
 to the logout confirmation page
 * **logout-confirmation.cgi** This pages checks to make sure that the
@@ -25,7 +25,6 @@ cookie and DB session are removed.
 * **setupDemo.py** Helper script used to create the DB and set
 file permissions.
 * **appLog.py** Module to centralize logging code
-* **constants.py** Module to centralize constant values
 * **request-resource.cgi** Script that requests data from UMA Resource Server
 * **get-rpt.cgi** Script that gets the RPT token from the Auth Server
 * **callback-claims.cgi** The script parses the response from Authorization
@@ -86,7 +85,7 @@ Let us set up the three components required for UMA:
     ```
     # pip install flask pyOpenSSL
     ```
-3. Edit the config file `rs-oxd.cfg` and input the `op_host` you are using. The `authorization_redirect_uri` 
+3. Edit the config file `rs-oxd.cfg` and input the `op_host` you are using. The `authorization_redirect_uri`
    is a part of the of the OAuth Spec requirement. You DON'T have to have a resolving URL, you can leave the dummy value
    in place.
 4. Run `python app.py` to start the server.
@@ -97,5 +96,3 @@ Let us set up the three components required for UMA:
 
 1. Visit `https://<your-hostname>/cgi-bin/request-resource.cgi`, based on the requirements and configured policies,
 the links should get you the resource from the resource server.
-
-
