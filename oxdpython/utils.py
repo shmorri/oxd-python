@@ -9,6 +9,7 @@ class Resource(object):
     def __init__(self, path):
         self.path = path
         self.conditions = []
+        self.scope_expression = {}
 
     def dump(self):
         """Returns a dictionary representation of the resource and conditions
@@ -18,7 +19,7 @@ class Resource(object):
         """
         return dict(path=self.path, conditions=self.conditions)
 
-    def set_condition(self, http_method, scope):
+    def set_scope(self, http_method, scope):
         """Set a scope condition for the resource for a http_method
 
         Args:
@@ -26,12 +27,45 @@ class Resource(object):
             scope (str): the scope of access control
         """
         for con in self.conditions:
-            if http_method in con['httpMethod']:
+            if http_method in con['httpMethods']:
                 con['scopes'].append(scope)
                 return
         # If not present, then create a new condition
-        self.conditions.append({'httpMethod': [http_method],
+        self.conditions.append({'httpMethods': [http_method],
                                 'scopes': [scope]})
+
+    def set_expression(self, http_method, expression):
+        """Set a scope expression scope_expression is Gluu invented extension
+        which allows to put JsonLogic expression instead of single list of
+        scopes. Please read more about scope_expression at
+        https://gluu.org/docs/ce/3.1.2/admin-guide/uma.md
+
+        Args:
+            http_method (str): a HTTP method like GET, POST, PUT, DELETE
+            expression (dict): the scope expression in the format::
+
+                {
+                  "rule": {
+                    "and": [
+                      {
+                        "or": [{"var": 0}, {"var": 1}]
+                      },
+                      {
+                        "var": 2
+                      }
+                    ]
+                  },
+                  "data": [
+                    "http://photoz.example.com/dev/actions/all",
+                    "http://photoz.example.com/dev/actions/add",
+                    "http://photoz.example.com/dev/actions/internalClient"
+                  ]
+                }
+
+        """
+        self.conditions.append({'httpMethods': [http_method],
+                                'scope_expression': expression})
+
 
     def __str__(self):
         return json.dumps(self.dump())

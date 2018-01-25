@@ -48,10 +48,10 @@ class ResourceSetTestCase(unittest.TestCase):
     def test_adding_resource_conditions(self):
         rset = ResourceSet()
         path = rset.add('/path')
-        path.set_condition('GET', 'View Resource')
+        path.set_scope('GET', 'View Resource')
         assert rset.dump() == [{
             'path': '/path',
-            'conditions': [{'httpMethod': ['GET'],
+            'conditions': [{'httpMethods': ['GET'],
                             'scopes': ['View Resource']}]
         }]
 
@@ -69,27 +69,44 @@ class ResourceTestCase(unittest.TestCase):
         r = Resource('/api')
         assert repr(r) == '<Resource /api>'
 
-    def test_add_condition_to_a_resource(self):
+    def test_add_scope_condition_to_a_resource(self):
         r = Resource('/api')
-        r.set_condition(http_method='GET', scope='View')
+        r.set_scope(http_method='GET', scope='View')
         assert r.dump() == {'path': '/api', 'conditions': [
-            {'httpMethod': ['GET'], 'scopes': ['View']}
+            {'httpMethods': ['GET'], 'scopes': ['View']}
         ]}
 
     def test_adding_another_scope_for_same_http_method_updates_condition(self):
         r = Resource('/api')
-        r.set_condition('GET', 'View')
-        r.set_condition('GET', 'All')
+        r.set_scope('GET', 'View')
+        r.set_scope('GET', 'All')
         assert r.dump() == {'path': '/api', 'conditions': [
-            {'httpMethod': ['GET'], 'scopes': ['View', 'All']}
+            {'httpMethods': ['GET'], 'scopes': ['View', 'All']}
         ]}
 
     def test_adding_multiple_http_methods(self):
         r = Resource('/api')
-        r.set_condition('GET', 'View')
-        r.set_condition('POST', 'Add')
+        r.set_scope('GET', 'View')
+        r.set_scope('POST', 'Add')
         assert r.dump() == {'path': '/api', 'conditions': [
-            {'httpMethod': ['GET'], 'scopes': ['View']},
-            {'httpMethod': ['POST'], 'scopes': ['Add']}
+            {'httpMethods': ['GET'], 'scopes': ['View']},
+            {'httpMethods': ['POST'], 'scopes': ['Add']}
         ]}
+
+    def test_add_scope_expression(self):
+        r = Resource('/api')
+        exp = {
+            "rule": {
+                "or": [{"var1": 1}, {"var2": 2}]
+            },
+            "data": [
+                "https://uma.scope/read",
+                "https://uma.scope/all"
+            ]
+        }
+        r.set_expression('GET', exp)
+        assert r.dump() == {'path': '/api', 'conditions': [{
+            'httpMethods': ['GET'],
+            'scope_expression': exp
+        }]}
 

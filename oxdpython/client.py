@@ -320,9 +320,13 @@ class Client:
             raise OxdServerError(response['data'])
         return response['data']['uri']
 
-    def update_site_registration(self):
+    def update_site(self, client_secret_expires_at=None):
         """Function to update the site's information with OpenID Provider.
         This should be called after changing the values in the cfg file.
+
+        Args:
+            client_secret_expires_at (long, OPTIONAL): milliseconds since 1970,
+                can be used to extends client lifetime
 
         Returns:
             bool: The status for update. True for success and False for failure
@@ -330,9 +334,14 @@ class Client:
         Raises:
             OxdServerError: When the update fails and oxd server returns error
         """
-        params = {"oxd_id": self.oxd_id,
-                  "authorization_redirect_uri": self.authorization_redirect_uri
-                  }
+        params = {
+            "oxd_id": self.oxd_id,
+            "authorization_redirect_uri": self.authorization_redirect_uri
+        }
+
+        if client_secret_expires_at:
+            params["client_secret_expires_at"] = client_secret_expires_at
+
         for param in self.opt_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
@@ -343,9 +352,9 @@ class Client:
                 value = self.config.get("client", param).split(",")
                 params[param] = value
 
-        logger.debug("Sending `update_site_registration` with params %s",
+        logger.debug("Sending `update_site` with params %s",
                      params)
-        response = self.msgr.request("update_site_registration", **params)
+        response = self.msgr.request("update_site", **params)
         logger.debug("Received response: %s", response)
 
         if response['status'] == 'error':
@@ -615,7 +624,7 @@ class Client:
                          op_host=None, op_discovery_path=None, scope=None,
                          auto_update=True):
         """Function to get the client token which can be used for protection in
-        all future communication. The access token recieved by this method is
+        all future communication. The access token received by this method is
         stored in the config file and used as the `protection_access_token`
         for all subsequent calls to oxd.
 
@@ -631,7 +640,7 @@ class Client:
                 are obtained from the config file
             auto_update(bool, optional): automatically get a new access_token
                 when the current one expires. If this is set to False, then
-                the appliacation must call `get_client_token` when the token
+                the application must call `get_client_token` when the token
                 expires to update the client with a new access token.
 
         Returns:
