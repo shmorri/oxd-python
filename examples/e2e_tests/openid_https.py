@@ -23,7 +23,7 @@ def run_commands(config):
     logging.info("Received: %s", tokens)
 
     print "\n=> Update site registration"
-    updated = c.update_site_registration()
+    updated = c.update_site()
     c.config.set("client", "scope", "openid,profile")
     logging.info("Received: %s", updated)
 

@@ -4,6 +4,7 @@ import logging
 import argparse
 
 from oxdpython import Client
+from oxdpython.utils import ResourceSet
 
 def run_commands(config):
     """function that runs the commands for UMA RS app context
@@ -18,17 +19,11 @@ def run_commands(config):
     logging.info("Received: %s", oxd_id)
 
     print "\n=> Protecting Resource: "
-    resource = {
-        "path": "/photoz",
-        "conditions": [
-            {
-                "httpMethods": ["GET"],
-                "scopes": ["https://photoz.example.com/uma/scope/view"]
-            }
-        ]
-    }
-    print resource
-    protected = c.uma_rs_protect([resource])
+    rset = ResourceSet()
+    r = rset.add("/photoz")
+    r.set_scope("GET", "https://photoz.example.com/uma/scope/view")
+    print rset
+    protected = c.uma_rs_protect(rset.dump())
     logging.info("Received: %s", protected)
 
     print "\n=> Checking Access for URL /photoz, with method GET"
