@@ -233,7 +233,7 @@ class GetLogoutUriTestCase(unittest.TestCase):
             self.c.get_logout_uri()
 
 
-class UpdateSiteRegistrationTestCase(unittest.TestCase):
+class UpdateSiteTestCase(unittest.TestCase):
     def setUp(self):
         self.success = {"status": "ok"}
         self.c = Client(initial_config)
@@ -242,13 +242,17 @@ class UpdateSiteRegistrationTestCase(unittest.TestCase):
     def test_command(self):
         self.c.config.set('client', 'post_logout_redirect_uri',
                           'https://client.example.com/')
-        status = self.c.update_site_registration()
+        status = self.c.update_site()
         assert status
+
+    def test_command_with_expires_time(self):
+        status = self.c.update_site(client_secret_expires_at=12345)
+        assert "client_secret_expires_at" in self.c.msgr.request.call_args[1]
 
     def test_raises_error_when_oxd_returns_error(self):
         self.c.msgr.request.return_value = generic_error
         with pytest.raises(OxdServerError):
-            self.c.update_site_registration()
+            self.c.update_site()
 
 
 class UmaRpGetRptTestCase(unittest.TestCase):
