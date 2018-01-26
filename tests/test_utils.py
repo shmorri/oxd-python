@@ -69,11 +69,18 @@ class ResourceTestCase(unittest.TestCase):
         r = Resource('/api')
         assert repr(r) == '<Resource /api>'
 
-    def test_add_scope_condition_to_a_resource(self):
+    def test_add_scope_condition_as_string(self):
         r = Resource('/api')
         r.set_scope(http_method='GET', scope='View')
         assert r.dump() == {'path': '/api', 'conditions': [
             {'httpMethods': ['GET'], 'scopes': ['View']}
+        ]}
+
+    def test_add_scope_condition_as_list(self):
+        r = Resource('/api')
+        r.set_scope('GET', ['view', 'all'])
+        assert r.dump() == {'path': '/api', 'conditions': [
+            {'httpMethods': ['GET'], 'scopes': ['view', 'all']}
         ]}
 
     def test_adding_another_scope_for_same_http_method_updates_condition(self):

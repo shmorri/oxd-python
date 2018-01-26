@@ -23,16 +23,25 @@ class Resource(object):
         """Set a scope condition for the resource for a http_method
 
         Args:
-            http_method (str): a HTTP method like GET, POST, PUT, DELETE
-            scope (str): the scope of access control
+            http_method (str): HTTP method like GET, POST, PUT, DELETE
+            scope (str, list): the scope of access control as str if single, or
+                as a list of strings if multiple scopes are to be set
         """
+
         for con in self.conditions:
             if http_method in con['httpMethods']:
-                con['scopes'].append(scope)
+                if isinstance(scope, list):
+                    con['scopes'] = scope
+                elif isinstance(scope, str) or isinstance(scope, unicode):
+                    con['scopes'].append(scope)
                 return
         # If not present, then create a new condition
-        self.conditions.append({'httpMethods': [http_method],
-                                'scopes': [scope]})
+        if isinstance(scope, list):
+            self.conditions.append({'httpMethods': [http_method],
+                                    'scopes': scope})
+        elif isinstance(scope, str) or isinstance(scope, unicode):
+            self.conditions.append({'httpMethods': [http_method],
+                                    'scopes': [scope]})
 
     def set_expression(self, http_method, expression):
         """Set a scope expression scope_expression is Gluu invented extension
@@ -65,7 +74,6 @@ class Resource(object):
         """
         self.conditions.append({'httpMethods': [http_method],
                                 'scope_expression': expression})
-
 
     def __str__(self):
         return json.dumps(self.dump())
