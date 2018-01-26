@@ -606,6 +606,8 @@ class Client:
         if response['status'] == 'error':
             raise OxdServerError(response['data'])
         data = response["data"]
+
+        self.oxd_id = data["oxd_id"]
         self.config.set("oxd", "id", data["oxd_id"])
         self.config.set("client", "client_id", data["client_id"])
         self.config.set("client", "client_secret", data["client_secret"])

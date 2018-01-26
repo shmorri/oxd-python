@@ -7,12 +7,12 @@ import urlparse
 from oxdpython import Client
 
 
-def run_commands(config):
+def run_commands(config_file):
     """function that runs the commands in a interactive manner
 
-    :param config: config file location
+    :param config_file: config file location
     """
-    c = Client(config)
+    c = Client(config_file)
 
     print "\n=> Calling setup_client()"
     setup_data = c.setup_client()
@@ -52,6 +52,10 @@ def run_commands(config):
     logging.info("Received: %s", logout_uri)
     print "Visit this URL to logout: ", logout_uri
 
+    print "\n=> Remove Site"
+    oxd_id = c.remove_site()
+    logging.info("Received: %s", oxd_id)
+
 
 if __name__ == '__main__':
     this_dir = os.path.dirname(os.path.realpath(__file__))
@@ -79,4 +83,3 @@ if __name__ == '__main__':
         print traceback.print_exc()
 
     os.remove(test_config)
-
