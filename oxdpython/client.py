@@ -4,7 +4,8 @@ from threading import Timer
 
 from .configurer import Configurer
 from .messenger import Messenger
-from .exceptions import OxdServerError, NeedInfoError, InvalidTicketError
+from .exceptions import OxdServerError, NeedInfoError, InvalidTicketError, \
+    InvalidRequestError
 
 logger = logging.getLogger(__name__)
 
@@ -394,6 +395,7 @@ class Client:
 
         Returns:
             dict: The access information received in the format below.
+
             If the access is granted::
 
                 { "access": "granted" }
@@ -413,15 +415,9 @@ class Client:
 
                 { "access": "denied" }
 
-            If the resource is not Protected::
-
-                {
-                    "error": "invalid_request",
-                    "error_description": "Resource is not protected. Please
-                        protect your resource first with uma_rs_protect
-                        command."
-                }
-
+        Raises:
+            ``oxdpython.exceptions.InvalidRequestError`` if the resource is not
+                protected
         """
         params = {"oxd_id": self.oxd_id,
                   "rpt": rpt,
@@ -434,7 +430,10 @@ class Client:
         logger.debug("Received response: %s", response)
 
         if response['status'] == 'error':
-            raise OxdServerError(response['data'])
+            if response['data']['error'] == 'invalid_request':
+                raise InvalidRequestError(response['data'])
+            else:
+                raise OxdServerError(response['data'])
         return response['data']
 
     def uma_rp_get_rpt(self, ticket, claim_token=None, claim_token_format=None,

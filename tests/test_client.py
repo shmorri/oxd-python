@@ -7,7 +7,7 @@ from mock import patch, MagicMock
 from oxdpython.client import Client, Configurer, Timer
 
 from oxdpython.exceptions import OxdServerError, InvalidTicketError, \
-    NeedInfoError
+    NeedInfoError, InvalidRequestError
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 initial_config = os.path.join(this_dir, 'data', 'initial.cfg')
@@ -393,9 +393,14 @@ class UmaRsCheckAccessTestCase(unittest.TestCase):
         assert 'http_method' in self.c.msgr.request.call_args[1]
 
     def test_raises_error_on_oxd_server_error(self):
-        self.c.msgr.request.return_value = self.failure
+        self.c.msgr.request.return_value = generic_error
         with pytest.raises(OxdServerError):
             self.c.uma_rs_check_access('rpt', '/photoz', 'GET')
+
+    def test_raises_invalid_access_error(self):
+        self.c.msgr.request.return_value = self.failure
+        with pytest.raises(InvalidRequestError):
+            self.c.uma_rs_check_access('rpt', '/api', 'GET')
 
 
 class UmaRpGetClaimsGatherUrlTestCase(unittest.TestCase):

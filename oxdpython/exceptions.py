@@ -26,3 +26,13 @@ class NeedInfoError(Exception):
             data['error_description'])
         Exception.__init__(self, error_string)
         self.details = data['details']
+
+class InvalidRequestError(Exception):
+    """Error raised when UMA RP does an `uma_rp_check_access` on unprotected resource
+    and the oxd server returns 'invalid_request' response.
+    """
+    def __init__(self, data):
+        error_string = "Invalid Request Error: {0}".format(
+            data['error_description']
+        )
+        Exception.__init__(self, error_string)
