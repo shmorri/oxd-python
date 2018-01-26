@@ -7,7 +7,7 @@ import urlparse
 from oxdpython import Client
 
 
-def run_commands(config_file):
+def test_openid_commands(config_file):
     """function that runs the commands in a interactive manner
 
     :param config_file: config file location
@@ -52,6 +52,37 @@ def run_commands(config_file):
     oxd_id = c.remove_site()
     logging.info("Received: %s", oxd_id)
 
+def test_setup_client(config_file):
+    c = Client(config_file)
+
+    print "\n=> Setup Client"
+    response = c.setup_client()
+    logging.info("Received: %s", response)
+
+    print "\n=> Get Client Token"
+    # Set auto_update to False to prevent launching of new thread. auto_update
+    # is helpful for long running apps, but unnecessary for this test script
+    token = c.get_client_token(auto_update=False)
+    logging.info("Received: %s", token)
+
+    print "\n=> Remove Site"
+    oxd_id = c.remove_site()
+    logging.info("Received: %s", oxd_id)
+
+def execute_test(test):
+    config = os.path.join(this_dir, 'openid_socket.cfg')
+    test_config = os.path.join(this_dir, 'test.cfg')
+
+    with open(config) as f:
+        with open(test_config, "w") as of:
+            of.write(f.read())
+
+    try:
+        test(test_config)
+    except:
+        print traceback.format_exc()
+
+    os.remove(test_config)
 
 if __name__ == '__main__':
     this_dir = os.path.dirname(os.path.realpath(__file__))
@@ -66,16 +97,9 @@ if __name__ == '__main__':
     else:
         logging.basicConfig(level=logging.ERROR)
 
-    config = os.path.join(this_dir, 'openid_socket.cfg')
-    test_config = os.path.join(this_dir, 'test.cfg')
+    tests = [test_openid_commands, test_setup_client]
 
-    with open(test_config, 'w') as of:
-        with open(config) as f:
-            of.write(f.read())
+    for test in tests:
+        execute_test(test)
 
-    try:
-        run_commands(test_config)
-    except:
-        print traceback.print_exc()
-
-    os.remove(test_config)
+    print "All tests complete."
