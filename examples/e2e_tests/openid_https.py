@@ -7,19 +7,19 @@ import urlparse
 from oxdpython import Client
 
 
-def run_commands(config_file):
+def test_openid_commands(config_file):
     """function that runs the commands in a interactive manner
 
     :param config_file: config file location
     """
     c = Client(config_file)
 
-    print "\n=> Calling setup_client()"
+    print "\n=> Setup Client"
     setup_data = c.setup_client()
     logging.info("Received: %s", setup_data)
 
-    print "\n=> Calling get_client_token()"
-    tokens = c.get_client_token()
+    print "\n=> Get Client Token"
+    tokens = c.get_client_token(auto_update=False)
     logging.info("Received: %s", tokens)
 
     print "\n=> Update site registration"
@@ -56,6 +56,20 @@ def run_commands(config_file):
     oxd_id = c.remove_site()
     logging.info("Received: %s", oxd_id)
 
+def execute_test(test):
+    config = os.path.join(this_dir, 'openid_https.cfg')
+    test_config = os.path.join(this_dir, 'test.cfg')
+
+    with open(test_config, 'w') as of:
+        with open(config) as f:
+            of.write(f.read())
+
+    try:
+        test(test_config)
+    except:
+        print traceback.format_exc()
+
+    os.remove(test_config)
 
 if __name__ == '__main__':
     this_dir = os.path.dirname(os.path.realpath(__file__))
@@ -70,16 +84,11 @@ if __name__ == '__main__':
     else:
         logging.basicConfig(level=logging.ERROR)
 
-    config = os.path.join(this_dir, 'openid_https.cfg')
-    test_config = os.path.join(this_dir, 'test.cfg')
+    tests = [test_openid_commands]
 
-    with open(test_config, 'w') as of:
-        with open(config) as f:
-            of.write(f.read())
+    for test in tests:
+        execute_test(test)
 
-    try:
-        run_commands(test_config)
-    except:
-        print traceback.print_exc()
+    print "All tests complete."
 
-    os.remove(test_config)
+
