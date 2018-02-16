@@ -326,8 +326,6 @@ class UmaRpGetRptTestCase(unittest.TestCase):
     def test_raises_need_info_error(self):
         self.c.msgr.request.return_value = self.needs_info
 
-        with pytest.raises(NeedInfoError):
-            self.c.uma_rp_get_rpt('ticket')
 
 
 class UmaRsProtectTestCase(unittest.TestCase):
@@ -341,6 +339,37 @@ class UmaRsProtectTestCase(unittest.TestCase):
                       "conditions": [{
                           "httpMethods": ["GET"],
                           "scopes": ["http://photoz.example.com/dev/actions/view"]
+                          }]
+                      }]
+
+        assert self.c.uma_rs_protect(resources)
+
+    def test_scope_expression(self):
+        resources = [{"path": "/photo",
+                      "conditions": [{
+                          "httpMethods": ["GET"],
+                          "scope_expression": {
+                                "rule": {
+                                    "and": [{
+                                            "or": [{
+                                                    "var": 0
+                                                },
+                                                {
+                                                    "var": 1
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "var": 2
+                                        }
+                                    ]
+                                },
+                                "data": [
+                                    "http://photoz.example.com/dev/actions/all",
+                                    "http://photoz.example.com/dev/actions/add",
+                                    "http://photoz.example.com/dev/actions/internalClient"
+                                ]
+                            }
                           }]
                       }]
 
@@ -521,3 +550,72 @@ class RemoveSiteTestCase(unittest.TestCase):
         assert self.c.remove_site()
 
 
+
+class IntrospectAccessTokenTestCase(unittest.TestCase):
+    def setUp(self):
+        self.success = {
+            "status": "ok",
+            "data": {
+                "active": True,
+                "client_id": "<client id>",
+                "username": "John Doe",
+                "scopes": ["read", "write"],
+                "token_type": "bearer",
+                "sub": "jdoe",
+                "aud": "l238j323ds-23ij4",
+                "iss": "https://as.gluu.org/",
+                "exp": "<exp>",
+                "iat": "<iat>",
+                "acr_values": ["basic", "duo"]
+            }
+        }
+        self.c = Client(initial_config)
+        self.c.msgr.request = MagicMock(return_value=self.success)
+
+    def test_command(self):
+        response = self.c.introspect_access_token('access_token')
+        assert "oxd_id" in self.c.msgr.request.call_args[1]
+        assert "access_token" in self.c.msgr.request.call_args[1]
+        assert response["active"] == True
+
+    def test_raises_error_when_oxd_server_errors(self):
+        self.c.msgr.request.return_value = generic_error
+
+        with pytest.raises(OxdServerError):
+            self.c.introspect_access_token('access_token')
+
+
+class UMAIntrospectRPTTestCase(unittest.TestCase):
+    def setUp(self):
+        self.success = {
+            "status": "ok",
+            "data": {
+                "active": True,
+                "exp": "<exp>",
+                "iat": "<iat>",
+                "permissions":[
+                    {
+                        "resource_id": "112210f47de98100",
+                        "resource_scopes":[
+                            "view",
+                            "http://photoz.example.com/dev/actions/print"
+                        ],
+                        "exp": "<exp>"
+                    }
+                ]
+            }
+        }
+        self.c = Client(initial_config)
+        self.c.msgr.request = MagicMock(return_value=self.success)
+
+    def test_command(self):
+        response = self.c.introspect_rpt('rpt')
+        assert "oxd_id" in self.c.msgr.request.call_args[1]
+        assert "rpt" in self.c.msgr.request.call_args[1]
+        assert response["active"] == True
+
+    def test_raises_error_when_oxd_server_errors(self):
+        self.c.msgr.request.return_value = generic_error
+
+        with pytest.raises(OxdServerError):
+            self.c.introspect_rpt('rpt')

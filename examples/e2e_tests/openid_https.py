@@ -22,6 +22,10 @@ def test_openid_commands(config_file):
     tokens = c.get_client_token(auto_update=False)
     logging.info("Received: %s", tokens)
 
+    print "\n=> Introspect Access Token"
+    introspection = c.introspect_access_token(access_token=tokens['access_token'])
+    logging.info("Received: %s", introspection)
+
     print "\n=> Update site registration"
     updated = c.update_site()
     c.config.set("client", "scope", "openid,profile")
@@ -51,6 +55,10 @@ def test_openid_commands(config_file):
     logout_uri = c.get_logout_uri()
     logging.info("Received: %s", logout_uri)
     print "Visit this URL to logout: ", logout_uri
+
+    print "\n=> Register Site"
+    reg = c.register_site()
+    logging.info("Received: %s", reg)
 
     print "\n=> Remove Site"
     oxd_id = c.remove_site()

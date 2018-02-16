@@ -2,6 +2,7 @@ import json
 import socket
 import logging
 import urllib2
+import ssl
 
 from . import __version__
 
@@ -197,12 +198,15 @@ class HttpMessenger(Messenger):
         req.add_header("User-Agent", "oxdpython/%s" % __version__)
         req.add_header("Content-type", "application/json; charset=UTF-8")
 
+
         # add the protection token if available
         if self.access_token:
             req.add_header("Authorization",
                            "Bearer {0}".format(self.access_token))
 
-        resp = urllib2.urlopen(req)
+        gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        resp = urllib2.urlopen(req, context=gcontext)
+
         return json.load(resp)
 
     def __str__(self):

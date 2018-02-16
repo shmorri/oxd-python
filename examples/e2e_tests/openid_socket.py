@@ -65,6 +65,10 @@ def test_setup_client(config_file):
     token = c.get_client_token(auto_update=False)
     logging.info("Received: %s", token)
 
+    print "\n=> Introspect Access Token"
+    introspection = c.introspect_access_token(token['access_token'])
+    logging.info("Received: %s", introspection)
+
     print "\n=> Remove Site"
     oxd_id = c.remove_site()
     logging.info("Received: %s", oxd_id)

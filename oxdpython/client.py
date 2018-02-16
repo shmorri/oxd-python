@@ -89,6 +89,7 @@ class Client:
         # add required params for the command
         params = {
             "authorization_redirect_uri": self.authorization_redirect_uri,
+			"oxd_rp_programming_language": "python",
             }
 
         # add other optional params if they exist in config
@@ -526,7 +527,7 @@ class Client:
             raise OxdServerError(response['data'])
 
         if response['data']['error'] == 'need_info':
-            raise NeedInfoError(response['data'])
+            return response['data']
 
         if response['data']['error'] == 'invalid_ticket':
             raise InvalidTicketError(response['data'])
@@ -586,6 +587,7 @@ class Client:
         # add required params for the command
         params = {
             "authorization_redirect_uri": self.authorization_redirect_uri,
+			"oxd_rp_programming_language": "python",
             }
 
         # add other optional params if they exist in config
@@ -718,3 +720,92 @@ class Client:
         if response['status'] == 'error':
             raise OxdServerError(response['data'])
         return response['data']['oxd_id']
+
+    def introspect_access_token(self, access_token):
+        """Gives information about an access token.
+
+        Args:
+            access_token (str, required) - access_token from get_tokens_by_code or get_client_token function
+                
+        Returns:
+            dict: The information about the access token.
+
+            Example response ::
+
+                {
+                    "active":true,
+                    "client_id": "@6F96!19756yCF4F!C964FF",
+                    "username": "John Doe",
+                    "scopes": "openid",
+                    "token_type": "bearer",
+                    "sub": "John Doe",
+                    "aud": "@6F96!19756yCF4F!C964FF",
+                    "iss": "https://idp.example.com",
+                    "exp": "1518268876",
+                    "iat": "1518268576",
+                    "acr_values": null,
+                    "jti": null
+                }
+
+        Raises:
+            OxdServerError if there was an issue with the operation
+        """
+        params = dict(oxd_id=self.oxd_id)
+
+        params['access_token'] = access_token
+
+        logger.debug("Sending command `introspect_access_token` with params %s",
+                     params)
+        response = self.msgr.request("introspect_access_token", **params)
+        logger.debug("Received response: %s", response)
+
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']
+
+    def introspect_rpt(self, rpt):
+        """Gives information about an RPT.
+
+        Args:
+            rpt (str, required) - rpt from uma_rp_get_rpt function
+
+        Returns:
+            dict: The information about the RPT.
+
+            Example response ::
+
+                {
+                    "active": true,
+                    "exp": 1256953732,
+                    "iat": 1256912345,
+                    "nbf": null,
+                    "permissions": [{
+                        "resource_id": "112210f47de98100",
+                        "resource_scopes": [
+                            "view",
+                            "http://photoz.example.com/dev/actions/print"
+                        ],
+                        "exp": 1256953732
+                    }],
+                    "client_id": "@6F96!19756yCF4F!C964FF",
+                    "sub": "John Doe",
+                    "aud": "@6F96!19756yCF4F!C964FF",
+                    "iss": "https://idp.example.com",
+                    "jti": null                                         
+                }
+
+        Raises:
+            OxdServerError if there was an issue with the operation
+        """
+        params = dict(oxd_id=self.oxd_id)
+
+        params['rpt'] = rpt
+
+        logger.debug("Sending command `introspect_rpt` with params %s",
+                     params)
+        response = self.msgr.request("introspect_rpt", **params)
+        logger.debug("Received response: %s", response)
+
+        if response['status'] == 'error':
+            raise OxdServerError(response['data'])
+        return response['data']
