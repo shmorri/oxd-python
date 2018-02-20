@@ -1,7 +1,6 @@
 # oxd Python Demo site
 
-This is a demo site for oxd-python written using Python Flask to demonstrate how
-to use oxd-python to perform authorization with an OpenID Provider and fetch information.
+This is a demo Python Flask app to show how to use oxd-python to perform authentication with an OpenID Provider and fetch user information.
 
 ## Deployment
 
@@ -18,7 +17,7 @@ to use oxd-python to perform authorization with an OpenID Provider and fetch inf
 
 ### Testing OpenID Connect with the demo site
 
-* Install oxd-python in the **Client server**
+* Install oxd-python in the Client server:
 
 ```bash
 git clone https://github.com/GluuFederation/oxd-python.git
@@ -32,10 +31,9 @@ python setup.py install
 cd examples/flask_app
 ```
 
-* Edit the `demosite.cfg` file. Enter the value of `op_host` to point to the OpenID Provider. This can be 
-  skipped if you have configured `op_host` when installing oxd-server.
+* Edit the `demosite.cfg` file. Add the URI of the OpenID Provider (OP) in the `op_host` field, e.g. `https://idp.example.com`. If `op_host` was configured during installation, this step can be skipped.
   
-* Edit `/etc/hosts` to point `client.example.com` to point to your server.
+* Edit `/etc/hosts` and point `client.example.com` at the IP Address of the server where the demo app is installed, e.g. `100.100.100.100 client.example.com`
 
 * Run the demo server
 
