@@ -13,7 +13,7 @@ This is a demo Python Flask app to show how to use oxd-python to perform authent
 
 2. **OpenID Provider**
 
-     * An OpenID provider like Gluu Server. [Install Gluu Server](https://gluu.org/docs/ce/3.1.1/)
+     * An OpenID provider like Gluu Server. [Install Gluu Server](https://gluu.org/docs/ce/3.1.2/)
 
 ### Testing OpenID Connect with the demo site
 
